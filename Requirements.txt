@@ -4,7 +4,6 @@ falcon
 psycopg2-binary
 sqlalchemy
 base
-Cython
 numpy
 scipy
 scikit-image
