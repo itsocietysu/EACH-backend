@@ -1,9 +1,8 @@
-FROM python:3
+FROM python:3.6.6
 
 WORKDIR /usr/src/app
 
 COPY Requirements.txt ./
-RUN pip install Cython
 RUN pip install --no-cache-dir -r Requirements.txt
 
 COPY each/ ./each/
