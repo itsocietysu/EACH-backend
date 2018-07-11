@@ -1,0 +1,10 @@
+waitress
+requests
+falcon
+psycopg2-binary
+sqlalchemy
+base
+scipy
+scikit-image
+matplotlib
+falcon-multipart
