@@ -12,6 +12,7 @@ COPY server.py 		./server.py
 COPY config.json 	./config.json
 COPY swagger.json 	./swagger.json
 COPY VERSION 		./VERSION
+COPY museum.json    ./museum.json
 COPY startup.sh ./startup.sh
 RUN chmod 777 ./startup.sh && \
     sed -i 's/\r//' ./startup.sh
