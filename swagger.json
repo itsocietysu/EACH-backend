@@ -54,7 +54,7 @@
         ],
         "summary": "Returns list of available museums",
         "description": "Returns list of available museums",
-        "operationId": "getAll",
+        "operationId": "getAllMuseums",
         "produces": [
           "application/json"
         ],
