@@ -107,16 +107,23 @@ def getVersion(**request_handler_args):
     with open("VERSION") as f:
         resp.body = obj_to_json({"version": f.read()[0:-1]})
 
-def getAll(**request_handler_args):
+def getAllMuseums(**request_handler_args):
     resp = request_handler_args['resp']
     resp.status = falcon.HTTP_200
     with open("museum.json") as f:
         resp.body = f.read()
 
+def getFeed(**request_handler_args):
+    resp = request_handler_args['resp']
+    resp.status = falcon.HTTP_200
+    with open("feed.json") as f:
+        resp.body = f.read()
+
 
 operation_handlers = {
-    'getVersion':      [getVersion],
-    'getAll':          [getAll],
+    'getVersion':     [getVersion],
+    'getAllMuseums':     [getAllMuseums],
+    'getFeed':     [getFeed],
     'httpDefault':     [httpDefault]
 }
 
