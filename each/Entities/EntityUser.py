@@ -7,7 +7,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from each.Entities.EntityBase import EntityBase
 from each.Entities.EntityProp import EntityProp
-from each.Entities.EntityCourt import EntityCourt
+from each.Entities.EntityMuseum import EntityMuseum
 
 from each.Prop.PropBool import PropBool
 from each.Prop.PropMedia import PropMedia
@@ -128,16 +128,16 @@ class EntityUser(EntityBase, Base):
 
         result = {
             'eid': eid,
-            'court': []
+            'museum': []
         }
         for key, propid in PROPNAME_MAPPING.items():
             if key in PROP_MAPPING and (not len(items) or key in items):
                 result.update({key: PROP_MAPPING[key](eid, propid)})
 
-        courts = EntityCourt.get().filter_by(ownerid=eid).all()
+        museums = EntityMuseum.get().filter_by(ownerid=eid).all()
 
-        for _ in courts:
-            result['court'].append(EntityCourt.get_wide_object(_.eid))
+        for _ in museums:
+            result['museum'].append(EntityMuseum.get_wide_object(_.eid))
 
         return result
 
