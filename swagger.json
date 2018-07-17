@@ -197,7 +197,7 @@
     "/user/all": {
       "get": {
         "tags": [
-          "user"
+          "User"
         ],
         "summary": "Get all users",
         "description": "Returns a list of courts descriptions",
