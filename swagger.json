@@ -19,6 +19,10 @@
     {
       "name": "Feed",
       "description": "Feed feature set"
+    },
+    {
+      "name": "User",
+      "description": "User feature set"
     }
   ],
   "schemes": [
@@ -102,6 +106,228 @@
           }
         ]
       }
+    },
+    "/user": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Create a new user",
+        "description": "",
+        "operationId": "createUser",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "new_user",
+            "in": "body",
+            "description": "User encoded in JSON string",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "405": {
+            "description": "Validation exception"
+          },
+          "412": {
+            "description": "Name already taken"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Update existing catalog info",
+        "description": "",
+        "operationId": "updateUser",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "new_user",
+            "in": "body",
+            "description": "User encoded in JSON string",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/user/all": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Get all users",
+        "description": "Returns a list of courts descriptions",
+        "operationId": "getAllUsers",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/user/me": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Get my user info",
+        "description": "Returns an info of currently authorized user",
+        "operationId": "getMyUser",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/user/{userId}": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Find user by ID",
+        "description": "Returns a user description",
+        "operationId": "getUser",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "ID of user to return",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Remove user",
+        "description": "",
+        "operationId": "deleteUser",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "User id to unlink",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "hard",
+            "in": "query",
+            "description": "Hard-delete (no undo)",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
     }
   },
   "definitions": {
@@ -114,6 +340,47 @@
         },
         "message": {
           "type": "string"
+        }
+      }
+    },
+    "User": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "username": {
+          "type": "string",
+          "example": "Daniil"
+        },
+        "e_mail": {
+          "type": "string",
+          "example": "savchuk@itsociety.su"
+        },
+        "prop": {
+          "type": "object",
+          "properties": {
+            "avatar": {
+              "type": "int",
+              "example": "media_id or base64 encoded string"
+            },
+            "private": {
+              "type": "boolean",
+              "example": false
+            }
+          }
+        },
+        "created": {
+          "type": "string",
+          "example": "2018-03-28 20:24:00+00:00"
+        },
+        "updated": {
+          "type": "string",
+          "example": "2018-03-28 20:24:00+00:00"
         }
       }
     }

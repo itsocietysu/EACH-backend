@@ -11,7 +11,6 @@ from each.Entities.EntityMuseum import EntityMuseum
 
 from each.Prop.PropBool import PropBool
 from each.Prop.PropMedia import PropMedia
-from each.Prop.PropPost import PropPost
 
 from each.db import DBConnection
 
@@ -21,17 +20,17 @@ class EntityUser(EntityBase, Base):
     __tablename__ = 'each_user'
 
     eid = Column(Integer, Sequence('each_seq'), primary_key=True)
-    name = Column(String)
+    login = Column(String)
     e_mail = Column(String)
     created = Column(Date)
     updated = Column(Date)
 
-    json_serialize_items_list = ['eid', 'name', 'e_mail', 'created', 'updated']
+    json_serialize_items_list = ['eid', 'login', 'e_mail', 'created', 'updated']
 
     def __init__(self, username, email):
         super().__init__()
 
-        self.name = username
+        self.login = username
         self.e_mail = email
 
         ts = time.time()
@@ -122,7 +121,6 @@ class EntityUser(EntityBase, Base):
 
         PROP_MAPPING = {
             'private': lambda _eid, _id: PropBool.get_object_property(_eid, _id),
-            'post': lambda _eid, _id: PropPost.get_object_property(_eid, _id),
             'avatar': lambda _eid, _id: PropMedia.get_object_property(_eid, _id, ['eid', 'url'])
         }
 
@@ -147,7 +145,6 @@ class EntityUser(EntityBase, Base):
 
         PROP_MAPPING = {
             'private': lambda _eid, _id: PropBool.delete(_eid, _id, False),
-            'post': lambda _eid, _id: PropPost.delete(_eid, _id, False),
             'avatar': lambda _eid, _id: PropMedia.delete(_eid, _id, False)
         }
 
