@@ -18,6 +18,7 @@ from each.utils import obj_to_json, getIntPathParam
 from each.Entities.EntityUser import EntityUser
 from each.Entities.EntityBase import EntityBase
 from each.Entities.EntityMedia import EntityMedia
+from each.Entities.EntityNews import EntityNews
 
 from each.Prop.PropMedia import PropMedia
 # from each.MediaResolver.MediaResolverFactory import MediaResolverFactory
@@ -262,6 +263,27 @@ def deleteUser(**request_handler_args):
     resp.status = falcon.HTTP_400
 
 
+def addFeed(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    try:
+        params = json.loads(req.stream.read().decode('utf-8'))
+        id = EntityNews.add_from_json(params)
+
+        if id:
+            objects = EntityNews.get().filter_by(eid=id).all()
+
+            resp.body = obj_to_json([o.to_dict() for o in objects])
+            resp.status = falcon.HTTP_200
+            return
+    except ValueError:
+        resp.status = falcon.HTTP_405
+        return
+
+    resp.status = falcon.HTTP_501
+
+
 operation_handlers = {
     # Users
     'createUser':           [createUser],
@@ -276,6 +298,7 @@ operation_handlers = {
 
     # Feed
     'getFeed':              [getFeed],
+    'addFeed':              [addFeed],
 
     'getVersion':           [getVersion],
     'httpDefault':          [httpDefault]
