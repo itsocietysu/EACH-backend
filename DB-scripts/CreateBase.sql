@@ -70,6 +70,8 @@ CREATE TABLE "each_prop" (
 );
 
 
+INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'private', 'bool');
+commit;
 INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'price', 'real');
 INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'image', 'media');
 INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'avatar', 'media');

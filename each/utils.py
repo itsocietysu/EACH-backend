@@ -24,6 +24,16 @@ def batch(iterable, batch_size):
     if len(b) > 0:
         yield b
 
+def getPathParam(name, **request_handler_args):
+    return request_handler_args['uri_fields'][name].partition('?')[0]
+
+def getIntPathParam(name, **request_handler_args):
+    s = getPathParam(name, **request_handler_args)
+    try:
+        return int(s)
+    except ValueError:
+        return None
+
 
 # def ReadEntireLobs(entire_tuple):
 #     result = []
