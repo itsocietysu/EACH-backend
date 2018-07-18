@@ -56,17 +56,20 @@ class EntityNews(EntityBase, Base):
             new_entity = EntityNews(title, text)
             eid = new_entity.add()
 
-            with DBConnection() as session:
-                for prop_name, prop_val in data['prop'].items():
-
-                    if prop_name in PROPNAME_MAPPING and prop_name in PROP_MAPPING:
-                        PROP_MAPPING[prop_name](session, eid, PROPNAME_MAPPING[prop_name], prop_val, eid)
-                    else:
-                        new_entity.delete(eid)
-                        raise Exception('{%s} not existed property\nPlease use one of:\n%s' %
+            try:
+                with DBConnection() as session:
+                    for prop_name, prop_val in data['prop'].items():
+                        if prop_name in PROPNAME_MAPPING and prop_name in PROP_MAPPING:
+                            PROP_MAPPING[prop_name](session, eid, PROPNAME_MAPPING[prop_name], prop_val, eid)
+                        else:
+                            EntityNews.delete(eid)
+                            raise Exception('{%s} not existed property\nPlease use one of:\n%s' %
                                         (prop_name, str(PROPNAME_MAPPING)))
 
-                session.db.commit()
+                    session.db.commit()
+            except Exception as e:
+                EntityNews.delete(eid)
+                raise Exception('Internal error')
 
         return eid
 
