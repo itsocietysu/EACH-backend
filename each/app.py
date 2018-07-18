@@ -306,6 +306,16 @@ def updateFeed(**request_handler_args):
     resp.status = falcon.HTTP_501
 
 
+def getAllFeeds(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    objects = EntityNews.get().all()
+
+    resp.body = obj_to_json([o.to_dict() for o in objects])
+    resp.status = falcon.HTTP_200
+
+
 operation_handlers = {
     # Users
     'createUser':           [createUser],
@@ -322,6 +332,7 @@ operation_handlers = {
     'getFeed':              [getFeed],
     'addFeed':              [addFeed],
     'updateFeed':           [updateFeed],
+    'getAllFeeds':          [getAllFeeds],
 
     'getVersion':           [getVersion],
     'httpDefault':          [httpDefault]

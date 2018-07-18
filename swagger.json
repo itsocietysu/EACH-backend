@@ -192,6 +192,32 @@
         ]
       }
     },
+    "/feed/all": {
+      "get": {
+        "tags": [
+          "Feed"
+        ],
+        "summary": "Get all feeds",
+        "description": "Returns a list of feeds descriptions",
+        "operationId": "getAllFeeds",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
     "/user": {
       "post": {
         "tags": [
@@ -285,7 +311,7 @@
           "User"
         ],
         "summary": "Get all users",
-        "description": "Returns a list of courts descriptions",
+        "description": "Returns a list of users descriptions",
         "operationId": "getAllUsers",
         "produces": [
           "application/json"
