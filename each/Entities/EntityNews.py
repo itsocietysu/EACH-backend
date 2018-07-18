@@ -72,7 +72,17 @@ class EntityNews(EntityBase, Base):
 
     @classmethod
     def update_from_json(cls, data):
+        PROPNAME_MAPPING = EntityProp.map_name_id()
+
         eid = None
+
+        PROP_MAPPING = {
+            'image':
+                lambda s, _eid, _id, _val:
+                PropMedia(_eid, _id, _val).update(session=s)
+                if len(PropMedia.get().filter_by(eid=_eid, propid=_id).all())
+                else PropMedia(_eid, _id, _val).add(session=session)
+        }
 
         if 'id' in data:
             with DBConnection() as session:
@@ -86,6 +96,12 @@ class EntityNews(EntityBase, Base):
 
                         if 'text' in data:
                             _.text = data['text']
+
+                        session.db.commit()
+
+                        for prop_name, prop_val in data['prop'].items():
+                            if prop_name in PROPNAME_MAPPING and prop_name in PROP_MAPPING:
+                                PROP_MAPPING[prop_name](session, eid, PROPNAME_MAPPING[prop_name], prop_val)
 
                         session.db.commit()
 
