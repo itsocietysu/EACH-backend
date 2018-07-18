@@ -21,9 +21,11 @@ class PropBase:
     def add(self, session=None, no_commit=False):
         def proseed(session):
             session.db.add(self)
+
             if not no_commit:
                 session.db.commit()
                 return self.eid
+
             return None
 
         if session:
@@ -32,11 +34,9 @@ class PropBase:
         with DBConnection() as session:
             return proseed(session)
 
-        return None
-
     def update(self, session, no_commit=False):
         def proseed(session):
-            entities = self.__class__.get().filter_by(eid=self.eid, propid=self.propid).all()
+            entities = self.__class__.get(session).filter_by(eid=self.eid, propid=self.propid).all()
             for _ in entities:
                 _.value = self.value
 
@@ -44,10 +44,28 @@ class PropBase:
                 session.db.commit()
 
         if session:
-            proseed(session)
+            return proseed(session)
 
         with DBConnection() as session:
-            proseed(session)
+            return proseed(session)
+
+    def add_or_update(self, session, no_commit=False):
+        def proseed(session):
+            entities = self.__class__.get(session).filter_by(eid=self.eid, propid=self.propid).all()
+            if len(entities):
+                for _ in entities:
+                    _.value = self.value
+            else:
+                self.add(session, no_commit)
+
+            if not no_commit:
+                session.db.commit()
+
+        if session:
+            return proseed(session)
+
+        with DBConnection() as session:
+            return proseed(session)
 
     @classmethod
     def delete(cls, eid, propid, raise_exception=True):
@@ -74,12 +92,25 @@ class PropBase:
                     raise FileNotFoundError('(value)=(%s) was not found' % str(value))
 
     @classmethod
-    def get(cls):
-        with DBConnection() as session:
+    def get(cls, session=None):
+        def proceed(session):
             return session.db.query(cls)
 
-    @classmethod
-    def get_object_property(cls, eid, propid):
+        if session:
+            return proceed(session)
+
         with DBConnection() as session:
+            return proceed(session)
+
+    @classmethod
+    def get_object_property(cls, eid, propid, session=None):
+        def proceed(session):
             return [_.value for _ in session.db.query(cls).filter_by(eid=eid, propid=propid).all()]
+
+        if session:
+            return proceed(session)
+
+        with DBConnection() as session:
+            return proceed(session)
+
 
