@@ -86,9 +86,9 @@
         "tags": [
           "Feed"
         ],
-        "summary": "Returns feed",
-        "description": "Returns feed",
-        "operationId": "getFeed",
+        "summary": "Returns feed mockup",
+        "description": "Returns feed mockup",
+        "operationId": "getFeedMockup",
         "produces": [
           "application/json"
         ],

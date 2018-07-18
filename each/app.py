@@ -119,7 +119,7 @@ def getAllMuseums(**request_handler_args):
     with open("museum.json") as f:
         resp.body = f.read()
 
-def getFeed(**request_handler_args):
+def getFeedMockup(**request_handler_args):
     resp = request_handler_args['resp']
     resp.status = falcon.HTTP_200
     with open("feed.json") as f:
@@ -329,7 +329,7 @@ operation_handlers = {
     'getAllMuseums':        [getAllMuseums],
 
     # Feed
-    'getFeed':              [getFeed],
+    'getFeedMockup':        [getFeedMockup],
     'addFeed':              [addFeed],
     'updateFeed':           [updateFeed],
     'getAllFeeds':          [getAllFeeds],
