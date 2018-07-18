@@ -218,6 +218,48 @@
         ]
       }
     },
+    "/feed/{feedId}": {
+      "get": {
+        "tags": [
+          "Feed"
+        ],
+        "summary": "Find feed by ID",
+        "description": "Returns a feed description",
+        "operationId": "getFeed",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "feedId",
+            "in": "path",
+            "description": "ID of feed to return",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Feed"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Feed not found"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
     "/user": {
       "post": {
         "tags": [

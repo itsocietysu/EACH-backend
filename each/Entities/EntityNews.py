@@ -96,14 +96,11 @@ class EntityNews(EntityBase, Base):
         PROPNAME_MAPPING = EntityProp.map_name_id()
 
         PROP_MAPPING = {
-            'location': lambda _eid, _id: PropLocation.get_object_property(_eid, _id),
-            'comment':  lambda _eid, _id: PropComment.get_object_property(_eid, _id),
-            'media':    lambda _eid, _id: PropMedia.get_object_property(_eid, _id, ['eid', 'url']),
-            'like':     lambda _eid, _id: PropLike.get_object_property(_eid, _id)
+            'image': lambda _eid, _id: PropMedia.get_object_property(_eid, _id, ['eid', 'url'])
         }
 
         result = {
-            'eid': eid,
+            'eid': eid
         }
         for key, propid in PROPNAME_MAPPING.items():
             if key in PROP_MAPPING and (not len(items) or key in items):

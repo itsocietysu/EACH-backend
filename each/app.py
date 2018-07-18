@@ -316,6 +316,25 @@ def getAllFeeds(**request_handler_args):
     resp.status = falcon.HTTP_200
 
 
+def getFeedById(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    id = getIntPathParam("feedId", **request_handler_args)
+    objects = EntityNews.get().filter_by(eid=id).all()
+
+    wide_info = EntityNews.get_wide_object(id, ['image'])
+
+    res = []
+    for _ in objects:
+        obj_dict = _.to_dict(['eid', 'title', 'text'])
+        obj_dict.update(wide_info)
+        res.append(obj_dict)
+
+    resp.body = obj_to_json(res)
+    resp.status = falcon.HTTP_200
+
+
 operation_handlers = {
     # Users
     'createUser':           [createUser],
@@ -333,6 +352,7 @@ operation_handlers = {
     'addFeed':              [addFeed],
     'updateFeed':           [updateFeed],
     'getAllFeeds':          [getAllFeeds],
+    'getFeed':              [getFeedById],
 
     'getVersion':           [getVersion],
     'httpDefault':          [httpDefault]
