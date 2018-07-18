@@ -80,11 +80,9 @@ class EntityNews(EntityBase, Base):
         eid = None
 
         PROP_MAPPING = {
-            'image':
-                lambda s, _eid, _id, _val:
-                PropMedia(_eid, _id, _val).update(session=s)
-                if len(PropMedia.get().filter_by(eid=_eid, propid=_id).all())
-                else PropMedia(_eid, _id, _val).add(session=session)
+            'image':  lambda s, _eid, _id, _val: PropMedia(eid, _id,
+                                                            cls.convert_media_value_to_media_item('image', _eid, _val))
+                                                                        .add_or_update(session=s, no_commit=True)
         }
 
         if 'id' in data:
