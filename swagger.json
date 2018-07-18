@@ -149,6 +149,47 @@
             "auth_env": []
           }
         ]
+      },
+      "put": {
+        "tags": [
+          "Feed"
+        ],
+        "summary": "Update existing catalog info",
+        "description": "Update existing catalog info",
+        "operationId": "updateFeed",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+       "parameters": [
+          {
+            "name": "new_feed",
+            "in": "body",
+            "description": "Feed encoded in JSON string",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Feed"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Feed not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
       }
     },
     "/user": {

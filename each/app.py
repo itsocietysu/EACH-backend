@@ -284,6 +284,28 @@ def addFeed(**request_handler_args):
     resp.status = falcon.HTTP_501
 
 
+def updateFeed(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    try:
+        params = json.loads(req.stream.read().decode('utf-8'))
+
+        id = EntityNews.update_from_json(params)
+
+        if id:
+            objects = EntityNews.get().filter_by(eid=id).all()
+
+            resp.body = obj_to_json([o.to_dict() for o in objects])
+            resp.status = falcon.HTTP_200
+            return
+    except ValueError:
+        resp.status = falcon.HTTP_405
+        return
+
+    resp.status = falcon.HTTP_501
+
+
 operation_handlers = {
     # Users
     'createUser':           [createUser],
@@ -299,6 +321,7 @@ operation_handlers = {
     # Feed
     'getFeed':              [getFeed],
     'addFeed':              [addFeed],
+    'updateFeed':           [updateFeed],
 
     'getVersion':           [getVersion],
     'httpDefault':          [httpDefault]
