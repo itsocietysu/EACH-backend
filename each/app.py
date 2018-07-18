@@ -334,6 +334,31 @@ def getFeedById(**request_handler_args):
     resp.body = obj_to_json(res)
     resp.status = falcon.HTTP_200
 
+def deleteFeed(**request_handler_args):
+    resp = request_handler_args['resp']
+    req = request_handler_args['req']
+
+    id = getIntPathParam("feedId", **request_handler_args)
+
+    try:
+        EntityNews.delete(id)
+    except FileNotFoundError:
+        resp.status = falcon.HTTP_404
+        return
+
+    try:
+        EntityNews.delete_wide_object(id)
+    except FileNotFoundError:
+        resp.status = falcon.HTTP_405
+        return
+
+    object = EntityNews.get().filter_by(eid=id).all()
+    if not len(object):
+        resp.status = falcon.HTTP_200
+        return
+
+    resp.status = falcon.HTTP_400
+
 
 operation_handlers = {
     # Users
@@ -353,6 +378,7 @@ operation_handlers = {
     'updateFeed':           [updateFeed],
     'getAllFeeds':          [getAllFeeds],
     'getFeed':              [getFeedById],
+    'deleteFeed':           [deleteFeed],
 
     'getVersion':           [getVersion],
     'httpDefault':          [httpDefault]

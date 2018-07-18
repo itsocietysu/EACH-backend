@@ -113,10 +113,7 @@ class EntityNews(EntityBase, Base):
         PROPNAME_MAPPING = EntityProp.map_name_id()
 
         PROP_MAPPING = {
-            'location': lambda _eid, _id: PropLocation.delete(_eid, _id, False),
-            'comment':  lambda _eid, _id: PropComment.delete(_eid, _id, False),
-            'media':    lambda _eid, _id: PropMedia.delete(_eid, _id, False),
-            'like':     lambda _eid, _id: PropLike.delete(_eid, _id, False)
+            'image': lambda _eid, _id: PropMedia.delete(_eid, _id, False)
         }
 
         for key, propid in PROPNAME_MAPPING.items():

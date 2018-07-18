@@ -258,6 +258,47 @@
             "auth_env": []
           }
         ]
+      },
+      "delete": {
+        "tags": [
+          "Feed"
+        ],
+        "summary": "Remove feed",
+        "description": "Remove feed",
+        "operationId": "deleteFeed",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "feedId",
+            "in": "path",
+            "description": "Feed id to unlink",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "hard",
+            "in": "query",
+            "description": "Hard-delete (no undo)",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Feed not found"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
       }
     },
     "/user": {
