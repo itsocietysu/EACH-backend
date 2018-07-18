@@ -94,7 +94,7 @@ class EntityUser(EntityBase, Base):
                 if len(entity):
                     for _ in entity:
                         if 'username' in data:
-                            _.username = data['username']
+                            _.login = data['username']
 
                         if 'e_mail' in data:
                             _.e_mail = data['e_mail']
