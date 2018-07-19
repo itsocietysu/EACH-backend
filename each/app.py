@@ -21,6 +21,8 @@ from each.Entities.EntityMedia import EntityMedia
 from each.Entities.EntityNews import EntityNews
 
 from each.Prop.PropMedia import PropMedia
+
+from each.auth import auth
 # from each.MediaResolver.MediaResolverFactory import MediaResolverFactory
 
 def guess_response_type(path):
@@ -435,13 +437,16 @@ class Auth(object):
 
         error = 'Authorization required.'
         if token:
-            error, res, email = auth.Validate(token, auth.PROVIDER.GOOGLE)
-            if not error:
-                req.context['email'] = email
+            error, acc_type, user_email, user_id, user_name = auth.Validate(
+                cfg['oidc']['each_oauth2']['check_token_url'],
+                token
+            )
 
-                if not EntityUser.get_id_from_email(email) and not re.match('(/each/user).*', req.relative_uri):
-                    raise falcon.HTTPUnavailableForLegalReasons(description=
-                                                                "Requestor [%s] not existed as user yet" % email)
+            if not error:
+                req.context['user_email'] = user_email
+                req.context['user_id'] = user_id
+                req.context['user_name'] = user_name
+                req.context['access_type'] = acc_type
 
                 return # passed access token is valid
 
@@ -463,7 +468,8 @@ with open(cfgPath) as f:
 
 general_executor = ftr.ThreadPoolExecutor(max_workers=20)
 
-wsgi_app = api = falcon.API(middleware=[CORS(), MultipartMiddleware()])# , Auth()
+#wsgi_app = api = falcon.API(middleware=[CORS(), Auth(), MultipartMiddleware()])
+wsgi_app = api = falcon.API(middleware=[CORS(), MultipartMiddleware()])
 
 server = SpecServer(operation_handlers=operation_handlers)
 
