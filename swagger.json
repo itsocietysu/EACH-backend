@@ -696,6 +696,18 @@
       }
     }
   },
+  "securityDefinitions": {
+    "auth_env": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "http://127.0.0.1:5000/oauth2/authorize",
+      "tokenUrl": "http://127.0.0.1:5000/oauth2/token",
+      "scopes": {
+        "email": "View your email address",
+        "profile": "View your basic profile info"
+      }
+    }
+  },
   "definitions": {
     "ApiResponse": {
       "type": "object",
