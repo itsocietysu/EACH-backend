@@ -70,6 +70,8 @@ CREATE TABLE "each_prop" (
 );
 
 
+INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'private', 'bool');
+commit;
 INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'price', 'real');
 INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'image', 'media');
 INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'avatar', 'media');
@@ -152,6 +154,16 @@ CREATE TABLE "each_prop_location" (
   OIDS=FALSE
 );
 
+DROP TABLE IF EXISTS "each_news";
+CREATE TABLE "each_news" (
+	"eid" BIGSERIAL NOT NULL PRIMARY KEY,
+	"title" VARCHAR(256) NOT NULL UNIQUE,
+	"text" VARCHAR(4000) NOT NULL DEFAULT '',
+	"created" TIMESTAMP WITH TIME ZONE NOT NULL,
+	"updated" TIMESTAMP WITH TIME ZONE NOT NULL
+) WITH (
+  OIDS=FALSE
+);
 
 DROP TABLE IF EXISTS "each_comment";
 CREATE TABLE "each_comment" (

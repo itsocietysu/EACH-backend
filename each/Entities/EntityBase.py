@@ -85,22 +85,31 @@ class EntityBase:
         return ownerid
 
     @classmethod
-    def process_media(cls, session, media_type, _owner_id, eid, _id, _):
+    def convert_media_value_to_media_item(cls, media_type, _owner_id, _):
+        _name = ''
+        _desc = ''
+
+        if media_type == 'equipment':
+            _name = _['name']
+            _desc = _['desc']
+            _ = _['media']
+
+        if type(_) is str:
+            resolver = MediaResolverFactory.produce(media_type, base64.b64decode(_))
+            resolver.Resolve()
+            return EntityBase.MediaCls(_owner_id, media_type, resolver.url, name=_name, desc=_desc).add()
+        return _
+
+    @classmethod
+    def process_media(cls, session, media_type, _owner_id, eid, _id, _, update=False):
         if EntityBase.MediaCls:
-            _name = ''
-            _desc = ''
-
-            if media_type == 'equipment':
-                _name = _['name']
-                _desc = _['desc']
-                _ = _['media']
-
-            if type(_) is str:
-                resolver = MediaResolverFactory.produce(media_type, base64.b64decode(_))
-                resolver.Resolve()
-                _ = EntityBase.MediaCls(_owner_id, media_type, resolver.url, name=_name, desc=_desc).add()
+            _ = cls.convert_media_value_to_media_item(media_type, _owner_id, _)
 
             if type(_) is int:
-                EntityBase.MediaPropCls(eid, _id, _).add(session=session, no_commit=True)
+                if not update:
+                    EntityBase.MediaPropCls(eid, _id, _).add(session=session, no_commit=True)
+                else:
+                    EntityBase.MediaPropCls(eid, _id, _).update(session=session, no_commit=True)
             else:
                 raise FileNotFoundError("Media has not been created")
+

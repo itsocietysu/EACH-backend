@@ -2,7 +2,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine.url import URL
 from sqlalchemy.orm import sessionmaker
 
-
 class DBConnection:
     s_owner_token = None
 

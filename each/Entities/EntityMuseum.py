@@ -17,7 +17,7 @@ from each.db import DBConnection
 
 Base = declarative_base()
 
-class EntityCourt(EntityBase, Base):
+class EntityMuseum(EntityBase, Base):
     __tablename__ = 'each_museum'
 
     eid = Column(Integer, Sequence('each_seq'), primary_key=True)
@@ -77,7 +77,7 @@ class EntityCourt(EntityBase, Base):
             name = data['name']
             desc = data['desc']
 
-            new_entity = EntityCourt(ownerid, name, desc)
+            new_entity = EntityMuseum(ownerid, name, desc)
             eid = new_entity.add()
 
             with DBConnection() as session:
@@ -129,7 +129,7 @@ class EntityCourt(EntityBase, Base):
             with DBConnection() as session:
                 eid = data['id']
                 ownerid = data['ownerid']
-                entity = session.db.query(EntityCourt).filter_by(eid=eid).all()
+                entity = session.db.query(EntityMuseum).filter_by(eid=eid).all()
 
                 if len(entity):
                     for _ in entity:

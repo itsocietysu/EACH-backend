@@ -14,7 +14,13 @@ from falcon_multipart.middleware import MultipartMiddleware
 from each import utils
 from each.db import DBConnection
 from each.serve_swagger import SpecServer
-from each.utils import obj_to_json
+from each.utils import obj_to_json, getIntPathParam
+from each.Entities.EntityUser import EntityUser
+from each.Entities.EntityBase import EntityBase
+from each.Entities.EntityMedia import EntityMedia
+from each.Entities.EntityNews import EntityNews
+
+from each.Prop.PropMedia import PropMedia
 # from each.MediaResolver.MediaResolverFactory import MediaResolverFactory
 
 def guess_response_type(path):
@@ -113,11 +119,269 @@ def getAllMuseums(**request_handler_args):
     with open("museum.json") as f:
         resp.body = f.read()
 
+def getFeedMockup(**request_handler_args):
+    resp = request_handler_args['resp']
+    resp.status = falcon.HTTP_200
+    with open("feed.json") as f:
+        resp.body = f.read()
+
+
+def createUser(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    try:
+        params = json.loads(req.stream.read().decode('utf-8'))
+        id = EntityUser.add_from_json(params)
+
+        if id:
+            objects = EntityUser.get().filter_by(eid=id).all()
+
+            resp.body = obj_to_json([o.to_dict() for o in objects])
+            resp.status = falcon.HTTP_200
+            return
+    except ValueError:
+        resp.status = falcon.HTTP_405
+        return
+
+    resp.status = falcon.HTTP_501
+
+
+def updateUser(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    #email = req.context['email']
+    #id_email = EntityUser.get_id_from_email(email)
+
+    try:
+        params = json.loads(req.stream.read().decode('utf-8'))
+
+        #if params['id'] != id_email or not EntitySuperUser.is_id_super_admin(id_email):
+        #    resp.status = falcon.HTTP_403
+        #    return
+
+        id = EntityUser.update_from_json(params)
+
+        if id:
+            objects = EntityUser.get().filter_by(eid=id).all()
+
+            resp.body = obj_to_json([o.to_dict() for o in objects])
+            resp.status = falcon.HTTP_200
+            return
+    except ValueError:
+        resp.status = falcon.HTTP_405
+        return
+
+    resp.status = falcon.HTTP_501
+
+
+def getAllUsers(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    objects = EntityUser.get().all()
+
+    resp.body = obj_to_json([o.to_dict() for o in objects])
+    resp.status = falcon.HTTP_200
+
+
+def getUserById(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    id = getIntPathParam("userId", **request_handler_args)
+    objects = EntityUser.get().filter_by(eid=id).all()
+
+    wide_info = EntityUser.get_wide_object(id, ['private', 'avatar'])
+
+    res = []
+    for _ in objects:
+        obj_dict = _.to_dict(['eid', 'login'])
+        obj_dict.update(wide_info)
+        res.append(obj_dict)
+
+    resp.body = obj_to_json(res)
+    resp.status = falcon.HTTP_200
+
+
+def getMyUser(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    e_mail = req.context['email']
+    id = EntityUser.get_id_from_email(e_mail)
+
+    objects = EntityUser.get().filter_by(eid=id).all()
+
+    # TODO: LIMIT the posts output counts with a paging
+    wide_info = EntityUser.get_wide_object(id, ['private', 'avatar', 'post'])
+
+    wide_info['post'].sort(key=lambda x: x['eid'], reverse=True)
+
+    res = []
+    for _ in objects:
+        obj_dict = _.to_dict(['eid', 'login'])
+        obj_dict.update(wide_info)
+        res.append(obj_dict)
+
+    resp.body = obj_to_json(res)
+    resp.status = falcon.HTTP_200
+
+
+def deleteUser(**request_handler_args):
+    resp = request_handler_args['resp']
+    req = request_handler_args['req']
+
+    # TODO: VERIFICATION IF ADMIN DELETE ANY
+    #email = req.context['email']
+    id = getIntPathParam("userId", **request_handler_args)
+    #id_email = EntityUser.get_id_from_email(email)
+
+    if id is not None:
+        #if id != id_email or not EntitySuperUser.is_id_super_admin(id_email):
+        #    resp.status = falcon.HTTP_403
+        #    return
+
+        try:
+            EntityUser.delete(id)
+        except FileNotFoundError:
+            resp.status = falcon.HTTP_404
+            return
+
+        try:
+            EntityUser.delete_wide_object(id)
+        except FileNotFoundError:
+            resp.status = falcon.HTTP_405
+            return
+
+        object = EntityUser.get().filter_by(eid=id).all()
+        if not len(object):
+            resp.status = falcon.HTTP_200
+            return
+
+    resp.status = falcon.HTTP_400
+
+
+def addFeed(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    try:
+        params = json.loads(req.stream.read().decode('utf-8'))
+        id = EntityNews.add_from_json(params)
+
+        if id:
+            objects = EntityNews.get().filter_by(eid=id).all()
+
+            resp.body = obj_to_json([o.to_dict() for o in objects])
+            resp.status = falcon.HTTP_200
+            return
+    except ValueError:
+        resp.status = falcon.HTTP_405
+        return
+
+    resp.status = falcon.HTTP_501
+
+
+def updateFeed(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    try:
+        params = json.loads(req.stream.read().decode('utf-8'))
+
+        id = EntityNews.update_from_json(params)
+
+        if id:
+            objects = EntityNews.get().filter_by(eid=id).all()
+
+            resp.body = obj_to_json([o.to_dict() for o in objects])
+            resp.status = falcon.HTTP_200
+            return
+    except ValueError:
+        resp.status = falcon.HTTP_405
+        return
+
+    resp.status = falcon.HTTP_501
+
+
+def getAllFeeds(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    objects = EntityNews.get().all()
+
+    resp.body = obj_to_json([o.to_dict() for o in objects])
+    resp.status = falcon.HTTP_200
+
+
+def getFeedById(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    id = getIntPathParam("feedId", **request_handler_args)
+    objects = EntityNews.get().filter_by(eid=id).all()
+
+    wide_info = EntityNews.get_wide_object(id, ['image'])
+
+    res = []
+    for _ in objects:
+        obj_dict = _.to_dict(['eid', 'title', 'text'])
+        obj_dict.update(wide_info)
+        res.append(obj_dict)
+
+    resp.body = obj_to_json(res)
+    resp.status = falcon.HTTP_200
+
+def deleteFeed(**request_handler_args):
+    resp = request_handler_args['resp']
+    req = request_handler_args['req']
+
+    id = getIntPathParam("feedId", **request_handler_args)
+
+    try:
+        EntityNews.delete(id)
+    except FileNotFoundError:
+        resp.status = falcon.HTTP_404
+        return
+
+    try:
+        EntityNews.delete_wide_object(id)
+    except FileNotFoundError:
+        resp.status = falcon.HTTP_405
+        return
+
+    object = EntityNews.get().filter_by(eid=id).all()
+    if not len(object):
+        resp.status = falcon.HTTP_200
+        return
+
+    resp.status = falcon.HTTP_400
+
 
 operation_handlers = {
-    'getVersion':      [getVersion],
-    'getAllMuseums':          [getAllMuseums],
-    'httpDefault':     [httpDefault]
+    # Users
+    'createUser':           [createUser],
+    'updateUser':           [updateUser],
+    'getAllUsers':          [getAllUsers],
+    'getUser':              [getUserById],
+    'getMyUser':            [getMyUser],
+    'deleteUser':           [deleteUser],
+
+    # Museums
+    'getAllMuseums':        [getAllMuseums],
+
+    # Feed
+    'getFeedMockup':        [getFeedMockup],
+    'addFeed':              [addFeed],
+    'updateFeed':           [updateFeed],
+    'getAllFeeds':          [getAllFeeds],
+    'getFeed':              [getFeedById],
+    'deleteFeed':           [deleteFeed],
+
+    'getVersion':           [getVersion],
+    'httpDefault':          [httpDefault]
 }
 
 class CORS(object):
@@ -213,6 +477,10 @@ if 'server_host' in cfg:
     baseURL = '/each'
     if 'basePath' in swagger_json:
         baseURL = swagger_json['basePath']
+
+    EntityBase.host = server_host + baseURL
+    EntityBase.MediaCls = EntityMedia
+    EntityBase.MediaPropCls = PropMedia
 
     json_string = json.dumps(swagger_json)
 
