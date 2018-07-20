@@ -486,6 +486,7 @@ operation_handlers = {
     'deleteUser':           [deleteUser],
 
     # Museums
+    'getAllMuseumsMockup':  [getAllMuseumsMockup],
     'getAllMuseums':        [getAllMuseums],
     'addNewMuseum':         [addNewMuseum],
     'updateMuseum':         [updateMuseum],
@@ -587,6 +588,7 @@ with open(cfgPath) as f:
 
 general_executor = ftr.ThreadPoolExecutor(max_workers=20)
 
+# change line to enable OAuth autorization:
 #wsgi_app = api = falcon.API(middleware=[CORS(), Auth(), MultipartMiddleware()])
 wsgi_app = api = falcon.API(middleware=[CORS(), MultipartMiddleware()])
 
