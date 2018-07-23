@@ -2,7 +2,7 @@ DROP SEQUENCE IF EXISTS each_seq;
 CREATE SEQUENCE each_seq start with 1 increment by 1;
 
 DROP TYPE IF EXISTS each_prop_type CASCADE;
-CREATE TYPE each_prop_type AS ENUM ('bool', 'int', 'real', 'media', 'comment', 'like', 'location', 'post');
+CREATE TYPE each_prop_type AS ENUM ('bool', 'int', 'real', 'media', 'comment', 'like', 'location', 'post', 'game');
 
 DROP TYPE IF EXISTS each_media_type CASCADE;
 CREATE TYPE each_media_type AS ENUM ('ava', 'image');
@@ -22,6 +22,18 @@ CREATE TABLE "each_museum" (
   OIDS=FALSE
 );
 
+
+DROP TABLE IF EXISTS "each_game";
+CREATE TABLE "each_game" (
+	"eid" BIGSERIAL NOT NULL PRIMARY KEY,
+	"ownerid" BIGINT NOT NULL,
+	"name" VARCHAR(256) NOT NULL UNIQUE,
+	"game" VARCHAR(4000) NOT NULL DEFAULT '',
+	"created" TIMESTAMP WITH TIME ZONE NOT NULL,
+	"updated" TIMESTAMP WITH TIME ZONE NOT NULL
+) WITH (
+  OIDS=FALSE
+);
 
 DROP TABLE IF EXISTS "each_user";
 CREATE TABLE "each_user" (
@@ -78,6 +90,19 @@ INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'avatar', '
 INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'comment', 'comment');
 INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'like', 'like');
 INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'location', 'location');
+INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'game', 'game');
+
+
+DROP TABLE IF EXISTS "each_prop_game";
+CREATE TABLE "each_prop_game" (
+	"eid" BIGINT NOT NULL,
+	"propid" BIGINT NOT NULL,
+	"value" BIGINT NOT NULL,
+	PRIMARY KEY (eid, propid, value)
+) WITH (
+  OIDS=FALSE
+);
+
 
 DROP TABLE IF EXISTS "each_prop_bool";
 CREATE TABLE "each_prop_bool" (
