@@ -46,30 +46,8 @@ class EntityMuseum(EntityBase, Base):
         eid = None
 
         PROP_MAPPING = {
-            'private':
-                lambda session, _eid, _id, _value, _uid: PropBool(_eid, _id, _value)
-                    .add(session=session, no_commit=True),
-            'isopen':
-                lambda session, _eid, _id, _value, _uid: PropBool(_eid, _id, _value)
-                    .add(session=session, no_commit=True),
-            'isfree':
-                lambda session, _eid, _id, _value, _uid: PropBool(_eid, _id, _value)
-                    .add(session=session, no_commit=True),
-            'isonair':
-                lambda session, _eid, _id, _value, _uid: PropBool(_eid, _id, _value)
-                    .add(session=session, no_commit=True),
-            'price':
-                lambda session, _eid, _id, _value, _uid: PropReal(_eid, _id, _value)
-                    .add(session=session, no_commit=True),
-            'location':
-                lambda s, _eid, _id, _val, _uid: PropLocation(_eid, _id, _val)
-                    .add(session=s, no_commit=True),
-            'media':
-                lambda s, _eid, _id, _val, _uid: [cls.process_media(s, 'image', _uid, _eid, _id, _)
-                                                    for _ in _val],
-            'equipment':
-                lambda s, _eid, _id, _val, _uid: [cls.process_media(s, 'equipment', _uid, _eid, _id, _)
-                                                    for _ in _val]
+            'image':
+                lambda s, _eid, _id, _val, _uid: cls.process_media(s, 'image', _uid, _eid, _id, _val)
         }
 
         if 'ownerid' in data and 'name' in data and 'desc' in data and 'prop' in data:
@@ -83,7 +61,7 @@ class EntityMuseum(EntityBase, Base):
             with DBConnection() as session:
                 for prop_name, prop_val in data['prop'].items():
                     if prop_name in PROPNAME_MAPPING and prop_name in PROP_MAPPING:
-                        PROP_MAPPING[prop_name](session, eid, PROPNAME_MAPPING[prop_name], prop_val, ownerid)
+                        PROP_MAPPING[prop_name](session, eid, PROPNAME_MAPPING[prop_name], prop_val, eid)
                     else:
                         new_entity.delete(eid)
                         raise Exception('{%s} not existed property\nPlease use one of:\n%s' %
@@ -94,56 +72,35 @@ class EntityMuseum(EntityBase, Base):
         return eid
 
     @classmethod
-    def __update_equipment(cls, s, _eid, _id, _val, _uid):
-        if 'del' in _val:
-            PropMedia.deleteList(_eid, _id, _val['del'], s, False)
-
-        if 'new' in _val:
-            for _val_new in _val['new']:
-                cls.process_media(s, 'equipment', _uid, _eid, _id, _val_new)
-
-
-
-    @classmethod
     def update_from_json(cls, data):
         PROPNAME_MAPPING = EntityProp.map_name_id()
 
         eid = None
 
         PROP_MAPPING = {
-            'location':
-                lambda s, _eid, _id, _val, _uid:
-                PropLocation(_eid, _id, _val).update(session=s)
-                if len(PropLocation.get().filter_by(eid=_eid, propid=_id).all())
-                else PropLocation(_eid, _id, _val).add(session=s),
-            'equipment':
-                lambda s, _eid, _id, _val, _uid: cls.__update_equipment(s,_eid, _id, _val, _uid),
-            'description':
-                lambda s, _eid, _id, _val, _uid:
-                PropComment(_eid, _id, _val).update(session=s)
-                if len(PropComment.get().filter_by(eid=_eid, propid=_id).all())
-                else PropComment(_eid, _id, _val).add(session=s),
+            'image':  lambda s, _eid, _id, _val: PropMedia(eid, _id,
+                                                            cls.convert_media_value_to_media_item('image', _eid, _val))
+                                                                        .add_or_update(session=s, no_commit=True)
         }
 
         if 'id' in data:
             with DBConnection() as session:
                 eid = data['id']
-                ownerid = data['ownerid']
                 entity = session.db.query(EntityMuseum).filter_by(eid=eid).all()
 
                 if len(entity):
                     for _ in entity:
-                        if 'username' in data:
-                            _.username = data['username']
+                        if 'name' in data:
+                            _.name = data['name']
 
-                        if 'e_mail' in data:
-                            _.e_mail = data['e_mail']
+                        if 'desc' in data:
+                            _.desc = data['desc']
 
                         session.db.commit()
 
                         for prop_name, prop_val in data['prop'].items():
                             if prop_name in PROPNAME_MAPPING and prop_name in PROP_MAPPING:
-                                PROP_MAPPING[prop_name](session, eid, PROPNAME_MAPPING[prop_name], prop_val, ownerid)
+                                PROP_MAPPING[prop_name](session, eid, PROPNAME_MAPPING[prop_name], prop_val)
 
                         session.db.commit()
 
@@ -154,14 +111,7 @@ class EntityMuseum(EntityBase, Base):
         PROPNAME_MAPPING = EntityProp.map_name_id()
 
         PROP_MAPPING = {
-            'private':   lambda _eid, _id: PropBool.get_object_property(_eid, _id),
-            'isopen':    lambda _eid, _id: PropBool.get_object_property(_eid, _id),
-            'isfree':    lambda _eid, _id: PropBool.get_object_property(_eid, _id),
-            'isonair':   lambda _eid, _id: PropBool.get_object_property(_eid, _id),
-            'price':     lambda _eid, _id: PropReal.get_object_property(_eid, _id),
-            'location':  lambda _eid, _id: PropLocation.get_object_property(_eid, _id),
-            'media':     lambda _eid, _id: PropMedia.get_object_property(_eid, _id),
-            'equipment': lambda _eid, _id: PropMedia.get_object_property(_eid, _id)
+            'image': lambda _eid, _id: PropMedia.get_object_property(_eid, _id, ['eid', 'url'])
         }
 
         result = {
@@ -178,14 +128,7 @@ class EntityMuseum(EntityBase, Base):
         PROPNAME_MAPPING = EntityProp.map_name_id()
 
         PROP_MAPPING = {
-            'private':   lambda _eid, _id: PropBool.delete(_eid, _id, False),
-            'isopen':    lambda _eid, _id: PropBool.delete(_eid, _id, False),
-            'isfree':    lambda _eid, _id: PropBool.delete(_eid, _id, False),
-            'isonair':   lambda _eid, _id: PropBool.delete(_eid, _id, False),
-            'price':     lambda _eid, _id: PropReal.delete(_eid, _id, False),
-            'location':  lambda _eid, _id: PropLocation.delete(_eid, _id, False),
-            'media':     lambda _eid, _id: PropMedia.delete(_eid, _id, False),
-            'equipment': lambda _eid, _id: PropMedia.delete(_eid, _id, False)
+            'image': lambda _eid, _id: PropMedia.delete(_eid, _id, False)
         }
 
         for key, propid in PROPNAME_MAPPING.items():

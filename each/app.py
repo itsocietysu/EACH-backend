@@ -19,8 +19,11 @@ from each.Entities.EntityUser import EntityUser
 from each.Entities.EntityBase import EntityBase
 from each.Entities.EntityMedia import EntityMedia
 from each.Entities.EntityNews import EntityNews
+from each.Entities.EntityMuseum import EntityMuseum
 
 from each.Prop.PropMedia import PropMedia
+
+from each.auth import auth
 # from each.MediaResolver.MediaResolverFactory import MediaResolverFactory
 
 def guess_response_type(path):
@@ -112,12 +115,6 @@ def getVersion(**request_handler_args):
     resp.status = falcon.HTTP_200
     with open("VERSION") as f:
         resp.body = obj_to_json({"version": f.read()[0:-1]})
-
-def getAllMuseums(**request_handler_args):
-    resp = request_handler_args['resp']
-    resp.status = falcon.HTTP_200
-    with open("museum.json") as f:
-        resp.body = f.read()
 
 def getFeedMockup(**request_handler_args):
     resp = request_handler_args['resp']
@@ -359,6 +356,125 @@ def deleteFeed(**request_handler_args):
 
     resp.status = falcon.HTTP_400
 
+# museum feature set functions
+# ----------------------------
+
+def getAllMuseumsMockup(**request_handler_args):
+    resp = request_handler_args['resp']
+    resp.status = falcon.HTTP_200
+    with open("museum.json") as f:
+        resp.body = f.read()
+
+def getAllMuseums(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    objects = EntityMuseum.get().all()
+
+    resp.body = obj_to_json([o.to_dict() for o in objects])
+    resp.status = falcon.HTTP_200
+
+def addNewMuseum(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    try:
+        params = json.loads(req.stream.read().decode('utf-8'))
+        id = EntityMuseum.add_from_json(params)
+
+        if id:
+            objects = EntityMuseum.get().filter_by(eid=id).all()
+
+            resp.body = obj_to_json([o.to_dict() for o in objects])
+            resp.status = falcon.HTTP_200
+            return
+    except ValueError:
+        resp.status = falcon.HTTP_405
+        return
+
+    resp.status = falcon.HTTP_501
+
+def updateMuseum(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    #email = req.context['email']
+    #id_email = EntityUser.get_id_from_email(email)
+
+    try:
+        params = json.loads(req.stream.read().decode('utf-8'))
+
+        #if params['id'] != id_email or not EntitySuperUser.is_id_super_admin(id_email):
+        #    resp.status = falcon.HTTP_403
+        #    return
+
+        id = EntityMuseum.update_from_json(params)
+
+        if id:
+            objects = EntityMuseum.get().filter_by(eid=id).all()
+
+            resp.body = obj_to_json([o.to_dict() for o in objects])
+            resp.status = falcon.HTTP_200
+            return
+    except ValueError:
+        resp.status = falcon.HTTP_405
+        return
+
+    resp.status = falcon.HTTP_501
+
+def deleteMuseum(**request_handler_args):
+    resp = request_handler_args['resp']
+    req = request_handler_args['req']
+
+    # TODO: VERIFICATION IF ADMIN DELETE ANY
+    #email = req.context['email']
+    id = getIntPathParam("Id", **request_handler_args)
+    #id_email = EntityUser.get_id_from_email(email)
+
+    if id is not None:
+        #if id != id_email or not EntitySuperUser.is_id_super_admin(id_email):
+        #    resp.status = falcon.HTTP_403
+        #    return
+
+        try:
+            EntityMuseum.delete(id)
+        except FileNotFoundError:
+            resp.status = falcon.HTTP_404
+            return
+
+        try:
+            EntityMuseum.delete_wide_object(id)
+        except FileNotFoundError:
+            resp.status = falcon.HTTP_405
+            return
+
+        object = EntityMuseum.get().filter_by(eid=id).all()
+        if not len(object):
+            resp.status = falcon.HTTP_200
+            return
+
+    resp.status = falcon.HTTP_400
+
+def getMuseumById(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    id = getIntPathParam("Id", **request_handler_args)
+    objects = EntityMuseum.get().filter_by(eid=id).all()
+
+    wide_info = EntityMuseum.get_wide_object(id, ['image'])
+
+    res = []
+    for _ in objects:
+        obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
+        obj_dict.update(wide_info)
+        res.append(obj_dict)
+
+    resp.body = obj_to_json(res)
+    resp.status = falcon.HTTP_200
+
+# end of museum feature set functions
+# -----------------------------------
 
 operation_handlers = {
     # Users
@@ -370,7 +486,12 @@ operation_handlers = {
     'deleteUser':           [deleteUser],
 
     # Museums
+    'getAllMuseumsMockup':  [getAllMuseumsMockup],
     'getAllMuseums':        [getAllMuseums],
+    'addNewMuseum':         [addNewMuseum],
+    'updateMuseum':         [updateMuseum],
+    'deleteMuseum':         [deleteMuseum],
+    'getMuseum':            [getMuseumById],
 
     # Feed
     'getFeedMockup':        [getFeedMockup],
@@ -435,13 +556,16 @@ class Auth(object):
 
         error = 'Authorization required.'
         if token:
-            error, res, email = auth.Validate(token, auth.PROVIDER.GOOGLE)
-            if not error:
-                req.context['email'] = email
+            error, acc_type, user_email, user_id, user_name = auth.Validate(
+                cfg['oidc']['each_oauth2']['check_token_url'],
+                token
+            )
 
-                if not EntityUser.get_id_from_email(email) and not re.match('(/each/user).*', req.relative_uri):
-                    raise falcon.HTTPUnavailableForLegalReasons(description=
-                                                                "Requestor [%s] not existed as user yet" % email)
+            if not error:
+                req.context['user_email'] = user_email
+                req.context['user_id'] = user_id
+                req.context['user_name'] = user_name
+                req.context['access_type'] = acc_type
 
                 return # passed access token is valid
 
@@ -454,6 +578,7 @@ args = utils.RegisterLaunchArguments()
 
 cfgPath = args.cfgpath
 profile = args.profile
+
 # configure
 with open(cfgPath) as f:
     cfg = utils.GetAuthProfile(json.load(f), profile, args)
@@ -463,7 +588,9 @@ with open(cfgPath) as f:
 
 general_executor = ftr.ThreadPoolExecutor(max_workers=20)
 
-wsgi_app = api = falcon.API(middleware=[CORS(), MultipartMiddleware()])# , Auth()
+# change line to enable OAuth autorization:
+#wsgi_app = api = falcon.API(middleware=[CORS(), Auth(), MultipartMiddleware()])
+wsgi_app = api = falcon.API(middleware=[CORS(), MultipartMiddleware()])
 
 server = SpecServer(operation_handlers=operation_handlers)
 
