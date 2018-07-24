@@ -309,7 +309,14 @@ def getAllFeeds(**request_handler_args):
 
     objects = EntityNews.get().all()
 
-    resp.body = obj_to_json([o.to_dict() for o in objects])
+    res = []
+    for _ in objects:
+        obj_dict = _.to_dict(['eid', 'title', 'text'])
+        wide_info = EntityNews.get_wide_object(_.eid, ['image'])
+        obj_dict.update(wide_info)
+        res.append(obj_dict)
+
+    resp.body = obj_to_json(res)
     resp.status = falcon.HTTP_200
 
 
@@ -371,7 +378,14 @@ def getAllMuseums(**request_handler_args):
 
     objects = EntityMuseum.get().all()
 
-    resp.body = obj_to_json([o.to_dict() for o in objects])
+    res = []
+    for _ in objects:
+        obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
+        wide_info = EntityMuseum.get_wide_object(_.eid, ['image'])
+        obj_dict.update(wide_info)
+        res.append(obj_dict)
+
+    resp.body = obj_to_json(res)
     resp.status = falcon.HTTP_200
 
 def addNewMuseum(**request_handler_args):
