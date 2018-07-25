@@ -15,6 +15,8 @@ from each.Prop.PropLocation import PropLocation
 from each.Prop.PropComment import PropComment
 from each.db import DBConnection
 
+from each.Prop.PropGame import PropGame
+
 Base = declarative_base()
 
 class EntityMuseum(EntityBase, Base):
@@ -111,7 +113,8 @@ class EntityMuseum(EntityBase, Base):
         PROPNAME_MAPPING = EntityProp.map_name_id()
 
         PROP_MAPPING = {
-            'image': lambda _eid, _id: PropMedia.get_object_property(_eid, _id, ['eid', 'url'])
+            'image': lambda _eid, _id: PropMedia.get_object_property(_eid, _id, ['eid', 'url']),
+            'game': lambda _eid, _id: PropGame.get_object_property(_eid, _id, ['eid', 'ownerid', 'name', 'game'])
         }
 
         result = {

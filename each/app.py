@@ -382,7 +382,7 @@ def getAllMuseums(**request_handler_args):
     res = []
     for _ in objects:
         obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
-        wide_info = EntityMuseum.get_wide_object(_.eid, ['image'])
+        wide_info = EntityMuseum.get_wide_object(_.eid, ['image', 'game'])
         obj_dict.update(wide_info)
         res.append(obj_dict)
 
@@ -477,7 +477,7 @@ def getMuseumById(**request_handler_args):
     id = getIntPathParam("Id", **request_handler_args)
     objects = EntityMuseum.get().filter_by(eid=id).all()
 
-    wide_info = EntityMuseum.get_wide_object(id, ['image'])
+    wide_info = EntityMuseum.get_wide_object(id, ['image', 'game'])
 
     res = []
     for _ in objects:
@@ -494,7 +494,6 @@ def getMuseumById(**request_handler_args):
 # Game feature set functions
 # --------------------------
 
-# ok
 def deleteGame(**request_handler_args):
     resp = request_handler_args['resp']
     req = request_handler_args['req']
@@ -585,7 +584,7 @@ def getGameById(**request_handler_args):
     id = getIntPathParam("gameId", **request_handler_args)
     objects = EntityGame.get().filter_by(eid=id).all()
 
-    wide_info = EntityGame.get_wide_object(id, ['avatar'])
+    wide_info = EntityGame.get_wide_object(id, ['game', 'avatar'])
 
     res = []
     for _ in objects:
@@ -603,7 +602,14 @@ def GetAllGamesById(**request_handler_args):
     id = getIntPathParam("ownerId", **request_handler_args)
     objects = EntityGame.get().filter(EntityGame.ownerid==id).all()
 
-    resp.body = obj_to_json([o.to_dict() for o in objects])
+    res = []
+    for _ in objects:
+        obj_dict = _.to_dict(['eid', 'name'])
+        wide_info = EntityGame.get_wide_object(_.eid, ['game', 'avatar'])
+        obj_dict.update(wide_info)
+        res.append(obj_dict)
+
+    resp.body = obj_to_json(res)
     resp.status = falcon.HTTP_200
 
 # End of game feature set functions

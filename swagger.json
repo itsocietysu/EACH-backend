@@ -1073,6 +1073,10 @@
             "avatar": {
               "type": "int",
               "example": "media_id or base64 encoded string"
+            },
+            "game": {
+              "type": "game",
+              "example": "museum id"
             }
           }
         },

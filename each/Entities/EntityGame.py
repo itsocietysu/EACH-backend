@@ -8,8 +8,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from each.Entities.EntityBase import EntityBase
 from each.Entities.EntityProp import EntityProp
 
+from each.Prop.PropBase import PropBase
 from each.Prop.PropMedia import PropMedia
-from each.Prop.PropGame import PropGame
 
 from each.db import DBConnection
 
@@ -42,10 +42,15 @@ class EntityGame(EntityBase, Base):
         PROPNAME_MAPPING = EntityProp.map_name_id()
 
         eid = None
+        from each.Prop.PropGame import PropGame
 
         PROP_MAPPING = {
             'avatar':
-                lambda s, _eid, _id, _val, _uid: cls.process_media(s, 'image', _uid, _eid, _id, _val)
+                lambda s, _eid, _id, _val, _uid: cls.process_media(s, 'image', _uid, _eid, _id, _val),
+            # in table - eid is museum id, and value is eid of game in each_game table
+            'game':
+                 lambda session, _eid, _id, _value, _uid: PropGame(_value, _id, _eid).add(session=session, no_commit=True)
+
         }
 
         if 'ownerid' in data and 'name' in data and 'game' in data and 'prop' in data:
@@ -55,7 +60,6 @@ class EntityGame(EntityBase, Base):
 
             new_entity = EntityGame(ownerid, name, game)
             eid = new_entity.add()
-
 
             with DBConnection() as session:
                 for prop_name, prop_val in data['prop'].items():
@@ -77,7 +81,8 @@ class EntityGame(EntityBase, Base):
         eid = None
 
         PROP_MAPPING = {
-            'avatar':  lambda s, _eid, _id, _val: PropMedia(eid, _id,
+           # 'game': lambda s, _eid, _id, _val: PropGame(eid, _id, _val).add_or_update(session=s, no_commit=True),
+            'avatar': lambda s, _eid, _id, _val: PropMedia(eid, _id,
                                                             cls.convert_media_value_to_media_item('image', _eid, _val))
                                                                         .add_or_update(session=s, no_commit=True)
         }
@@ -110,6 +115,7 @@ class EntityGame(EntityBase, Base):
         PROPNAME_MAPPING = EntityProp.map_name_id()
 
         PROP_MAPPING = {
+           # 'game': lambda _eid, _id: PropGame.get_object_property(_eid, _id),
             'avatar': lambda _eid, _id: PropMedia.get_object_property(_eid, _id, ['eid', 'url'])
         }
 
@@ -127,6 +133,7 @@ class EntityGame(EntityBase, Base):
         PROPNAME_MAPPING = EntityProp.map_name_id()
 
         PROP_MAPPING = {
+           # 'game': lambda _eid, _id: PropGame.delete(_eid, _id),
             'avatar': lambda _eid, _id: PropMedia.delete(_eid, _id, False)
         }
 
