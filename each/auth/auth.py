@@ -13,4 +13,4 @@ def Validate(url, token):
         json_load = json.loads(certs)
         return None, json_load['access_type'], json_load['email'], json_load['user_id'], json_load['name']
     except Exception as e:
-        return str(e), None, None
+        return str(e), None, None, None, None
