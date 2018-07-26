@@ -603,8 +603,8 @@ with open(cfgPath) as f:
 general_executor = ftr.ThreadPoolExecutor(max_workers=20)
 
 # change line to enable OAuth autorization:
-#wsgi_app = api = falcon.API(middleware=[CORS(), Auth(), MultipartMiddleware()])
-wsgi_app = api = falcon.API(middleware=[CORS(), MultipartMiddleware()])
+wsgi_app = api = falcon.API(middleware=[CORS(), Auth(), MultipartMiddleware()])
+#wsgi_app = api = falcon.API(middleware=[CORS(), MultipartMiddleware()])
 
 server = SpecServer(operation_handlers=operation_handlers)
 
