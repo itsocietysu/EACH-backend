@@ -272,7 +272,14 @@ def addFeed(**request_handler_args):
         if id:
             objects = EntityNews.get().filter_by(eid=id).all()
 
-            resp.body = obj_to_json([o.to_dict() for o in objects])
+            res = []
+            for _ in objects:
+                obj_dict = _.to_dict(['eid', 'title', 'text'])
+                wide_info = EntityNews.get_wide_object(_.eid, ['image'])
+                obj_dict.update(wide_info)
+                res.append(obj_dict)
+
+            resp.body = obj_to_json(res)
             resp.status = falcon.HTTP_200
             return
     except ValueError:
@@ -294,7 +301,14 @@ def updateFeed(**request_handler_args):
         if id:
             objects = EntityNews.get().filter_by(eid=id).all()
 
-            resp.body = obj_to_json([o.to_dict() for o in objects])
+            res = []
+            for _ in objects:
+                obj_dict = _.to_dict(['eid', 'title', 'text'])
+                wide_info = EntityNews.get_wide_object(_.eid, ['image'])
+                obj_dict.update(wide_info)
+                res.append(obj_dict)
+
+            resp.body = obj_to_json(res)
             resp.status = falcon.HTTP_200
             return
     except ValueError:
@@ -344,7 +358,7 @@ def deleteFeed(**request_handler_args):
     req = request_handler_args['req']
 
     id = getIntPathParam("feedId", **request_handler_args)
-
+    res = []
     try:
         EntityNews.delete(id)
     except FileNotFoundError:
@@ -359,6 +373,7 @@ def deleteFeed(**request_handler_args):
 
     object = EntityNews.get().filter_by(eid=id).all()
     if not len(object):
+        resp.body = obj_to_json(res)
         resp.status = falcon.HTTP_200
         return
 
@@ -735,8 +750,8 @@ with open(cfgPath) as f:
 general_executor = ftr.ThreadPoolExecutor(max_workers=20)
 
 # change line to enable OAuth autorization:
-#wsgi_app = api = falcon.API(middleware=[CORS(), Auth(), MultipartMiddleware()])
-wsgi_app = api = falcon.API(middleware=[CORS(), MultipartMiddleware()])
+wsgi_app = api = falcon.API(middleware=[CORS(), Auth(), MultipartMiddleware()])
+#wsgi_app = api = falcon.API(middleware=[CORS(), MultipartMiddleware()])
 
 server = SpecServer(operation_handlers=operation_handlers)
 
