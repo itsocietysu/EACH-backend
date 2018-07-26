@@ -20,6 +20,7 @@ from each.Entities.EntityBase import EntityBase
 from each.Entities.EntityMedia import EntityMedia
 from each.Entities.EntityNews import EntityNews
 from each.Entities.EntityMuseum import EntityMuseum
+from each.Entities.EntityGame import EntityGame
 
 from each.Prop.PropMedia import PropMedia
 
@@ -396,7 +397,7 @@ def getAllMuseums(**request_handler_args):
     res = []
     for _ in objects:
         obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
-        wide_info = EntityMuseum.get_wide_object(_.eid, ['image'])
+        wide_info = EntityMuseum.get_wide_object(_.eid, ['image', 'game'])
         obj_dict.update(wide_info)
         res.append(obj_dict)
 
@@ -491,7 +492,7 @@ def getMuseumById(**request_handler_args):
     id = getIntPathParam("Id", **request_handler_args)
     objects = EntityMuseum.get().filter_by(eid=id).all()
 
-    wide_info = EntityMuseum.get_wide_object(id, ['image'])
+    wide_info = EntityMuseum.get_wide_object(id, ['image', 'game'])
 
     res = []
     for _ in objects:
@@ -504,6 +505,130 @@ def getMuseumById(**request_handler_args):
 
 # end of museum feature set functions
 # -----------------------------------
+
+# Game feature set functions
+# --------------------------
+
+def deleteGame(**request_handler_args):
+    resp = request_handler_args['resp']
+    req = request_handler_args['req']
+
+    # TODO: VERIFICATION IF ADMIN DELETE ANY
+    #email = req.context['email']
+    id = getIntPathParam("gameId", **request_handler_args)
+    #id_email = EntityUser.get_id_from_email(email)
+
+    if id is not None:
+        #if id != id_email or not EntitySuperUser.is_id_super_admin(id_email):
+        #    resp.status = falcon.HTTP_403
+        #    return
+
+        try:
+            EntityGame.delete(id)
+        except FileNotFoundError:
+            resp.status = falcon.HTTP_404
+            return
+
+        try:
+            EntityGame.delete_wide_object(id)
+        except FileNotFoundError:
+            resp.status = falcon.HTTP_405
+            return
+
+        object = EntityGame.get().filter_by(eid=id).all()
+        if not len(object):
+            resp.status = falcon.HTTP_200
+            return
+
+    resp.status = falcon.HTTP_400
+
+def createGame(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    try:
+        params = json.loads(req.stream.read().decode('utf-8'))
+        id = EntityGame.add_from_json(params)
+
+        if id:
+            objects = EntityGame.get().filter_by(eid=id).all()
+
+            resp.body = obj_to_json([o.to_dict() for o in objects])
+            resp.status = falcon.HTTP_200
+            return
+    except ValueError:
+        resp.status = falcon.HTTP_405
+        return
+
+    resp.status = falcon.HTTP_501
+
+
+def updateGame(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    #email = req.context['email']
+    #id_email = EntityUser.get_id_from_email(email)
+
+    try:
+        params = json.loads(req.stream.read().decode('utf-8'))
+
+        #if params['id'] != id_email or not EntitySuperUser.is_id_super_admin(id_email):
+        #    resp.status = falcon.HTTP_403
+        #    return
+
+        id = EntityGame.update_from_json(params)
+
+        if id:
+            objects = EntityGame.get().filter_by(eid=id).all()
+
+            resp.body = obj_to_json([o.to_dict() for o in objects])
+            resp.status = falcon.HTTP_200
+            return
+    except ValueError:
+        resp.status = falcon.HTTP_405
+        return
+
+    resp.status = falcon.HTTP_501
+
+
+def getGameById(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    id = getIntPathParam("gameId", **request_handler_args)
+    objects = EntityGame.get().filter_by(eid=id).all()
+
+    wide_info = EntityGame.get_wide_object(id, ['game', 'avatar'])
+
+    res = []
+    for _ in objects:
+        obj_dict = _.to_dict(['eid', 'name'])
+        obj_dict.update(wide_info)
+        res.append(obj_dict)
+
+    resp.body = obj_to_json(res)
+    resp.status = falcon.HTTP_200
+
+def GetAllGamesById(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    id = getIntPathParam("ownerId", **request_handler_args)
+    objects = EntityGame.get().filter(EntityGame.ownerid==id).all()
+
+    res = []
+    for _ in objects:
+        obj_dict = _.to_dict(['eid', 'name'])
+        wide_info = EntityGame.get_wide_object(_.eid, ['game', 'avatar'])
+        obj_dict.update(wide_info)
+        res.append(obj_dict)
+
+    resp.body = obj_to_json(res)
+    resp.status = falcon.HTTP_200
+
+# End of game feature set functions
+# ---------------------------------
 
 operation_handlers = {
     # Users
@@ -521,6 +646,13 @@ operation_handlers = {
     'updateMuseum':         [updateMuseum],
     'deleteMuseum':         [deleteMuseum],
     'getMuseum':            [getMuseumById],
+
+    #Games
+    'getAllGamesById':      [GetAllGamesById],
+    'getGameById':          [getGameById],
+    'addNewGame':           [createGame],
+    'updateGame':           [updateGame],
+    'deleteGame':           [deleteGame],
 
     # Feed
     'getFeedMockup':        [getFeedMockup],
