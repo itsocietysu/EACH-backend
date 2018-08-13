@@ -277,7 +277,14 @@ def addNewMuseum(**request_handler_args):
         if id:
             objects = EntityMuseum.get().filter_by(eid=id).all()
 
-            resp.body = obj_to_json([o.to_dict() for o in objects])
+            res = []
+            for _ in objects:
+                obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
+                wide_info = EntityMuseum.get_wide_object(_.eid, ['image'])
+                obj_dict.update(wide_info)
+                res.append(obj_dict)
+
+            resp.body = obj_to_json(res)
             resp.status = falcon.HTTP_200
             return
     except ValueError:
@@ -305,7 +312,14 @@ def updateMuseum(**request_handler_args):
         if id:
             objects = EntityMuseum.get().filter_by(eid=id).all()
 
-            resp.body = obj_to_json([o.to_dict() for o in objects])
+            res = []
+            for _ in objects:
+                obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
+                wide_info = EntityMuseum.get_wide_object(_.eid, ['image'])
+                obj_dict.update(wide_info)
+                res.append(obj_dict)
+
+            resp.body = obj_to_json(res)
             resp.status = falcon.HTTP_200
             return
     except ValueError:
@@ -328,6 +342,7 @@ def deleteMuseum(**request_handler_args):
         #    resp.status = falcon.HTTP_403
         #    return
 
+        res = []
         try:
             EntityMuseum.delete(id)
         except FileNotFoundError:
@@ -342,6 +357,7 @@ def deleteMuseum(**request_handler_args):
 
         object = EntityMuseum.get().filter_by(eid=id).all()
         if not len(object):
+            resp.body = obj_to_json(res)
             resp.status = falcon.HTTP_200
             return
 
