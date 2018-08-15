@@ -96,7 +96,9 @@ INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'like', 'li
 commit;
 INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'location', 'location');
 commit;
-INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'museum', 'museum');
+INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'game', 'game');
+commit;
+INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'priority', 'int');
 commit;
 
 

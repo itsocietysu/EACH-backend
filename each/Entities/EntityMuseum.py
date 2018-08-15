@@ -80,7 +80,8 @@ class EntityMuseum(EntityBase, Base):
         eid = None
 
         PROP_MAPPING = {
-            'image':  lambda s, _eid, _id, _val: PropMedia(eid, _id,
+            'image':
+                lambda s, _eid, _id, _val: PropMedia(eid, _id,
                                                             cls.convert_media_value_to_media_item('image', _eid, _val))
                                                                         .add_or_update(session=s, no_commit=True)
         }
@@ -113,8 +114,10 @@ class EntityMuseum(EntityBase, Base):
         PROPNAME_MAPPING = EntityProp.map_name_id()
 
         PROP_MAPPING = {
-            'image': lambda _eid, _id: PropMedia.get_object_property(_eid, _id, ['eid', 'url']),
-            'game': lambda _eid, _id: PropGame.get_object_property(_eid, _id, ['eid', 'ownerid', 'name', 'game'])
+            'image':
+                lambda _eid, _id: PropMedia.get_object_property(_eid, _id, ['eid', 'url']),
+            'game':
+                lambda _eid, _id: PropGame.get_object_property(_eid, _id, ['eid', 'ownerid', 'name', 'game'])
         }
 
         result = {
@@ -131,7 +134,8 @@ class EntityMuseum(EntityBase, Base):
         PROPNAME_MAPPING = EntityProp.map_name_id()
 
         PROP_MAPPING = {
-            'image': lambda _eid, _id: PropMedia.delete(_eid, _id, False)
+            'image':
+                lambda _eid, _id: PropMedia.delete(_eid, _id, False)
         }
 
         for key, propid in PROPNAME_MAPPING.items():

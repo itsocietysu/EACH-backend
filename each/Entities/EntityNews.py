@@ -12,6 +12,7 @@ from each.Prop.PropLocation import PropLocation
 from each.Prop.PropComment import PropComment
 from each.Prop.PropLike import PropLike
 from each.Prop.PropMedia import PropMedia
+from each.Prop.PropInt import PropInt
 
 from each.db import DBConnection
 
@@ -46,7 +47,9 @@ class EntityNews(EntityBase, Base):
 
         PROP_MAPPING = {
             'image':
-                lambda s, _eid, _id, _val, _uid: cls.process_media(s, 'image', _uid, _eid, _id, _val)
+                lambda s, _eid, _id, _val, _uid: cls.process_media(s, 'image', _uid, _eid, _id, _val),
+            'priority':
+                lambda s, _eid, _id, _val, _uid: PropInt(eid, _id, _val).add_or_update(session=s, no_commit=False)
         }
 
         if 'title' in data and 'text' in data and "prop" in data:
@@ -80,9 +83,12 @@ class EntityNews(EntityBase, Base):
         eid = None
 
         PROP_MAPPING = {
-            'image':  lambda s, _eid, _id, _val: PropMedia(eid, _id,
-                                                            cls.convert_media_value_to_media_item('image', _eid, _val))
-                                                                        .add_or_update(session=s, no_commit=True)
+            'image':
+                lambda s, _eid, _id, _val: PropMedia(eid, _id,
+                                                           cls.convert_media_value_to_media_item('image', _eid, _val))
+                                                                    .add_or_update(session=s, no_commit=True),
+            'priority':
+                lambda s, _eid, _id, _val: PropInt(eid, _id, _val).add_or_update(session=s, no_commit=True)
         }
 
         if 'id' in data:
@@ -113,7 +119,10 @@ class EntityNews(EntityBase, Base):
         PROPNAME_MAPPING = EntityProp.map_name_id()
 
         PROP_MAPPING = {
-            'image': lambda _eid, _id: PropMedia.get_object_property(_eid, _id, ['eid', 'url'])
+            'image':
+                lambda _eid, _id: PropMedia.get_object_property(_eid, _id, ['eid', 'url']),
+            'priority':
+                lambda _eid, _id: PropInt.get().filter_by(eid=_eid, id=_id),
         }
 
         result = {
@@ -130,7 +139,10 @@ class EntityNews(EntityBase, Base):
         PROPNAME_MAPPING = EntityProp.map_name_id()
 
         PROP_MAPPING = {
-            'image': lambda _eid, _id: PropMedia.delete(_eid, _id, False)
+            'image':
+                lambda _eid, _id: PropMedia.delete(_eid, _id, False),
+            'priority':
+                lambda _eid, _id: PropInt.delete(_eid, _id, False)
         }
 
         for key, propid in PROPNAME_MAPPING.items():

@@ -847,6 +847,10 @@
             "image": {
               "type": "int",
               "example": "media_id or base64 encoded string"
+            },
+            "priority": {
+              "type": "int",
+              "example": "from 0 to INT_MAX"
             }
           }
         },
