@@ -193,6 +193,7 @@ def getAllFeeds(**request_handler_args):
         obj_dict.update(wide_info)
         res.append(obj_dict)
 
+    res.sort(key=lambda row: row['priority'], reverse=True)
 
     resp.body = obj_to_json(res)
     resp.status = falcon.HTTP_200
