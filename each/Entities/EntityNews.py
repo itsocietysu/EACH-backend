@@ -122,7 +122,7 @@ class EntityNews(EntityBase, Base):
             'image':
                 lambda _eid, _id: PropMedia.get_object_property(_eid, _id, ['eid', 'url']),
             'priority':
-                lambda _eid, _id: PropInt.get().filter_by(eid=_eid, id=_id),
+                lambda _eid, _id: [_.value for _ in PropInt.get().filter_by(eid=_eid, propid=_id).all() or [PropInt(0, 0, 0)]]
         }
 
         result = {

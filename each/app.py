@@ -137,7 +137,7 @@ def addFeed(**request_handler_args):
             res = []
             for _ in objects:
                 obj_dict = _.to_dict(['eid', 'title', 'text'])
-                wide_info = EntityNews.get_wide_object(_.eid, ['image'])
+                wide_info = EntityNews.get_wide_object(_.eid, ['image', 'priority'])
                 obj_dict.update(wide_info)
                 res.append(obj_dict)
 
@@ -166,7 +166,7 @@ def updateFeed(**request_handler_args):
             res = []
             for _ in objects:
                 obj_dict = _.to_dict(['eid', 'title', 'text'])
-                wide_info = EntityNews.get_wide_object(_.eid, ['image'])
+                wide_info = EntityNews.get_wide_object(_.eid, ['image', 'priority'])
                 obj_dict.update(wide_info)
                 res.append(obj_dict)
 
@@ -189,9 +189,10 @@ def getAllFeeds(**request_handler_args):
     res = []
     for _ in objects:
         obj_dict = _.to_dict(['eid', 'title', 'text'])
-        wide_info = EntityNews.get_wide_object(_.eid, ['image'])
+        wide_info = EntityNews.get_wide_object(_.eid, ['image', 'priority'])
         obj_dict.update(wide_info)
         res.append(obj_dict)
+
 
     resp.body = obj_to_json(res)
     resp.status = falcon.HTTP_200
