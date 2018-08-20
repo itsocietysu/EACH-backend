@@ -14,7 +14,7 @@ from falcon_multipart.middleware import MultipartMiddleware
 from each import utils
 from each.db import DBConnection
 from each.serve_swagger import SpecServer
-from each.utils import obj_to_json, getIntPathParam
+from each.utils import obj_to_json, getIntPathParam, admin_access_type_required
 
 from each.Entities.EntityBase import EntityBase
 from each.Entities.EntityMedia import EntityMedia
@@ -23,7 +23,6 @@ from each.Entities.EntityMuseum import EntityMuseum
 from each.Entities.EntityGame import EntityGame
 
 from each.Prop.PropMedia import PropMedia
-
 from each.auth import auth
 # from each.MediaResolver.MediaResolverFactory import MediaResolverFactory
 
@@ -123,6 +122,7 @@ def getFeedMockup(**request_handler_args):
     with open("feed.json") as f:
         resp.body = f.read()
 
+@admin_access_type_required
 def addFeed(**request_handler_args):
     req = request_handler_args['req']
     resp = request_handler_args['resp']
@@ -150,7 +150,7 @@ def addFeed(**request_handler_args):
 
     resp.status = falcon.HTTP_501
 
-
+@admin_access_type_required
 def updateFeed(**request_handler_args):
     req = request_handler_args['req']
     resp = request_handler_args['resp']
@@ -179,7 +179,6 @@ def updateFeed(**request_handler_args):
 
     resp.status = falcon.HTTP_501
 
-
 def getAllFeeds(**request_handler_args):
     req = request_handler_args['req']
     resp = request_handler_args['resp']
@@ -197,7 +196,6 @@ def getAllFeeds(**request_handler_args):
 
     resp.body = obj_to_json(res)
     resp.status = falcon.HTTP_200
-
 
 def getFeedById(**request_handler_args):
     req = request_handler_args['req']
@@ -217,6 +215,7 @@ def getFeedById(**request_handler_args):
     resp.body = obj_to_json(res)
     resp.status = falcon.HTTP_200
 
+@admin_access_type_required
 def deleteFeed(**request_handler_args):
     resp = request_handler_args['resp']
     req = request_handler_args['req']
@@ -268,6 +267,7 @@ def getAllMuseums(**request_handler_args):
     resp.body = obj_to_json(res)
     resp.status = falcon.HTTP_200
 
+@admin_access_type_required
 def addNewMuseum(**request_handler_args):
     req = request_handler_args['req']
     resp = request_handler_args['resp']
@@ -295,6 +295,7 @@ def addNewMuseum(**request_handler_args):
 
     resp.status = falcon.HTTP_501
 
+@admin_access_type_required
 def updateMuseum(**request_handler_args):
     req = request_handler_args['req']
     resp = request_handler_args['resp']
@@ -330,6 +331,7 @@ def updateMuseum(**request_handler_args):
 
     resp.status = falcon.HTTP_501
 
+@admin_access_type_required
 def deleteMuseum(**request_handler_args):
     resp = request_handler_args['resp']
     req = request_handler_args['req']

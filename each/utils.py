@@ -5,6 +5,7 @@ import argparse
 import base64
 import requests
 import json
+import falcon
 
 def obj_to_json(obj):
     return json.dumps(obj, indent=2)
@@ -130,3 +131,12 @@ def GetItemByPath(dic, path):
         v = v.get(k)
 
     return v
+
+def admin_access_type_required(func_to_set_access):
+    def check_access_type(**arg):
+        if arg['req'].context['access_type'] == 'admin':
+            return func_to_set_access(**arg)
+        else:
+            arg['resp'].status = falcon.HTTP_423
+            return
+    return check_access_type
