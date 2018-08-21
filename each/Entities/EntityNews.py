@@ -7,6 +7,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from each.Entities.EntityBase import EntityBase
 from each.Entities.EntityProp import EntityProp
+from each.Entities.EntityMedia import EntityMedia
 
 from each.Prop.PropLocation import PropLocation
 from each.Prop.PropComment import PropComment
@@ -84,9 +85,9 @@ class EntityNews(EntityBase, Base):
 
         PROP_MAPPING = {
             'image':
-                lambda s, _eid, _id, _val: PropMedia(eid, _id,
+                lambda s, _eid, _id, _val: [PropMedia.delete(_eid, _id), PropMedia(_eid, _id,
                                                            cls.convert_media_value_to_media_item('image', _eid, _val))
-                                                                    .add_or_update(session=s, no_commit=True),
+                                                                    .add_or_update(session=s, no_commit=True)],
             'priority':
                 lambda s, _eid, _id, _val: PropInt(eid, _id, _val).add_or_update(session=s, no_commit=True)
         }
