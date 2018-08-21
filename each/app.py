@@ -129,6 +129,7 @@ def addFeed(**request_handler_args):
 
     try:
         params = json.loads(req.stream.read().decode('utf-8'))
+        params['ownerid'] = req.context['user_id']
         id = EntityNews.add_from_json(params)
 
         if id:
@@ -274,6 +275,7 @@ def addNewMuseum(**request_handler_args):
 
     try:
         params = json.loads(req.stream.read().decode('utf-8'))
+        params['ownerid'] = req.context['user_id']
         id = EntityMuseum.add_from_json(params)
 
         if id:
@@ -430,6 +432,7 @@ def createGame(**request_handler_args):
 
     try:
         params = json.loads(req.stream.read().decode('utf-8'))
+        params['ownerid'] = req.context['user_id']
         id = EntityGame.add_from_json(params)
 
         if id:
