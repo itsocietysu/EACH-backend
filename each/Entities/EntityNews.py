@@ -7,7 +7,6 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from each.Entities.EntityBase import EntityBase
 from each.Entities.EntityProp import EntityProp
-from each.Entities.EntityMedia import EntityMedia
 
 from each.Prop.PropLocation import PropLocation
 from each.Prop.PropComment import PropComment
