@@ -137,7 +137,7 @@ def addFeed(**request_handler_args):
 
             res = []
             for _ in objects:
-                obj_dict = _.to_dict(['eid', 'title', 'text'])
+                obj_dict = _.to_dict(['eid', 'title_RU', 'text_RU'])
                 wide_info = EntityNews.get_wide_object(_.eid, ['image', 'priority'])
                 obj_dict.update(wide_info)
                 res.append(obj_dict)
@@ -166,7 +166,7 @@ def updateFeed(**request_handler_args):
 
             res = []
             for _ in objects:
-                obj_dict = _.to_dict(['eid', 'title', 'text'])
+                obj_dict = _.to_dict(['eid', 'title_RU', 'text_RU'])
                 wide_info = EntityNews.get_wide_object(_.eid, ['image', 'priority'])
                 obj_dict.update(wide_info)
                 res.append(obj_dict)
@@ -184,16 +184,20 @@ def getAllFeeds(**request_handler_args):
     req = request_handler_args['req']
     resp = request_handler_args['resp']
 
+    #first_f = getIntPathParam("First Feed", **request_handler_args)
+    #last_f = getIntPathParam("Last Feed", **request_handler_args)
+
     objects = EntityNews.get().all()
 
     res = []
     for _ in objects:
-        obj_dict = _.to_dict(['eid', 'title', 'text'])
+        obj_dict = _.to_dict(['eid', 'title_RU', 'text_RU'])
         wide_info = EntityNews.get_wide_object(_.eid, ['image', 'priority'])
         obj_dict.update(wide_info)
         res.append(obj_dict)
 
     res.sort(key=lambda row: row['priority'], reverse=True)
+    #res = res[first_f: last_f]
 
     resp.body = obj_to_json(res)
     resp.status = falcon.HTTP_200
@@ -209,7 +213,7 @@ def getFeedById(**request_handler_args):
 
     res = []
     for _ in objects:
-        obj_dict = _.to_dict(['eid', 'title', 'text'])
+        obj_dict = _.to_dict(['eid', 'title_RU', 'text_RU'])
         obj_dict.update(wide_info)
         res.append(obj_dict)
 

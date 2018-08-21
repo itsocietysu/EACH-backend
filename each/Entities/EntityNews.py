@@ -23,18 +23,18 @@ class EntityNews(EntityBase, Base):
     __tablename__ = 'each_news'
 
     eid = Column(Integer, Sequence('each_seq'), primary_key=True)
-    title = Column(String)
-    text = Column(String)
+    title_RU = Column(String)
+    text_RU = Column(String)
     created = Column(Date)
     updated = Column(Date)
 
-    json_serialize_items_list = ['eid', 'title', 'text', 'created', 'updated']
+    json_serialize_items_list = ['eid', 'title_RU', 'text_RU', 'created', 'updated']
 
-    def __init__(self, title, text):
+    def __init__(self, title_RU, text_RU):
         super().__init__()
 
-        self.title = title
-        self.text = text
+        self.title_RU = title_RU
+        self.text_RU = text_RU
 
         ts = time.time()
         self.created = self.updated = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M')
@@ -52,11 +52,11 @@ class EntityNews(EntityBase, Base):
                 lambda s, _eid, _id, _val, _uid: PropInt(eid, _id, _val).add_or_update(session=s, no_commit=False)
         }
 
-        if 'title' in data and 'text' in data and "prop" in data:
-            title = data['title']
-            text = data['text']
+        if 'title_RU' in data and 'text_RU' in data and "prop" in data:
+            title_RU = data['title_RU']
+            text_RU = data['text_RU']
 
-            new_entity = EntityNews(title, text)
+            new_entity = EntityNews(title_RU, text_RU)
             eid = new_entity.add()
 
             try:
@@ -98,11 +98,11 @@ class EntityNews(EntityBase, Base):
 
                 if len(entity):
                     for _ in entity:
-                        if 'title' in data:
-                            _.title = data['title']
+                        if 'title_RU' in data:
+                            _.title_RU = data['title_RU']
 
-                        if 'text' in data:
-                            _.text = data['text']
+                        if 'text_RU' in data:
+                            _.text_RU = data['text_RU']
 
                         session.db.commit()
 
