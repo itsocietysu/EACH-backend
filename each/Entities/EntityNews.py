@@ -117,13 +117,13 @@ class EntityNews(EntityBase, Base):
                         if 'EN' in data['title']:
                             _.title_EN = data['title']['EN']
                         if 'RU' in data['desc']:
-                            _.title_RU = data['desc']['RU']
+                            _.desc_RU = data['desc']['RU']
                         if 'EN' in data['desc']:
-                            _.title_EN = data['desc']['EN']
+                            _.desc_EN = data['desc']['EN']
                         if 'RU' in data['text']:
                             _.text_RU = data['text']['RU']
                         if 'EN' in data['text']:
-                            _.title_EN = data['text']['EN']
+                            _.text_EN = data['text']['EN']
                         session.db.commit()
 
                         for prop_name, prop_val in data['prop'].items():
