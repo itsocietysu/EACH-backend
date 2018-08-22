@@ -14,7 +14,7 @@ from falcon_multipart.middleware import MultipartMiddleware
 from each import utils
 from each.db import DBConnection
 from each.serve_swagger import SpecServer
-from each.utils import obj_to_json, getIntPathParam, getIntQueryParam, admin_access_type_required
+from each.utils import obj_to_json, getIntPathParam, admin_access_type_required
 
 from each.Entities.EntityBase import EntityBase
 from each.Entities.EntityMedia import EntityMedia
