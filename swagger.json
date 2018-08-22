@@ -613,6 +613,24 @@
         "produces": [
           "application/json"
         ],
+        "parameters": [
+          {
+            "name": "FirstFeed",
+            "in": "query",
+            "description": "Index of the first feed to be shown",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "LastFeed",
+            "in": "query",
+            "description": "Index of the last feed to be shown",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
         "responses": {
           "200": {
             "description": "successful operation",
@@ -834,12 +852,43 @@
           "format": "int64"
         },
         "title": {
-          "type": "string",
-          "example": "The Hermitage opened an interesting exhibition"
+          "type": "object",
+          "properties": {
+            "RU": {
+              "type": "string",
+              "example": "Туристы составили рейтинг обязательных к посещению музеев Европы"
+            },
+            "EN": {
+              "type": "string",
+              "example": "Tourists made a ranking of must seen museums in Europe"
+            }
+          }
+        },
+        "desc": {
+          "type": "object",
+          "properties": {
+            "RU": {
+              "type": "string",
+              "example": "В топе - два российских"
+            },
+            "EN": {
+              "type": "string",
+              "example": "Two of them are in Russia"
+            }
+          }
         },
         "text": {
-          "type": "string",
-          "example": "It will last 2 weeks."
+          "type": "object",
+          "properties": {
+            "RU": {
+              "type": "string",
+              "example": "Компания SentiOne проанализировала упоминания музеев Европы в соцсетях. На основе этого эксперты составили рейтинг самых популярных выставочных залов. Больше всего упоминаний получил Лувр, а сразу за ним идёт Эрмитаж. Третьяковка оказалась на седьмом месте."
+            },
+            "EN": {
+              "type": "string",
+              "example": "The company SentiOne has analyzed some mentions about European museums in social nets. The experts made a ranking of most popular showrooms. The Louvre gained most of all mentions, the Hermitage goes right behind the Louvre. Tretyakov gallery took the seventh place."
+            }
+          }
         },
         "prop": {
           "type": "object",

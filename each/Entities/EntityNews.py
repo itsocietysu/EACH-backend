@@ -15,6 +15,7 @@ from each.Prop.PropMedia import PropMedia
 from each.Prop.PropInt import PropInt
 
 from each.db import DBConnection
+from each.utils import isAllInData
 
 Base = declarative_base()
 
@@ -24,17 +25,29 @@ class EntityNews(EntityBase, Base):
 
     eid = Column(Integer, Sequence('each_seq'), primary_key=True)
     title_RU = Column(String)
+    title_EN = Column(String)
+    desc_RU = Column(String)
+    desc_EN = Column(String)
+    text_EN = Column(String)
     text_RU = Column(String)
     created = Column(Date)
     updated = Column(Date)
 
-    json_serialize_items_list = ['eid', 'title_RU', 'text_RU', 'created', 'updated']
+    json_serialize_items_list = ['eid', 'title_RU', 'title_EN', 'desc_RU', 'desc_EN',
+                                 'text_RU', 'text_EN', 'created', 'updated']
+    locales = ['RU', 'EN']
 
-    def __init__(self, title_RU, text_RU):
+    def __init__(self, title_RU, title_EN, desc_RU, desc_EN, text_RU, text_EN):
         super().__init__()
 
         self.title_RU = title_RU
+        self.title_EN = title_EN
+
+        self.desc_RU = desc_RU
+        self.desc_EN = desc_EN
+
         self.text_RU = text_RU
+        self.text_EN = text_EN
 
         ts = time.time()
         self.created = self.updated = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M')
@@ -51,12 +64,15 @@ class EntityNews(EntityBase, Base):
             'priority':
                 lambda s, _eid, _id, _val, _uid: PropInt(eid, _id, _val).add_or_update(session=s, no_commit=False)
         }
+        if isAllInData(['title', 'desc', 'text', 'prop'], data):
+            create_args = {}
+            if 'prop' in data:
+                for _ in cls.locales:
+                    create_args['title_%s' % _] = data['title'][_] if _ in data['title'] else ''
+                    create_args['desc_%s' % _] = data['desc'][_] if _ in data['desc'] else ''
+                    create_args['text_%s' % _] = data['text'][_] if _ in data['text'] else ''
+            new_entity = EntityNews(**create_args)
 
-        if 'title_RU' in data and 'text_RU' in data and "prop" in data:
-            title_RU = data['title_RU']
-            text_RU = data['text_RU']
-
-            new_entity = EntityNews(title_RU, text_RU)
             eid = new_entity.add()
 
             try:
@@ -79,9 +95,7 @@ class EntityNews(EntityBase, Base):
     @classmethod
     def update_from_json(cls, data):
         PROPNAME_MAPPING = EntityProp.map_name_id()
-
         eid = None
-
         PROP_MAPPING = {
             'image':
                 lambda s, _eid, _id, _val: [PropMedia.delete(_eid, _id), PropMedia(_eid, _id,
@@ -98,12 +112,18 @@ class EntityNews(EntityBase, Base):
 
                 if len(entity):
                     for _ in entity:
-                        if 'title_RU' in data:
-                            _.title_RU = data['title_RU']
-
-                        if 'text_RU' in data:
-                            _.text_RU = data['text_RU']
-
+                        if 'RU' in data['title']:
+                            _.title_RU = data['title']['RU']
+                        if 'EN' in data['title']:
+                            _.title_EN = data['title']['EN']
+                        if 'RU' in data['desc']:
+                            _.title_RU = data['desc']['RU']
+                        if 'EN' in data['desc']:
+                            _.title_EN = data['desc']['EN']
+                        if 'RU' in data['text']:
+                            _.text_RU = data['text']['RU']
+                        if 'EN' in data['text']:
+                            _.title_EN = data['text']['EN']
                         session.db.commit()
 
                         for prop_name, prop_val in data['prop'].items():

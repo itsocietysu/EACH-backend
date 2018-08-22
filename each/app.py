@@ -14,7 +14,7 @@ from falcon_multipart.middleware import MultipartMiddleware
 from each import utils
 from each.db import DBConnection
 from each.serve_swagger import SpecServer
-from each.utils import obj_to_json, getIntPathParam, admin_access_type_required
+from each.utils import obj_to_json, getIntPathParam, getIntQueryParam, admin_access_type_required
 
 from each.Entities.EntityBase import EntityBase
 from each.Entities.EntityMedia import EntityMedia
@@ -137,7 +137,7 @@ def addFeed(**request_handler_args):
 
             res = []
             for _ in objects:
-                obj_dict = _.to_dict(['eid', 'title_RU', 'text_RU'])
+                obj_dict = _.to_dict(['eid', 'title_RU', 'title_EN', 'desc_RU', 'desc_EN', 'text_RU', 'text_EN'])
                 wide_info = EntityNews.get_wide_object(_.eid, ['image', 'priority'])
                 obj_dict.update(wide_info)
                 res.append(obj_dict)
@@ -166,7 +166,7 @@ def updateFeed(**request_handler_args):
 
             res = []
             for _ in objects:
-                obj_dict = _.to_dict(['eid', 'title_RU', 'text_RU'])
+                obj_dict = _.to_dict(['eid', 'title_RU', 'title_EN', 'desc_RU', 'desc_EN', 'text_RU', 'text_EN'])
                 wide_info = EntityNews.get_wide_object(_.eid, ['image', 'priority'])
                 obj_dict.update(wide_info)
                 res.append(obj_dict)
@@ -184,14 +184,14 @@ def getAllFeeds(**request_handler_args):
     req = request_handler_args['req']
     resp = request_handler_args['resp']
 
-    #first_f = getIntPathParam("First Feed", **request_handler_args)
-    #last_f = getIntPathParam("Last Feed", **request_handler_args)
+    #first_f = getIntQueryParam("First Feed", **request_handler_args)
+    #last_f = getIntQueryParam("Last Feed", **request_handler_args)
 
     objects = EntityNews.get().all()
 
     res = []
     for _ in objects:
-        obj_dict = _.to_dict(['eid', 'title_RU', 'text_RU'])
+        obj_dict = _.to_dict(['eid', 'title_RU', 'title_EN', 'desc_RU', 'desc_EN', 'text_RU', 'text_EN'])
         wide_info = EntityNews.get_wide_object(_.eid, ['image', 'priority'])
         obj_dict.update(wide_info)
         res.append(obj_dict)

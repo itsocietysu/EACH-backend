@@ -28,6 +28,14 @@ def batch(iterable, batch_size):
 def getPathParam(name, **request_handler_args):
     return request_handler_args['uri_fields'][name].partition('?')[0]
 
+def getQueryParam(name, **request_handler_args):
+    tmp = request_handler_args['req']['params']
+    if name in tmp:
+        return tmp[name]
+    else:
+        return 0 if name == 'FirstFeed' else 5000
+
+
 def getIntPathParam(name, **request_handler_args):
     s = getPathParam(name, **request_handler_args)
     try:
@@ -35,6 +43,15 @@ def getIntPathParam(name, **request_handler_args):
     except ValueError:
         return None
 
+def getIntQueryParam(name, **request_handler_args):
+    try:
+        s = getQueryParam(name, **request_handler_args)
+        return int(s)
+    except ValueError:
+        return None
+
+def isAllInData(params, data):
+    return all([(_ in data) for _ in params])
 
 # def ReadEntireLobs(entire_tuple):
 #     result = []
