@@ -213,7 +213,7 @@ def getFeedById(**request_handler_args):
 
     res = []
     for _ in objects:
-        obj_dict = _.to_dict(['eid', {'title': {'RU', 'EN'}}, {'desc': {'RU', 'EN'}}, {'text': {'RU', 'EN'}}])
+        obj_dict = _.to_dict(['eid', 'title', 'desc', 'text'])
         obj_dict.update(wide_info)
         res.append(obj_dict)
 
