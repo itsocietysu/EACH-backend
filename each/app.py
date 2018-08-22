@@ -137,7 +137,7 @@ def addFeed(**request_handler_args):
 
             res = []
             for _ in objects:
-                obj_dict = _.to_dict(['eid', 'title_RU', 'title_EN', 'desc_RU', 'desc_EN', 'text_RU', 'text_EN'])
+                obj_dict = _.to_dict(['eid', 'title', 'desc', 'text'])
                 wide_info = EntityNews.get_wide_object(_.eid, ['image', 'priority'])
                 obj_dict.update(wide_info)
                 res.append(obj_dict)
@@ -166,7 +166,7 @@ def updateFeed(**request_handler_args):
 
             res = []
             for _ in objects:
-                obj_dict = _.to_dict(['eid', 'title_RU', 'title_EN', 'desc_RU', 'desc_EN', 'text_RU', 'text_EN'])
+                obj_dict = _.to_dict(['eid', 'title', 'desc', 'text'])
                 wide_info = EntityNews.get_wide_object(_.eid, ['image', 'priority'])
                 obj_dict.update(wide_info)
                 res.append(obj_dict)
@@ -191,7 +191,7 @@ def getAllFeeds(**request_handler_args):
 
     res = []
     for _ in objects:
-        obj_dict = _.to_dict(['eid', 'title_RU', 'title_EN', 'desc_RU', 'desc_EN', 'text_RU', 'text_EN'])
+        obj_dict = _.to_dict(['eid', 'title', 'desc', 'text'])
         wide_info = EntityNews.get_wide_object(_.eid, ['image', 'priority'])
         obj_dict.update(wide_info)
         res.append(obj_dict)
@@ -213,7 +213,7 @@ def getFeedById(**request_handler_args):
 
     res = []
     for _ in objects:
-        obj_dict = _.to_dict(['eid', 'title_RU', 'text_RU'])
+        obj_dict = _.to_dict(['eid', {'title': {'RU', 'EN'}}, {'desc': {'RU', 'EN'}}, {'text': {'RU', 'EN'}}])
         obj_dict.update(wide_info)
         res.append(obj_dict)
 

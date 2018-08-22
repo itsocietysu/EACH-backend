@@ -33,8 +33,8 @@ class EntityNews(EntityBase, Base):
     created = Column(Date)
     updated = Column(Date)
 
-    json_serialize_items_list = ['eid', 'title_RU', 'title_EN', 'desc_RU', 'desc_EN',
-                                 'text_RU', 'text_EN', 'created', 'updated']
+    json_serialize_items_list = ['eid', 'title', 'desc',
+                                 'text', 'created', 'updated']
     locales = ['RU', 'EN']
 
     def __init__(self, title_RU, title_EN, desc_RU, desc_EN, text_RU, text_EN):
@@ -48,9 +48,53 @@ class EntityNews(EntityBase, Base):
 
         self.text_RU = text_RU
         self.text_EN = text_EN
+        self.title = self.desc = self.text = None
 
         ts = time.time()
         self.created = self.updated = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M')
+
+    def to_dict(self, items=[]):
+        def fullfill_entity(key, value):
+            if key == 'url':
+                value = '%s%s' % (EntityBase.host, value[1:])
+            return value
+
+        def get_value(key):
+            if key == 'title':
+                return self.title
+            elif key == 'desc':
+                return self.text
+            elif key == 'text':
+                return self.desc
+            else:
+                return dictionate_entity(self.__dict__[key])
+
+        def dictionate_entity(entity):
+            try:
+                json.dump(entity)
+                return entity
+            except:
+                if 'to_dict' in dir(entity):
+                    return entity.to_dict()
+                else:
+                    return str(entity)
+
+        res = OrderedDict([(key, fullfill_entity(key, get_value(key)))
+                           for key in (self.json_serialize_items_list if not len(items) else items)])
+        return res
+
+    @property
+    def title(self):
+        return {_: self.__dict__['title_%s' % _] for _ in self.locales}
+
+    @property
+    def desc(self):
+        return {_: self.__dict__['desc_%s' % _] for _ in self.locales}
+
+    @property
+    def text(self):
+        return {_: self.__dict__['text_%s' % _] for _ in self.locales}
+
 
     @classmethod
     def add_from_json(cls, data):
@@ -109,26 +153,19 @@ class EntityNews(EntityBase, Base):
             with DBConnection() as session:
                 eid = data['id']
                 entity = session.db.query(EntityNews).filter_by(eid=eid).all()
-
+                fields = ['title', 'desc', 'text']
                 if len(entity):
                     for _ in entity:
-                        if 'RU' in data['title']:
-                            _.title_RU = data['title']['RU']
-                        if 'EN' in data['title']:
-                            _.title_EN = data['title']['EN']
-                        if 'RU' in data['desc']:
-                            _.desc_RU = data['desc']['RU']
-                        if 'EN' in data['desc']:
-                            _.desc_EN = data['desc']['EN']
-                        if 'RU' in data['text']:
-                            _.text_RU = data['text']['RU']
-                        if 'EN' in data['text']:
-                            _.text_EN = data['text']['EN']
+                        for l in cls.locales:
+                            for f in fields:
+                                if f in data and l in data[f]:
+                                    _.__dict__['%s_%s' % (f, l)] = data[f][l]
                         session.db.commit()
 
-                        for prop_name, prop_val in data['prop'].items():
-                            if prop_name in PROPNAME_MAPPING and prop_name in PROP_MAPPING:
-                                PROP_MAPPING[prop_name](session, eid, PROPNAME_MAPPING[prop_name], prop_val)
+                        if 'prop' in data:
+                            for prop_name, prop_val in data['prop'].items():
+                                if prop_name in PROPNAME_MAPPING and prop_name in PROP_MAPPING:
+                                    PROP_MAPPING[prop_name](session, eid, PROPNAME_MAPPING[prop_name], prop_val)
 
                         session.db.commit()
 
