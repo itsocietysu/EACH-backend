@@ -158,14 +158,13 @@ class EntityNews(EntityBase, Base):
                         for l in cls.locales:
                             for f in fields:
                                 if f in data and l in data[f]:
-                                    _.__dict__['%s_%s' % (f, l)] = data[f][l]
+                                    setattr(_, '%s_%s' % (f, l), data[f][l])
                         session.db.commit()
 
                         if 'prop' in data:
                             for prop_name, prop_val in data['prop'].items():
                                 if prop_name in PROPNAME_MAPPING and prop_name in PROP_MAPPING:
                                     PROP_MAPPING[prop_name](session, eid, PROPNAME_MAPPING[prop_name], prop_val)
-
                         session.db.commit()
 
         return eid
