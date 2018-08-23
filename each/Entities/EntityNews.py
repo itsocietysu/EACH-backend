@@ -48,7 +48,6 @@ class EntityNews(EntityBase, Base):
 
         self.text_RU = text_RU
         self.text_EN = text_EN
-        self.title = self.desc = self.text = None
 
         ts = time.time()
         self.created = self.updated = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M')
@@ -63,9 +62,9 @@ class EntityNews(EntityBase, Base):
             if key == 'title':
                 return self.title
             elif key == 'desc':
-                return self.text
-            elif key == 'text':
                 return self.desc
+            elif key == 'text':
+                return self.text
             else:
                 return dictionate_entity(self.__dict__[key])
 
