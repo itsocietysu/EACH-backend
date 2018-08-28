@@ -189,12 +189,14 @@ def getTapeFeeds(**request_handler_args):
     first_f = getIntQueryParam('FirstFeed', **request_handler_args)
     last_f = getIntQueryParam('LastFeed', **request_handler_args)
 
-    # TODO: -1 = inf, switch f and l params if l>f, sorting feeds, returning them, make getAllFeeds()
     #objects = EntityNews.get().all()
 
     with DBConnection() as session:
-        objects = session.db.query(EntityNews, PropInt.value).join(PropInt, PropInt.eid == EntityNews.eid).order_by(PropInt.value.desc()).all()
+        objects = session.db.query(EntityNews, PropInt.value)\
+            .join(PropInt, PropInt.eid == EntityNews.eid)\
+            .order_by(PropInt.value.desc()).all()
 
+    # if last_f isn't set (==-1), it is supposed to be an infinity
     if last_f == -1:
         objects = objects[first_f:]
     else:
