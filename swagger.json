@@ -602,6 +602,50 @@
         ]
       }
     },
+    "/feed/tape":{
+      "get": {
+        "tags": [
+          "Feed"
+        ],
+        "summary": "Get feeds in tape",
+        "description": "Returns a list of feeds descriptions in set tape",
+        "operationId": "getTapeFeeds",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "FirstFeed",
+            "in": "query",
+            "description": "Index of the first feed to be shown (from 0)",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "LastFeed",
+            "in": "query",
+            "description": "Index of the last feed to be shown (including)",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
     "/feed/all": {
       "get": {
         "tags": [
@@ -612,24 +656,6 @@
         "operationId": "getAllFeeds",
         "produces": [
           "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "FirstFeed",
-            "in": "query",
-            "description": "Index of the first feed to be shown",
-            "required": false,
-            "type": "integer",
-            "format": "int64"
-          },
-          {
-            "name": "LastFeed",
-            "in": "query",
-            "description": "Index of the last feed to be shown",
-            "required": false,
-            "type": "integer",
-            "format": "int64"
-          }
         ],
         "responses": {
           "200": {

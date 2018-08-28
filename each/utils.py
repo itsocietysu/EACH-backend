@@ -35,6 +35,19 @@ def getIntPathParam(name, **request_handler_args):
     except ValueError:
         return None
 
+def getQueryParam(name, **request_handler_args):
+    try:
+        return request_handler_args['req'].params[name]
+    except KeyError:
+        return 0 if name == 'FirstFeed' else -1
+
+def getIntQueryParam(name, **request_handler_args):
+    s = getQueryParam(name, **request_handler_args)
+    try:
+        return int(s)
+    except ValueError:
+        return None
+
 def isAllInData(params, data):
     return all([(_ in data) for _ in params])
 

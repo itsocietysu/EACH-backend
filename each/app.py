@@ -14,7 +14,7 @@ from falcon_multipart.middleware import MultipartMiddleware
 from each import utils
 from each.db import DBConnection
 from each.serve_swagger import SpecServer
-from each.utils import obj_to_json, getIntPathParam, admin_access_type_required
+from each.utils import obj_to_json, getIntPathParam, getIntQueryParam, admin_access_type_required
 
 from each.Entities.EntityBase import EntityBase
 from each.Entities.EntityMedia import EntityMedia
@@ -23,6 +23,8 @@ from each.Entities.EntityMuseum import EntityMuseum
 from each.Entities.EntityGame import EntityGame
 
 from each.Prop.PropMedia import PropMedia
+from each.Prop.PropInt import PropInt
+
 from each.auth import auth
 # from each.MediaResolver.MediaResolverFactory import MediaResolverFactory
 
@@ -180,27 +182,36 @@ def updateFeed(**request_handler_args):
 
     resp.status = falcon.HTTP_501
 
-def getAllFeeds(**request_handler_args):
+def getTapeFeeds(**request_handler_args):
     req = request_handler_args['req']
     resp = request_handler_args['resp']
 
-    #first_f = getIntQueryParam("First Feed", **request_handler_args)
-    #last_f = getIntQueryParam("Last Feed", **request_handler_args)
+    first_f = getIntQueryParam('FirstFeed', **request_handler_args)
+    last_f = getIntQueryParam('LastFeed', **request_handler_args)
 
-    objects = EntityNews.get().all()
+    # TODO: -1 = inf, switch f and l params if l>f, sorting feeds, returning them, make getAllFeeds()
+    #objects = EntityNews.get().all()
+
+    with DBConnection() as session:
+        objects = session.db.query(EntityNews, PropInt.value).join(PropInt, PropInt.eid == EntityNews.eid).order_by(PropInt.value.desc()).all()
+
+    if last_f == -1:
+        objects = objects[first_f:]
+    else:
+        objects = objects[first_f: last_f+1]
 
     res = []
     for _ in objects:
-        obj_dict = _.to_dict(['eid', 'title', 'desc', 'text'])
-        wide_info = EntityNews.get_wide_object(_.eid, ['image', 'priority'])
+        obj_dict = _[0].to_dict(['eid', 'title', 'desc', 'text'])
+        wide_info = EntityNews.get_wide_object(_[0].eid, ['image', 'priority'])
         obj_dict.update(wide_info)
         res.append(obj_dict)
 
-    res.sort(key=lambda row: row['priority'], reverse=True)
-    #res = res[first_f: last_f]
-
     resp.body = obj_to_json(res)
     resp.status = falcon.HTTP_200
+
+def getAllFeeds(**request_handler_args):
+    return None
 
 def getFeedById(**request_handler_args):
     req = request_handler_args['req']
@@ -539,6 +550,7 @@ operation_handlers = {
     'getFeedMockup':        [getFeedMockup],
     'addFeed':              [addFeed],
     'updateFeed':           [updateFeed],
+    'getTapeFeeds':         [getTapeFeeds],
     'getAllFeeds':          [getAllFeeds],
     'getFeed':              [getFeedById],
     'deleteFeed':           [deleteFeed],
