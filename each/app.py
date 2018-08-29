@@ -49,6 +49,7 @@ def guess_response_type(path):
     else:
         return extensions_map['']
 
+
 def date_time_string(timestamp=None):
     weekdayname = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
@@ -64,6 +65,7 @@ def date_time_string(timestamp=None):
             day, monthname[month], year,
             hh, mm, ss)
     return s
+
 
 def httpDefault(**request_handler_args):
     req = request_handler_args['req']
@@ -112,17 +114,20 @@ def httpDefault(**request_handler_args):
     resp.set_header("Path", path)
     resp.body = buffer
 
+
 def getVersion(**request_handler_args):
     resp = request_handler_args['resp']
     resp.status = falcon.HTTP_200
     with open("VERSION") as f:
         resp.body = obj_to_json({"version": f.read()[0:-1]})
 
+
 def getFeedMockup(**request_handler_args):
     resp = request_handler_args['resp']
     resp.status = falcon.HTTP_200
     with open("feed.json") as f:
         resp.body = f.read()
+
 
 @admin_access_type_required
 def addFeed(**request_handler_args):
@@ -153,6 +158,7 @@ def addFeed(**request_handler_args):
 
     resp.status = falcon.HTTP_501
 
+
 @admin_access_type_required
 def updateFeed(**request_handler_args):
     req = request_handler_args['req']
@@ -182,14 +188,13 @@ def updateFeed(**request_handler_args):
 
     resp.status = falcon.HTTP_501
 
+
 def getTapeFeeds(**request_handler_args):
     req = request_handler_args['req']
     resp = request_handler_args['resp']
 
     first_f = getIntQueryParam('FirstFeed', **request_handler_args)
     last_f = getIntQueryParam('LastFeed', **request_handler_args)
-
-    #objects = EntityNews.get().all()
 
     with DBConnection() as session:
         objects = session.db.query(EntityNews, PropInt.value)\
@@ -212,6 +217,7 @@ def getTapeFeeds(**request_handler_args):
     resp.body = obj_to_json(res)
     resp.status = falcon.HTTP_200
 
+
 def getAllFeeds(**request_handler_args):
     req = request_handler_args['req']
     resp = request_handler_args['resp']
@@ -226,6 +232,8 @@ def getAllFeeds(**request_handler_args):
     res.sort(key=lambda row: row['priority'], reverse=True)
     resp.body = obj_to_json(res)
     resp.status = falcon.HTTP_200
+
+
 def getFeedById(**request_handler_args):
     req = request_handler_args['req']
     resp = request_handler_args['resp']
@@ -243,6 +251,7 @@ def getFeedById(**request_handler_args):
 
     resp.body = obj_to_json(res)
     resp.status = falcon.HTTP_200
+
 
 @admin_access_type_required
 def deleteFeed(**request_handler_args):
@@ -274,11 +283,13 @@ def deleteFeed(**request_handler_args):
 # museum feature set functions
 # ----------------------------
 
+
 def getAllMuseumsMockup(**request_handler_args):
     resp = request_handler_args['resp']
     resp.status = falcon.HTTP_200
     with open("museum.json") as f:
         resp.body = f.read()
+
 
 def getAllMuseums(**request_handler_args):
     req = request_handler_args['req']
@@ -295,6 +306,7 @@ def getAllMuseums(**request_handler_args):
 
     resp.body = obj_to_json(res)
     resp.status = falcon.HTTP_200
+
 
 @admin_access_type_required
 def addNewMuseum(**request_handler_args):
@@ -324,6 +336,7 @@ def addNewMuseum(**request_handler_args):
         return
 
     resp.status = falcon.HTTP_501
+
 
 @admin_access_type_required
 def updateMuseum(**request_handler_args):
@@ -361,6 +374,7 @@ def updateMuseum(**request_handler_args):
 
     resp.status = falcon.HTTP_501
 
+
 @admin_access_type_required
 def deleteMuseum(**request_handler_args):
     resp = request_handler_args['resp']
@@ -397,6 +411,7 @@ def deleteMuseum(**request_handler_args):
 
     resp.status = falcon.HTTP_400
 
+
 def getMuseumById(**request_handler_args):
     req = request_handler_args['req']
     resp = request_handler_args['resp']
@@ -420,6 +435,7 @@ def getMuseumById(**request_handler_args):
 
 # Game feature set functions
 # --------------------------
+
 
 def deleteGame(**request_handler_args):
     resp = request_handler_args['resp']
@@ -453,6 +469,7 @@ def deleteGame(**request_handler_args):
             return
 
     resp.status = falcon.HTTP_400
+
 
 def createGame(**request_handler_args):
     req = request_handler_args['req']
@@ -523,6 +540,7 @@ def getGameById(**request_handler_args):
     resp.body = obj_to_json(res)
     resp.status = falcon.HTTP_200
 
+
 def GetAllGamesById(**request_handler_args):
     req = request_handler_args['req']
     resp = request_handler_args['resp']
@@ -571,6 +589,7 @@ operation_handlers = {
     'getVersion':           [getVersion],
     'httpDefault':          [httpDefault]
 }
+
 
 class CORS(object):
     def process_response(self, req, resp, resource):
