@@ -213,8 +213,19 @@ def getTapeFeeds(**request_handler_args):
     resp.status = falcon.HTTP_200
 
 def getAllFeeds(**request_handler_args):
-    return None
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+    objects = EntityNews.get().all()
+    res = []
+    for _ in objects:
+        obj_dict = _.to_dict(['eid', 'title', 'desc', 'text'])
+        wide_info = EntityNews.get_wide_object(_.eid, ['image', 'priority'])
+        obj_dict.update(wide_info)
+        res.append(obj_dict)
 
+    res.sort(key=lambda row: row['priority'], reverse=True)
+    resp.body = obj_to_json(res)
+    resp.status = falcon.HTTP_200
 def getFeedById(**request_handler_args):
     req = request_handler_args['req']
     resp = request_handler_args['resp']
