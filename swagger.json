@@ -754,6 +754,58 @@
           }
         ]
       }
+    },
+    "/token": {
+      "get": {
+        "tags": [
+          "OAuth"
+        ],
+        "summary": "Return access token by code",
+        "description": "Make request for getting token and return result",
+        "operationId": "getToken",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "redirect_uri",
+            "in": "query",
+            "description": "URL where code was sent",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "code",
+            "in": "query",
+            "description": "Current code for token getting request",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "client",
+            "in": "query",
+            "description": "The number of the client app",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid parameters supplied"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
     }
   },
   "securityDefinitions": {

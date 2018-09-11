@@ -6,6 +6,7 @@ import os
 import posixpath
 import re
 import time
+import requests
 from collections import OrderedDict
 
 import falcon
@@ -14,7 +15,7 @@ from falcon_multipart.middleware import MultipartMiddleware
 from each import utils
 from each.db import DBConnection
 from each.serve_swagger import SpecServer
-from each.utils import obj_to_json, getIntPathParam, getIntQueryParam, admin_access_type_required
+from each.utils import obj_to_json, getIntPathParam, getIntQueryParam, getQueryParam, admin_access_type_required
 
 from each.Entities.EntityBase import EntityBase
 from each.Entities.EntityMedia import EntityMedia
@@ -561,6 +562,37 @@ def GetAllGamesById(**request_handler_args):
 # End of game feature set functions
 # ---------------------------------
 
+# Token feature set functions
+# --------------------------
+
+def getToken(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    redirect_uri = getQueryParam('redirect_uri', **request_handler_args)
+    code = getQueryParam('code', **request_handler_args)
+    client_enum = getIntQueryParam('client', **request_handler_args)
+
+    with open("client_config.json") as client_config_file:
+        client_config = json.load(client_config_file)
+
+    client_name = client_config['clients_arr'][client_enum]
+    client = client_config['clients'][client_name]
+    request_data = {'client_id': client['client_id'], 'client_secret': client['client_secret'], 'code': code, 'redirect_uri': redirect_uri}
+    if client_enum != 1 and client_enum != 3:
+        request_data['grant_type'] = 'authorization_code'
+    if client_enum == 1:
+        request_data['v'] = '5.84'
+
+    r = requests.post(client['access_token_url'], data=request_data)
+
+    resp.body = obj_to_json(r.json())
+    resp.status = str(r.status_code)
+
+
+# End of token feature set functions
+# --------------------------
+
 operation_handlers = {
     # Museums
     'getAllMuseumsMockup':  [getAllMuseumsMockup],
@@ -585,6 +617,9 @@ operation_handlers = {
     'getAllFeeds':          [getAllFeeds],
     'getFeed':              [getFeedById],
     'deleteFeed':           [deleteFeed],
+
+    # OAuth
+    'getToken':             [getToken],
 
     'getVersion':           [getVersion],
     'httpDefault':          [httpDefault]
@@ -625,7 +660,8 @@ class Auth(object):
                      '/each/swagger\.json|'
                      '/each/swagger-temp\.json|'
                      '/each/swagger-ui|'
-                     '/each/feed/all).*', req.relative_uri):
+                     '/each/feed/all|'
+                     '/each/token).*', req.relative_uri):
             return
 
         if req.method == 'OPTIONS':
