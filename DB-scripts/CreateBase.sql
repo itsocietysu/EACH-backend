@@ -10,6 +10,12 @@ CREATE TYPE each_media_type AS ENUM ('ava', 'image');
 DROP TYPE IF EXISTS each_user_admin_type CASCADE;
 CREATE TYPE each_user_admin_type AS ENUM ('admin', 'super');
 
+DROP TYPE IF EXISTS each_user_access_type CASCADE;
+CREATE TYPE each_user_access_type AS ENUM ('admin', 'user');
+
+DROP TYPE IF EXISTS each_clients_type CASCADE;
+CREATE TYPE each_clients_type AS ENUM ('each', 'vkontakte', 'google', 'facebook');
+
 DROP TABLE IF EXISTS "each_museum";
 CREATE TABLE "each_museum" (
 	"eid" BIGSERIAL NOT NULL PRIMARY KEY,
@@ -35,13 +41,20 @@ CREATE TABLE "each_game" (
   OIDS=FALSE
 );
 
+
 DROP TABLE IF EXISTS "each_user";
 CREATE TABLE "each_user" (
-	"eid" BIGSERIAL NOT NULL PRIMARY KEY,
-	"login" VARCHAR(256) NOT NULL UNIQUE,
-	"e_mail" VARCHAR(256) NOT NULL UNIQUE,
+	"eid" BIGSERIAL NOT NULL,
+	"access_token" VARCHAR(256) NOT NULL,
+	"refresh_token" VARCHAR(256),
+	"type" each_clients_type NOT NULL,
+	"login" VARCHAR(256) NOT NULL,
+	"email" VARCHAR(256) NOT NULL UNIQUE,
+	"image" VARCHAR(256) NOT NULL,
+	"access_type" each_user_access_type NOT NULL,
 	"created" TIMESTAMP WITH TIME ZONE NOT NULL,
-	"updated" TIMESTAMP WITH TIME ZONE NOT NULL
+	"updated" TIMESTAMP WITH TIME ZONE NOT NULL,
+	PRIMARY KEY("eid", "access_token", "type")
 ) WITH (
   OIDS=FALSE
 );
