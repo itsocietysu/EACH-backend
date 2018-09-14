@@ -46,10 +46,9 @@ DROP TABLE IF EXISTS "each_user";
 CREATE TABLE "each_user" (
 	"eid" BIGSERIAL NOT NULL,
 	"access_token" VARCHAR(256) NOT NULL,
-	"refresh_token" VARCHAR(256),
 	"type" each_clients_type NOT NULL,
 	"login" VARCHAR(256) NOT NULL,
-	"email" VARCHAR(256) NOT NULL UNIQUE,
+	"email" VARCHAR(256) NOT NULL,
 	"image" VARCHAR(256) NOT NULL,
 	"access_type" each_user_access_type NOT NULL,
 	"created" TIMESTAMP WITH TIME ZONE NOT NULL,
