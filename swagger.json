@@ -784,9 +784,54 @@
           {
             "name": "client",
             "in": "query",
-            "description": "The number of the client app",
+            "description": "The name of the client app",
             "required": true,
-            "type": "integer"
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/OAuth"
+            }
+          },
+          "400": {
+            "description": "Invalid parameters supplied"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/tokeninfo": {
+      "get": {
+        "tags": [
+          "OAuth"
+        ],
+        "summary": "Return information about access token",
+        "description": "Make request for getting information about token and return result",
+        "operationId": "getTokenInfo",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access_token",
+            "in": "query",
+            "description": "Current access token for token information getting request",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "client",
+            "in": "query",
+            "description": "The name of the client app",
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {

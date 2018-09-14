@@ -22,6 +22,7 @@ from each.Entities.EntityMedia import EntityMedia
 from each.Entities.EntityNews import EntityNews
 from each.Entities.EntityMuseum import EntityMuseum
 from each.Entities.EntityGame import EntityGame
+from each.Entities.EntityToken import EntityToken
 
 from each.Prop.PropMedia import PropMedia
 from each.Prop.PropInt import PropInt
@@ -571,23 +572,43 @@ def getToken(**request_handler_args):
 
     redirect_uri = getQueryParam('redirect_uri', **request_handler_args)
     code = getQueryParam('code', **request_handler_args)
-    client_enum = getIntQueryParam('client', **request_handler_args)
+    client_name = getQueryParam('client', **request_handler_args)
 
-    with open("client_config.json") as client_config_file:
-        client_config = json.load(client_config_file)
+    res, status = EntityToken.add_from_query({'redirect_uri': redirect_uri, 'code': code, 'client_name': client_name})
 
-    client_name = client_config['clients_arr'][client_enum]
-    client = client_config['clients'][client_name]
-    request_data = {'client_id': client['client_id'], 'client_secret': client['client_secret'], 'code': code, 'redirect_uri': redirect_uri}
-    if client_enum != 1 and client_enum != 3:
-        request_data['grant_type'] = 'authorization_code'
-    if client_enum == 1:
-        request_data['v'] = '5.84'
+    if status == falcon.HTTP_200:
+        object = EntityToken.get().filter_by(eid=res).all()[0]
 
-    r = requests.post(client['access_token_url'], data=request_data)
+        obj_dict = object.to_dict(['eid', 'access_token', 'type', 'login', 'image', 'email', 'access_type'])
 
-    resp.body = obj_to_json(r.json())
-    resp.status = str(r.status_code)
+        resp.body = obj_to_json(obj_dict)
+        resp.status = falcon.HTTP_200
+        return
+
+    resp.body = obj_to_json(res)
+    resp.status = status
+
+
+def getTokenInfo(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    access_token = getQueryParam('access_token', **request_handler_args)
+    client_name = getQueryParam('client', **request_handler_args)
+
+    res, status = EntityToken.update_from_query({'access_token': access_token, 'client_name': client_name})
+
+    if status == falcon.HTTP_200:
+        object = EntityToken.get().filter_by(eid=res).all()[0]
+
+        obj_dict = object.to_dict(['eid', 'access_token', 'type', 'login', 'image', 'email', 'access_type'])
+
+        resp.body = obj_to_json(obj_dict)
+        resp.status = falcon.HTTP_200
+        return
+
+    resp.body = obj_to_json(res)
+    resp.status = status
 
 
 # End of token feature set functions
@@ -620,6 +641,7 @@ operation_handlers = {
 
     # OAuth
     'getToken':             [getToken],
+    'getTokenInfo':         [getTokenInfo],
 
     'getVersion':           [getVersion],
     'httpDefault':          [httpDefault]
