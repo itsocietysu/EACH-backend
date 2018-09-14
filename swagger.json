@@ -782,9 +782,9 @@
             "type": "string"
           },
           {
-            "name": "client",
+            "name": "type",
             "in": "query",
-            "description": "The name of the client app",
+            "description": "The type of the client app",
             "required": true,
             "type": "string"
           }
@@ -827,11 +827,54 @@
             "type": "string"
           },
           {
-            "name": "client",
+            "name": "type",
             "in": "query",
-            "description": "The name of the client app",
+            "description": "The type of the client app",
             "required": true,
             "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/OAuth"
+            }
+          },
+          "400": {
+            "description": "Invalid parameters supplied"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/revoke": {
+      "post": {
+        "tags": [
+          "OAuth"
+        ],
+        "summary": "Revoke access token",
+        "description": "Revoke access token from both databases",
+        "operationId": "revokeToken",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "token_info",
+            "in": "body",
+            "description": "Current access token for token revoking request",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/OAuthRevoke"
+            }
           }
         ],
         "responses": {
@@ -1078,6 +1121,23 @@
         "updated": {
           "type": "string",
           "example": "2018-03-28 20:24:00+00:00"
+        }
+      }
+    },
+    "OAuthRevoke": {
+      "type": "object",
+      "required": [
+        "access_token",
+        "type"
+      ],
+      "properties": {
+        "access_token": {
+          "type": "string",
+          "example": "ncr74RlkjTYFfyuGUjlkJO56J0"
+        },
+        "type": {
+          "type": "string",
+          "example": "each"
         }
       }
     }

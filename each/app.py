@@ -15,7 +15,7 @@ from falcon_multipart.middleware import MultipartMiddleware
 from each import utils
 from each.db import DBConnection
 from each.serve_swagger import SpecServer
-from each.utils import obj_to_json, getIntPathParam, getIntQueryParam, getQueryParam, admin_access_type_required
+from each.utils import obj_to_json, getIntPathParam, getIntQueryParam, getQueryParam, getStringQueryParam, admin_access_type_required
 
 from each.Entities.EntityBase import EntityBase
 from each.Entities.EntityMedia import EntityMedia
@@ -570,9 +570,14 @@ def getToken(**request_handler_args):
     req = request_handler_args['req']
     resp = request_handler_args['resp']
 
-    redirect_uri = getQueryParam('redirect_uri', **request_handler_args)
-    code = getQueryParam('code', **request_handler_args)
-    client_name = getQueryParam('client', **request_handler_args)
+    redirect_uri = getStringQueryParam('redirect_uri', **request_handler_args)
+    code = getStringQueryParam('code', **request_handler_args)
+    client_name = getStringQueryParam('type', **request_handler_args)
+
+    if redirect_uri is None or code is None or client_name is None:
+        resp.body = obj_to_json({'error': 'Invalid parameters supplied'})
+        resp.status = falcon.HTTP_400
+        return
 
     res, status = EntityToken.add_from_query({'redirect_uri': redirect_uri, 'code': code, 'client_name': client_name})
 
@@ -593,8 +598,13 @@ def getTokenInfo(**request_handler_args):
     req = request_handler_args['req']
     resp = request_handler_args['resp']
 
-    access_token = getQueryParam('access_token', **request_handler_args)
-    client_name = getQueryParam('client', **request_handler_args)
+    access_token = getStringQueryParam('access_token', **request_handler_args)
+    client_name = getStringQueryParam('type', **request_handler_args)
+
+    if access_token is None or client_name is None:
+        resp.body = obj_to_json({'error': 'Invalid parameters supplied'})
+        resp.status = falcon.HTTP_400
+        return
 
     res, status = EntityToken.update_from_query({'access_token': access_token, 'client_name': client_name})
 
@@ -606,6 +616,17 @@ def getTokenInfo(**request_handler_args):
         resp.body = obj_to_json(obj_dict)
         resp.status = falcon.HTTP_200
         return
+
+    resp.body = obj_to_json(res)
+    resp.status = status
+
+def revokeToken(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    params = json.loads(req.stream.read().decode('utf-8'))
+
+    res, status = EntityToken.delete_from_json(params)
 
     resp.body = obj_to_json(res)
     resp.status = status
@@ -642,6 +663,7 @@ operation_handlers = {
     # OAuth
     'getToken':             [getToken],
     'getTokenInfo':         [getTokenInfo],
+    'revokeToken':          [revokeToken],
 
     'getVersion':           [getVersion],
     'httpDefault':          [httpDefault]

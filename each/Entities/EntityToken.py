@@ -55,9 +55,6 @@ class EntityToken(EntityBase, Base):
 
         data = r.json()
 
-        if 'error' in data:
-            return data, falcon.HTTP_401
-
         res_data = {'access_token': access_token}
 
         if 'name' in data:
@@ -223,11 +220,9 @@ class EntityToken(EntityBase, Base):
         access_token = data['access_token']
 
         with DBConnection() as session:
-            entity = session.db.query(EntityToken).filter_by(access_token=access_token, type='each').all()
+            token = session.db.query(EntityToken).filter_by(access_token=access_token, type='each').first()
 
-            if len(entity):
-                token = entity[0]
-
+            if token:
                 res_data, res_status = cls.get_info_each(access_token)
 
                 if res_status != falcon.HTTP_200:
@@ -249,11 +244,9 @@ class EntityToken(EntityBase, Base):
         access_token = data['access_token']
 
         with DBConnection() as session:
-            entity = session.db.query(EntityToken).filter_by(access_token=access_token, type='vkontakte').all()
+            token = session.db.query(EntityToken).filter_by(access_token=access_token, type='vkontakte').first()
 
-            if len(entity):
-                token = entity[0]
-
+            if token:
                 res_data, res_status = cls.get_info_vkontakte(access_token)
 
                 if res_status != falcon.HTTP_200:
@@ -274,11 +267,9 @@ class EntityToken(EntityBase, Base):
         access_token = data['access_token']
 
         with DBConnection() as session:
-            entity = session.db.query(EntityToken).filter_by(access_token=access_token, type='google').all()
+            token = session.db.query(EntityToken).filter_by(access_token=access_token, type='google').first()
 
-            if len(entity):
-                token = entity[0]
-
+            if token:
                 res_data, res_status = cls.get_info_google(access_token)
 
                 if res_status != falcon.HTTP_200:
@@ -297,3 +288,54 @@ class EntityToken(EntityBase, Base):
     @classmethod
     def update_from_query(cls, data):
         return cls.__dict__['get_tokeninfo_%s' % data['client_name']].__get__(None, cls)(data)
+
+    @classmethod
+    def revoke_token_each(cls, access_token):
+        with DBConnection() as session:
+            token = session.db.query(EntityToken).filter_by(access_token=access_token, type='each').first()
+            if token:
+                r = requests.post('http://each.itsociety.su:5000/oauth2/revoke_bearer',
+                                  data={'access_token': access_token})
+
+                if r.status_code != 200:
+                    return r.json(), falcon.__dict__['HTTP_%s' % r.status_code]
+
+                session.db.delete(token)
+                session.db.commit()
+                return {'token': access_token}, falcon.HTTP_200
+
+            return {'error': 'Invalid access token supplied'}, falcon.HTTP_400
+
+    @classmethod
+    def revoke_token_vkontakte(cls, access_token):
+        with DBConnection() as session:
+            token = session.db.query(EntityToken).filter_by(access_token=access_token, type='vkontakte').first()
+            if token:
+                session.db.delete(token)
+                session.db.commit()
+                return {'token': access_token}, falcon.HTTP_200
+
+            return {'error': 'Invalid access token supplied'}, falcon.HTTP_400
+
+    @classmethod
+    def revoke_token_google(cls, access_token):
+        with DBConnection() as session:
+            token = session.db.query(EntityToken).filter_by(access_token=access_token, type='google').first()
+            if token:
+                r = requests.post('https://accounts.google.com/o/oauth2/revoke', params={'token': access_token},
+                                  headers={'content-type': 'application/x-www-form-urlencoded'})
+
+                if r.status_code != 200 and r.json()['error'] != 'invalid_token':
+                    return r.json(), falcon.__dict__['HTTP_%s' % r.status_code]
+
+                session.db.delete(token)
+                session.db.commit()
+                return {'token': access_token}, falcon.HTTP_200
+
+            return {'error': 'Invalid access token supplied'}, falcon.HTTP_400
+
+    @classmethod
+    def delete_from_json(cls, data):
+        if isAllInData(['type', 'access_token'], data):
+            return cls.__dict__['revoke_token_%s' % data['type']].__get__(None, cls)(data['access_token'])
+        return {'error': 'invalid arguments'}, falcon.HTTP_400

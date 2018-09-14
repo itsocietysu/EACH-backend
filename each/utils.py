@@ -48,6 +48,12 @@ def getIntQueryParam(name, **request_handler_args):
     except ValueError:
         return None
 
+def getStringQueryParam(name, **request_handler_args):
+    try:
+        return request_handler_args['req'].params[name]
+    except:
+        return None
+
 def isAllInData(params, data):
     return all([(_ in data) for _ in params])
 
