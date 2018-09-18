@@ -63,6 +63,8 @@ class EntityToken(EntityBase, Base):
             res_data['email'] = data['email']
         if 'access_type' in data:
             res_data['access_type'] = data['access_type']
+        if 'image' in data:
+            res_data['image'] = data['image']
 
         return res_data, falcon.HTTP_200
 
@@ -132,8 +134,9 @@ class EntityToken(EntityBase, Base):
         email = res_data['email']
         login = res_data['login']
         access_type = res_data['access_type']
+        image = res_data['image']
 
-        new_entity = EntityToken(access_token, 'each', login, email, 'http://something', access_type)
+        new_entity = EntityToken(access_token, 'each', login, email, image, access_type)
         eid = new_entity.add()
 
         with DBConnection() as session:
