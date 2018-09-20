@@ -14,36 +14,25 @@ from each.utils import isAllInData
 
 Base = declarative_base()
 
-
 class EntityToken(EntityBase, Base):
-    __tablename__ = 'each_user'
+    __tablename__ = 'each_token'
 
     eid = Column(Integer, Sequence('each_seq'), primary_key=True)
+    user_id = Column(Integer)
     access_token = Column(String, primary_key=True)
     type = Column(String, primary_key=True)
-    login = Column(String)
-    email = Column(String)
-    image = Column(String)
-    access_type = Column(String)
-    created = Column(Date)
-    updated = Column(Date)
+    created_at = Column(Date)
 
-    json_serialize_items_list = ['eid', 'access_token', 'type', 'login', 'email', 'image',
-                                 'access_type', 'created', 'updated']
+    json_serialize_items_list = ['eid', 'user_id' 'access_token', 'type', 'created_at']
 
-    def __init__(self, access_token, type, login, email, image, access_type):
+    def __init__(self, access_token, type, user_id):
         super().__init__()
 
+        self.user_id = user_id
         self.access_token = access_token
         self.type = type
-
-        self.login = login
-        self.email = email
-        self.image = image
-        self.access_type = access_type
-
         ts = time.time()
-        self.created = self.updated = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M')
+        self.created_at = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M')
 
     @classmethod
     def get_info_each(cls, access_token):

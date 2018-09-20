@@ -45,7 +45,6 @@ CREATE TABLE "each_game" (
 DROP TABLE IF EXISTS "each_user";
 CREATE TABLE "each_user" (
 	"eid" BIGSERIAL NOT NULL,
-	"access_token" VARCHAR(256) NOT NULL,
 	"type" each_clients_type NOT NULL,
 	"login" VARCHAR(256) NOT NULL,
 	"email" VARCHAR(256) NOT NULL,
@@ -53,11 +52,21 @@ CREATE TABLE "each_user" (
 	"access_type" each_user_access_type NOT NULL,
 	"created" TIMESTAMP WITH TIME ZONE NOT NULL,
 	"updated" TIMESTAMP WITH TIME ZONE NOT NULL,
-	PRIMARY KEY("eid", "access_token", "type")
+	PRIMARY KEY("eid", "email", "type")
 ) WITH (
   OIDS=FALSE
 );
 
+DROP TABLE IF EXISTS "each_user";
+CREATE TABLE "each_user" (
+	"eid" BIGSERIAL NOT NULL,
+	"user_id" VARCHAR(256) NOT NULL,
+	"access_token" VARCHAR(256) NOT NULL,
+	"type" each_clients_type NOT NULL,
+	PRIMARY KEY("eid", "access_token", "type")
+) WITH (
+  OIDS=FALSE
+);
 
 DROP TABLE IF EXISTS "each_media";
 CREATE TABLE "each_media" (
