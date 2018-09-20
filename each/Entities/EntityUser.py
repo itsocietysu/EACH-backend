@@ -6,7 +6,10 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from each.Entities.EntityBase import EntityBase
 
+from each.db import DBConnection
+
 Base = declarative_base()
+
 
 class EntityUser(EntityBase, Base):
     __tablename__ = 'each_user'
@@ -37,11 +40,15 @@ class EntityUser(EntityBase, Base):
 
     def update_user(self, data):
 
-        if ('login' in data):
-            self.login = data['login']
-        if ('email' in data):
-            self.email = data['email']
-        if ('image' in data):
-            self.image = data['image']
-        if ('access_type' in data):
-            self.access_type = data['access_type']
+        with DBConnection() as session:
+
+            if 'login' in data:
+                self.login = data['login']
+            if 'email' in data:
+                self.email = data['email']
+            if 'image' in data:
+                self.image = data['image']
+            if 'access_type' in data:
+                self.access_type = data['access_type']
+
+            session.db.commit()

@@ -15,7 +15,7 @@ from falcon_multipart.middleware import MultipartMiddleware
 from each import utils
 from each.db import DBConnection
 from each.serve_swagger import SpecServer
-from each.utils import obj_to_json, getIntPathParam, getIntQueryParam, getQueryParam, getStringQueryParam, admin_access_type_required
+from each.utils import obj_to_json, getIntPathParam, getIntQueryParam, getStringQueryParam, admin_access_type_required
 
 from each.Entities.EntityBase import EntityBase
 from each.Entities.EntityMedia import EntityMedia
@@ -23,6 +23,7 @@ from each.Entities.EntityNews import EntityNews
 from each.Entities.EntityMuseum import EntityMuseum
 from each.Entities.EntityGame import EntityGame
 from each.Entities.EntityToken import EntityToken
+from each.Entities.EntityUser import EntityUser
 
 from each.Prop.PropMedia import PropMedia
 from each.Prop.PropInt import PropInt
@@ -566,6 +567,7 @@ def GetAllGamesById(**request_handler_args):
 # Token feature set functions
 # --------------------------
 
+
 def getToken(**request_handler_args):
     req = request_handler_args['req']
     resp = request_handler_args['resp']
@@ -582,11 +584,14 @@ def getToken(**request_handler_args):
     res, status = EntityToken.add_from_query({'redirect_uri': redirect_uri, 'code': code, 'client_name': client_name})
 
     if status == falcon.HTTP_200:
-        object = EntityToken.get().filter_by(eid=res).all()[0]
+        token = EntityToken.get().filter_by(eid=res).first()
+        user = EntityUser.get().filter_by(eid=token.user_id).first()
 
-        obj_dict = object.to_dict(['eid', 'access_token', 'type', 'login', 'image', 'email', 'access_type'])
+        token_dict = token.to_dict(['eid', 'access_token', 'type'])
+        user_dict = user.to_dict(['login', 'image', 'email', 'access_type'])
+        token_dict.update(user_dict)
 
-        resp.body = obj_to_json(obj_dict)
+        resp.body = obj_to_json(token_dict)
         resp.status = falcon.HTTP_200
         return
 
@@ -609,16 +614,20 @@ def getTokenInfo(**request_handler_args):
     res, status = EntityToken.update_from_query({'access_token': access_token, 'client_name': client_name})
 
     if status == falcon.HTTP_200:
-        object = EntityToken.get().filter_by(eid=res).all()[0]
+        token = EntityToken.get().filter_by(eid=res).first()
+        user = EntityUser.get().filter_by(eid=token.user_id).first()
 
-        obj_dict = object.to_dict(['eid', 'access_token', 'type', 'login', 'image', 'email', 'access_type'])
+        token_dict = token.to_dict(['eid', 'access_token', 'type'])
+        user_dict = user.to_dict(['login', 'image', 'email', 'access_type'])
+        token_dict.update(user_dict)
 
-        resp.body = obj_to_json(obj_dict)
+        resp.body = obj_to_json(token_dict)
         resp.status = falcon.HTTP_200
         return
 
     resp.body = obj_to_json(res)
     resp.status = status
+
 
 def revokeToken(**request_handler_args):
     req = request_handler_args['req']

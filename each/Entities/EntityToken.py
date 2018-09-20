@@ -8,11 +8,13 @@ from sqlalchemy import Column, String, Integer, Date, Sequence
 from sqlalchemy.ext.declarative import declarative_base
 
 from each.Entities.EntityBase import EntityBase
+from each.Entities.EntityUser import EntityUser
 
 from each.db import DBConnection
 from each.utils import isAllInData
 
 Base = declarative_base()
+
 
 class EntityToken(EntityBase, Base):
     __tablename__ = 'each_token'
@@ -125,10 +127,16 @@ class EntityToken(EntityBase, Base):
         access_type = res_data['access_type']
         image = res_data['image']
 
-        new_entity = EntityToken(access_token, 'each', login, email, image, access_type)
-        eid = new_entity.add()
-
         with DBConnection() as session:
+            user = session.db.query(EntityUser).filter_by(email=email, type='each').first()
+            if user:
+                user_id = user.eid
+            else:
+                user_id = EntityUser('each', login, email, image, access_type).add()
+
+            new_entity = EntityToken(access_token, 'each', user_id)
+            eid = new_entity.add()
+
             session.db.commit()
 
         return eid, falcon.HTTP_200
@@ -160,10 +168,16 @@ class EntityToken(EntityBase, Base):
         login = res_data['login']
         image = res_data['image']
 
-        new_entity = EntityToken(access_token, 'vkontakte', login, email, image, 'user')
-        eid = new_entity.add()
-
         with DBConnection() as session:
+            user = session.db.query(EntityUser).filter_by(email=email, type='vkontakte').first()
+            if user:
+                user_id = user.eid
+            else:
+                user_id = EntityUser('vkontakte', login, email, image, 'user').add()
+
+            new_entity = EntityToken(access_token, 'vkontakte', user_id)
+            eid = new_entity.add()
+
             session.db.commit()
 
         return eid, falcon.HTTP_200
@@ -195,10 +209,16 @@ class EntityToken(EntityBase, Base):
         email = res_data['email']
         image = res_data['image']
 
-        new_entity = EntityToken(access_token, 'google', login, email, image, 'user')
-        eid = new_entity.add()
-
         with DBConnection() as session:
+            user = session.db.query(EntityUser).filter_by(email=email, type='google').first()
+            if user:
+                user_id = user.eid
+            else:
+                user_id = EntityUser('google', login, email, image, 'user').add()
+
+            new_entity = EntityToken(access_token, 'google', user_id)
+            eid = new_entity.add()
+
             session.db.commit()
 
         return eid, falcon.HTTP_200
@@ -215,19 +235,23 @@ class EntityToken(EntityBase, Base):
             token = session.db.query(EntityToken).filter_by(access_token=access_token, type='each').first()
 
             if token:
-                res_data, res_status = cls.get_info_each(access_token)
+                user = session.db.query(EntityUser).filter_by(eid=token.user_id).first()
 
-                if res_status != falcon.HTTP_200:
-                    return res_data, res_status
+                if user:
+                    res_data, res_status = cls.get_info_each(access_token)
 
-                token.email = res_data['email']
-                token.login = res_data['login']
-                token.access_type = res_data['access_type']
-                eid = token.eid
+                    if res_status != falcon.HTTP_200:
+                        return res_data, res_status
 
-                session.db.commit()
+                    user.email = res_data['email']
+                    user.login = res_data['login']
+                    user.access_type = res_data['access_type']
+                    user.image = res_data['image']
+                    eid = token.eid
 
-                return eid, falcon.HTTP_200
+                    session.db.commit()
+
+                    return eid, falcon.HTTP_200
 
         return {'error': 'Invalid access token supplied'}, falcon.HTTP_400
 
@@ -239,18 +263,21 @@ class EntityToken(EntityBase, Base):
             token = session.db.query(EntityToken).filter_by(access_token=access_token, type='vkontakte').first()
 
             if token:
-                res_data, res_status = cls.get_info_vkontakte(access_token)
+                user = session.db.query(EntityUser).filter_by(eid=token.user_id).first()
 
-                if res_status != falcon.HTTP_200:
-                    return res_data, res_status
+                if user:
+                    res_data, res_status = cls.get_info_vkontakte(access_token)
 
-                token.image = res_data['image']
-                token.login = res_data['login']
-                eid = token.eid
+                    if res_status != falcon.HTTP_200:
+                        return res_data, res_status
 
-                session.db.commit()
+                    user.image = res_data['image']
+                    user.login = res_data['login']
+                    eid = token.eid
 
-                return eid, falcon.HTTP_200
+                    session.db.commit()
+
+                    return eid, falcon.HTTP_200
 
         return {'error': 'Invalid access token supplied'}, falcon.HTTP_400
 
@@ -262,18 +289,22 @@ class EntityToken(EntityBase, Base):
             token = session.db.query(EntityToken).filter_by(access_token=access_token, type='google').first()
 
             if token:
-                res_data, res_status = cls.get_info_google(access_token)
+                user = session.db.query(EntityUser).filter_by(eid=token.user_id).first()
 
-                if res_status != falcon.HTTP_200:
-                    return res_data, res_status
+                if user:
+                    res_data, res_status = cls.get_info_google(access_token)
 
-                token.image = res_data['image']
-                token.login = res_data['login']
-                eid = token.eid
+                    if res_status != falcon.HTTP_200:
+                        return res_data, res_status
 
-                session.db.commit()
+                    user.image = res_data['image']
+                    user.login = res_data['login']
+                    user.email = res_data['email']
+                    eid = token.eid
 
-                return eid, falcon.HTTP_200
+                    session.db.commit()
+
+                    return eid, falcon.HTTP_200
 
         return {'error': 'Invalid access token supplied'}, falcon.HTTP_400
 
