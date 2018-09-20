@@ -26,7 +26,7 @@ class EntityUser(EntityBase, Base):
     json_serialize_items_list = ['eid', 'type', 'login', 'email', 'image',
                                  'access_type', 'created', 'updated']
 
-    def __init__(self, type, login, email, image, access_type):
+    def __init__(self, type='each', login='user', email=None, image=None, access_type='user'):
         super().__init__()
 
         self.type = type
@@ -37,6 +37,9 @@ class EntityUser(EntityBase, Base):
 
         ts = time.time()
         self.created = self.updated = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M')
+
+    def __setitem__(self, key, value):
+        self.__dict__[key] = value
 
     def update_user(self, data):
 
