@@ -25,6 +25,7 @@ class EntityUser(EntityBase, Base):
 
     json_serialize_items_list = ['eid', 'type', 'login', 'email', 'image',
                                  'access_type', 'created', 'updated']
+    required_fields = ['login', 'email', 'image', 'access_type']
 
     def __init__(self, type='each', login='user', email=None, image=None, access_type='user'):
         super().__init__()
@@ -41,17 +42,16 @@ class EntityUser(EntityBase, Base):
     def __setitem__(self, key, value):
         self.__dict__[key] = value
 
-    def update_user(self, data):
+    @classmethod
+    def update_user(cls, eid, data):
 
         with DBConnection() as session:
+            entity = session.db.query(EntityUser).filter_by(eid=eid).first()
+            if entity:
+                for _ in cls.required_fields:
+                    if _ in data:
+                        setattr(entity, _, data[_])
 
-            if 'login' in data:
-                self.login = data['login']
-            if 'email' in data:
-                self.email = data['email']
-            if 'image' in data:
-                self.image = data['image']
-            if 'access_type' in data:
-                self.access_type = data['access_type']
-
-            session.db.commit()
+                ts = time.time()
+                entity.updated = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M')
+                session.db.commit()

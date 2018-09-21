@@ -27,9 +27,8 @@ class EntityToken(EntityBase, Base):
 
     json_serialize_items_list = ['eid', 'user_id' 'access_token', 'type', 'created_at']
 
-    user_fields = ['login', 'email', 'image', 'access_type']
     fields_each = {'login': 'name', 'email': 'email', 'image': 'image', 'access_type': 'access_type'}
-    fields_vkontakte = {'login': 'first_name', 'image': 'photo_200_orig'}
+    fields_vkontakte = {'login': 'first_name', 'image': 'photo_400_orig'}
     fields_google = {'login': 'given_name', 'email': 'email', 'image': 'picture'}
 
     allowed_types = ['each', 'vkontakte', 'google']
@@ -46,54 +45,50 @@ class EntityToken(EntityBase, Base):
         self.created_at = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M')
 
     @classmethod
-    def get_info_api(cls, access_token, type):
-        with open("client_config.json") as client_config_file:
-            client_config = json.load(client_config_file)
+    def get_info_api(cls, access_token, type, client=None):
+        if client is None:
+            with open("client_config.json") as client_config_file:
+                client_config = json.load(client_config_file)
+                client = client_config['clients'][type]
 
-        client = client_config['clients'][type]
         req_url = client['token_info_url'] + access_token
         r = requests.get(req_url)
-
         if r.status_code != 200:
             return r.json(), falcon.__dict__['HTTP_%s' % r.status_code]
 
         data = r.json()
         if type == 'vkontakte':
             data = data['response'][0]
-
         res_data = {'access_token': access_token}
-        user_data = cls.__dict__['fields_%s' % type]
 
-        for _ in cls.user_fields:
-            if _ in user_data and user_data[_] in data:
-                res_data[_] = data[user_data[_]]
+        info_fields = cls.__dict__['fields_%s' % type]
+        for _ in EntityUser.required_fields:
+            if _ in info_fields and info_fields[_] in data:
+                res_data[_] = data[info_fields[_]]
 
         return res_data, falcon.HTTP_200
 
     @classmethod
     def add_from_query(cls, data):
-        if isAllInData(['client_name', 'redirect_uri', 'code'], data) and data['client_name'] in cls.allowed_types:
-
-            type = data['client_name']
+        if isAllInData(['type', 'redirect_uri', 'code'], data) and data['type'] in cls.allowed_types:
+            type = data['type']
             redirect_uri = data['redirect_uri']
             code = data['code']
 
             with open("client_config.json") as client_config_file:
                 client_config = json.load(client_config_file)
+                client = client_config['clients'][type]
 
-            client = client_config['clients'][type]
             request_data = {'client_id': client['client_id'], 'client_secret': client['client_secret'], 'code': code,
                             'redirect_uri': redirect_uri}
             if type in cls.granted_types:
                 request_data['grant_type'] = 'authorization_code'
 
             r = requests.post(client['access_token_url'], data=request_data)
-
             if r.status_code != 200:
                 return r.json(), falcon.__dict__['HTTP_%s' % r.status_code]
 
-            res_data, res_status = cls.get_info_api(r.json()['access_token'], type)
-
+            res_data, res_status = cls.get_info_api(r.json()['access_token'], type, client)
             if res_status != falcon.HTTP_200:
                 return res_data, res_status
 
@@ -102,80 +97,66 @@ class EntityToken(EntityBase, Base):
             else:
                 email = res_data['email']
 
-            with DBConnection() as session:
-                user = session.db.query(EntityUser).filter_by(email=email, type=type).first()
-                if user:
-                    user_id = user.eid
-                else:
-                    user = EntityUser(type=type, email=email)
-                    for _ in cls.user_fields:
-                        if _ in res_data:
-                            user[_] = res_data[_]
-                    user_id = user.add()
+            user = EntityUser.get().filter_by(email=email, type=type).first()
+            if user:
+                user_id = user.eid
+            else:
+                user = EntityUser(type=type, email=email)
+                for _ in EntityUser.required_fields:
+                    if _ in res_data:
+                        user[_] = res_data[_]
+                user_id = user.add()
 
-                new_entity = EntityToken(res_data['access_token'], type, user_id)
-                eid = new_entity.add()
-
-                session.db.commit()
+            new_entity = EntityToken(res_data['access_token'], type, user_id)
+            eid = new_entity.add()
 
             return eid, falcon.HTTP_200
+        return {'error': 'invalid arguments'}, falcon.HTTP_400
 
     @classmethod
     def update_from_query(cls, data):
-        if isAllInData(['client_name', 'access_token'], data) and data['client_name'] in cls.allowed_types:
-
-            type = data['client_name']
+        if isAllInData(['type', 'access_token'], data) and data['type'] in cls.allowed_types:
+            type = data['type']
             access_token = data['access_token']
 
-            with DBConnection() as session:
-                token = session.db.query(EntityToken).filter_by(access_token=access_token, type=type).first()
+            token = EntityToken.get().filter_by(access_token=access_token, type=type).first()
+            if token:
+                user = EntityUser.get().filter_by(eid=token.user_id).first()
+                if user:
 
-                if token:
-                    user = session.db.query(EntityUser).filter_by(eid=token.user_id).first()
+                    res_data, res_status = cls.get_info_api(access_token, type)
+                    if res_status != falcon.HTTP_200:
+                        with DBConnection() as session:
+                            session.db.delete(token)
+                            session.db.commit()
+                        return res_data, res_status
 
-                    if user:
-                        res_data, res_status = cls.get_info_api(access_token, type)
+                    EntityUser.update_user(token.user_id, res_data)
+                    eid = token.eid
 
-                        if res_status != falcon.HTTP_200:
-                            return res_data, res_status
-
-                        for _ in cls.user_fields:
-                            if _ in res_data:
-                                user[_] = res_data[_]
-                        eid = token.eid
-
-                        session.db.commit()
-
-                        return eid, falcon.HTTP_200
-
-                return {'error': 'Invalid access token supplied'}, falcon.HTTP_400
+                    return eid, falcon.HTTP_200
+            return {'error': 'Invalid access token supplied'}, falcon.HTTP_400
         return {'error': 'invalid arguments'}, falcon.HTTP_400
 
     @classmethod
     def delete_from_json(cls, data):
         if isAllInData(['type', 'access_token'], data) and data['type'] in cls.allowed_types:
-
             access_token = data['access_token']
             type = data['type']
-
-            with open("client_config.json") as client_config_file:
-                client_config = json.load(client_config_file)
-
-            client = client_config['clients'][type]
 
             with DBConnection() as session:
                 token = session.db.query(EntityToken).filter_by(access_token=access_token, type=type).first()
                 if token:
                     if type in cls.revoke_types:
-                        r = requests.post(client['revoke_token_url'], params={'token': access_token},
-                                          headers={'content-type': 'application/x-www-form-urlencoded'})
-
-                        if r.status_code != 200:
-                            return r.json(), falcon.__dict__['HTTP_%s' % r.status_code]
+                        with open("client_config.json") as client_config_file:
+                            client_config = json.load(client_config_file)
+                            client = client_config['clients'][type]
+                        requests.post(client['revoke_token_url'], params={'token': access_token},
+                                      headers={'content-type': 'application/x-www-form-urlencoded'})
 
                     session.db.delete(token)
                     session.db.commit()
-                    return {'token': access_token}, falcon.HTTP_200
 
+                    return {'token': access_token}, falcon.HTTP_200
                 return {'error': 'Invalid access token supplied'}, falcon.HTTP_400
         return {'error': 'invalid arguments'}, falcon.HTTP_400

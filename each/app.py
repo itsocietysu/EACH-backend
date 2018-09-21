@@ -574,14 +574,14 @@ def getToken(**request_handler_args):
 
     redirect_uri = getStringQueryParam('redirect_uri', **request_handler_args)
     code = getStringQueryParam('code', **request_handler_args)
-    client_name = getStringQueryParam('type', **request_handler_args)
+    type = getStringQueryParam('type', **request_handler_args)
 
-    if redirect_uri is None or code is None or client_name is None:
+    if redirect_uri is None or code is None or type is None:
         resp.body = obj_to_json({'error': 'Invalid parameters supplied'})
         resp.status = falcon.HTTP_400
         return
 
-    res, status = EntityToken.add_from_query({'redirect_uri': redirect_uri, 'code': code, 'client_name': client_name})
+    res, status = EntityToken.add_from_query({'redirect_uri': redirect_uri, 'code': code, 'type': type})
 
     if status == falcon.HTTP_200:
         token = EntityToken.get().filter_by(eid=res).first()
@@ -604,14 +604,14 @@ def getTokenInfo(**request_handler_args):
     resp = request_handler_args['resp']
 
     access_token = getStringQueryParam('access_token', **request_handler_args)
-    client_name = getStringQueryParam('type', **request_handler_args)
+    type = getStringQueryParam('type', **request_handler_args)
 
-    if access_token is None or client_name is None:
+    if access_token is None or type is None:
         resp.body = obj_to_json({'error': 'Invalid parameters supplied'})
         resp.status = falcon.HTTP_400
         return
 
-    res, status = EntityToken.update_from_query({'access_token': access_token, 'client_name': client_name})
+    res, status = EntityToken.update_from_query({'access_token': access_token, 'type': type})
 
     if status == falcon.HTTP_200:
         token = EntityToken.get().filter_by(eid=res).first()
