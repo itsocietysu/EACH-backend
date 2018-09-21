@@ -46,7 +46,7 @@ DROP TABLE IF EXISTS "each_user";
 CREATE TABLE "each_user" (
 	"eid" BIGSERIAL NOT NULL,
 	"type" each_clients_type NOT NULL,
-	"login" VARCHAR(256) NOT NULL,
+	"name" VARCHAR(256) NOT NULL,
 	"email" VARCHAR(256) NOT NULL,
 	"image" VARCHAR(256) NOT NULL,
 	"access_type" each_user_access_type NOT NULL,
@@ -57,12 +57,13 @@ CREATE TABLE "each_user" (
   OIDS=FALSE
 );
 
-DROP TABLE IF EXISTS "each_user";
-CREATE TABLE "each_user" (
+DROP TABLE IF EXISTS "each_token";
+CREATE TABLE "each_token" (
 	"eid" BIGSERIAL NOT NULL,
 	"user_id" VARCHAR(256) NOT NULL,
 	"access_token" VARCHAR(256) NOT NULL,
 	"type" each_clients_type NOT NULL,
+	"created_at" TIMESTAMP WITH TIME ZONE NOT NULL,
 	PRIMARY KEY("eid", "access_token", "type")
 ) WITH (
   OIDS=FALSE

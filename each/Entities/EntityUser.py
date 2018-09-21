@@ -16,22 +16,22 @@ class EntityUser(EntityBase, Base):
 
     eid = Column(Integer, Sequence('each_seq'), primary_key=True)
     type = Column(String, primary_key=True)
-    login = Column(String)
+    name = Column(String)
     email = Column(String, primary_key=True)
     image = Column(String)
     access_type = Column(String)
     created = Column(Date)
     updated = Column(Date)
 
-    json_serialize_items_list = ['eid', 'type', 'login', 'email', 'image',
+    json_serialize_items_list = ['eid', 'type', 'name', 'email', 'image',
                                  'access_type', 'created', 'updated']
-    required_fields = ['login', 'email', 'image', 'access_type']
+    required_fields = ['name', 'email', 'image', 'access_type']
 
-    def __init__(self, type='each', login='user', email=None, image=None, access_type='user'):
+    def __init__(self, type='each', name='user', email=None, image=None, access_type='user'):
         super().__init__()
 
         self.type = type
-        self.login = login
+        self.name = name
         self.email = email
         self.image = image
         self.access_type = access_type

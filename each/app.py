@@ -6,7 +6,7 @@ import os
 import posixpath
 import re
 import time
-import requests
+from urllib.parse import parse_qs
 from collections import OrderedDict
 
 import falcon
@@ -572,9 +572,14 @@ def getToken(**request_handler_args):
     req = request_handler_args['req']
     resp = request_handler_args['resp']
 
-    redirect_uri = getStringQueryParam('redirect_uri', **request_handler_args)
-    code = getStringQueryParam('code', **request_handler_args)
     type = getStringQueryParam('type', **request_handler_args)
+    if type == 'swagger':
+        query = parse_qs(req.stream.read().decode('utf-8'))
+        redirect_uri = query['redirect_uri'][0]
+        code = query['code'][0]
+    else:
+        redirect_uri = getStringQueryParam('redirect_uri', **request_handler_args)
+        code = getStringQueryParam('code', **request_handler_args)
 
     if redirect_uri is None or code is None or type is None:
         resp.body = obj_to_json({'error': 'Invalid parameters supplied'})
@@ -587,8 +592,8 @@ def getToken(**request_handler_args):
         token = EntityToken.get().filter_by(eid=res).first()
         user = EntityUser.get().filter_by(eid=token.user_id).first()
 
-        token_dict = token.to_dict(['eid', 'access_token', 'type'])
-        user_dict = user.to_dict(['login', 'image', 'email', 'access_type'])
+        token_dict = token.to_dict(['eid', 'access_token', 'type', 'user_id'])
+        user_dict = user.to_dict(['name', 'image', 'email', 'access_type'])
         token_dict.update(user_dict)
 
         resp.body = obj_to_json(token_dict)
@@ -617,8 +622,8 @@ def getTokenInfo(**request_handler_args):
         token = EntityToken.get().filter_by(eid=res).first()
         user = EntityUser.get().filter_by(eid=token.user_id).first()
 
-        token_dict = token.to_dict(['eid', 'access_token', 'type'])
-        user_dict = user.to_dict(['login', 'image', 'email', 'access_type'])
+        token_dict = token.to_dict(['eid', 'access_token', 'type', 'user_id'])
+        user_dict = user.to_dict(['name', 'image', 'email', 'access_type'])
         token_dict.update(user_dict)
 
         resp.body = obj_to_json(token_dict)
@@ -724,8 +729,10 @@ class Auth(object):
         try:
             if req.auth:
                 token = req.auth.split(" ")[1].strip()
+                type = req.auth.split(" ")[2].strip()
             else:
                 token = req.params.get('access_token')
+                type = req.params.get('type')
         except:
             raise falcon.HTTPUnauthorized(description='Token was not provided in schema [berear <Token>]',
                                       challenges=['Bearer realm=http://GOOOOGLE'])
@@ -734,7 +741,8 @@ class Auth(object):
         if token:
             error, acc_type, user_email, user_id, user_name = auth.Validate(
                 cfg['oidc']['each_oauth2']['check_token_url'],
-                token
+                token,
+                type
             )
 
             if not error:

@@ -27,12 +27,13 @@ class EntityToken(EntityBase, Base):
 
     json_serialize_items_list = ['eid', 'user_id' 'access_token', 'type', 'created_at']
 
-    fields_each = {'login': 'name', 'email': 'email', 'image': 'image', 'access_type': 'access_type'}
-    fields_vkontakte = {'login': 'first_name', 'image': 'photo_400_orig'}
-    fields_google = {'login': 'given_name', 'email': 'email', 'image': 'picture'}
+    fields_each = {'name': 'name', 'email': 'email', 'image': 'image', 'access_type': 'access_type'}
+    fields_swagger = {'name': 'name', 'email': 'email', 'image': 'image', 'access_type': 'access_type'}
+    fields_vkontakte = {'name': 'first_name', 'image': 'photo_400_orig'}
+    fields_google = {'name': 'given_name', 'email': 'email', 'image': 'picture'}
 
-    allowed_types = ['each', 'vkontakte', 'google']
-    granted_types = ['each', 'google']
+    allowed_types = ['each', 'vkontakte', 'google', 'swagger']
+    granted_types = ['each', 'google', 'swagger']
     revoke_types = ['each', 'google']
 
     def __init__(self, access_token, type, user_id):
