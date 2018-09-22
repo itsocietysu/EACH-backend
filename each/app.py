@@ -29,6 +29,8 @@ from each.Prop.PropMedia import PropMedia
 from each.Prop.PropInt import PropInt
 
 from each.auth import auth
+
+
 # from each.MediaResolver.MediaResolverFactory import MediaResolverFactory
 
 def guess_response_type(path):
@@ -64,9 +66,9 @@ def date_time_string(timestamp=None):
         timestamp = time.time()
     year, month, day, hh, mm, ss, wd, y, z = time.gmtime(timestamp)
     s = "%s, %02d %3s %4d %02d:%02d:%02d GMT" % (
-            weekdayname[wd],
-            day, monthname[month], year,
-            hh, mm, ss)
+        weekdayname[wd],
+        day, monthname[month], year,
+        hh, mm, ss)
     return s
 
 
@@ -200,15 +202,15 @@ def getTapeFeeds(**request_handler_args):
     last_f = getIntQueryParam('LastFeed', **request_handler_args)
 
     with DBConnection() as session:
-        objects = session.db.query(EntityNews, PropInt.value)\
-            .join(PropInt, PropInt.eid == EntityNews.eid)\
+        objects = session.db.query(EntityNews, PropInt.value) \
+            .join(PropInt, PropInt.eid == EntityNews.eid) \
             .order_by(PropInt.value.desc()).all()
 
     # if last_f isn't set (==-1), it is supposed to be an infinity
     if last_f == -1:
         objects = objects[first_f:]
     else:
-        objects = objects[first_f: last_f+1]
+        objects = objects[first_f: last_f + 1]
 
     res = []
     for _ in objects:
@@ -283,6 +285,7 @@ def deleteFeed(**request_handler_args):
 
     resp.status = falcon.HTTP_400
 
+
 # museum feature set functions
 # ----------------------------
 
@@ -346,13 +349,13 @@ def updateMuseum(**request_handler_args):
     req = request_handler_args['req']
     resp = request_handler_args['resp']
 
-    #email = req.context['email']
-    #id_email = EntityUser.get_id_from_email(email)
+    # email = req.context['email']
+    # id_email = EntityUser.get_id_from_email(email)
 
     try:
         params = json.loads(req.stream.read().decode('utf-8'))
 
-        #if params['id'] != id_email or not EntitySuperUser.is_id_super_admin(id_email):
+        # if params['id'] != id_email or not EntitySuperUser.is_id_super_admin(id_email):
         #    resp.status = falcon.HTTP_403
         #    return
 
@@ -384,12 +387,12 @@ def deleteMuseum(**request_handler_args):
     req = request_handler_args['req']
 
     # TODO: VERIFICATION IF ADMIN DELETE ANY
-    #email = req.context['email']
+    # email = req.context['email']
     id = getIntPathParam("Id", **request_handler_args)
-    #id_email = EntityUser.get_id_from_email(email)
+    # id_email = EntityUser.get_id_from_email(email)
 
     if id is not None:
-        #if id != id_email or not EntitySuperUser.is_id_super_admin(id_email):
+        # if id != id_email or not EntitySuperUser.is_id_super_admin(id_email):
         #    resp.status = falcon.HTTP_403
         #    return
 
@@ -433,6 +436,7 @@ def getMuseumById(**request_handler_args):
     resp.body = obj_to_json(res)
     resp.status = falcon.HTTP_200
 
+
 # end of museum feature set functions
 # -----------------------------------
 
@@ -445,12 +449,12 @@ def deleteGame(**request_handler_args):
     req = request_handler_args['req']
 
     # TODO: VERIFICATION IF ADMIN DELETE ANY
-    #email = req.context['email']
+    # email = req.context['email']
     id = getIntPathParam("gameId", **request_handler_args)
-    #id_email = EntityUser.get_id_from_email(email)
+    # id_email = EntityUser.get_id_from_email(email)
 
     if id is not None:
-        #if id != id_email or not EntitySuperUser.is_id_super_admin(id_email):
+        # if id != id_email or not EntitySuperUser.is_id_super_admin(id_email):
         #    resp.status = falcon.HTTP_403
         #    return
 
@@ -500,13 +504,13 @@ def updateGame(**request_handler_args):
     req = request_handler_args['req']
     resp = request_handler_args['resp']
 
-    #email = req.context['email']
-    #id_email = EntityUser.get_id_from_email(email)
+    # email = req.context['email']
+    # id_email = EntityUser.get_id_from_email(email)
 
     try:
         params = json.loads(req.stream.read().decode('utf-8'))
 
-        #if params['id'] != id_email or not EntitySuperUser.is_id_super_admin(id_email):
+        # if params['id'] != id_email or not EntitySuperUser.is_id_super_admin(id_email):
         #    resp.status = falcon.HTTP_403
         #    return
 
@@ -549,7 +553,7 @@ def GetAllGamesById(**request_handler_args):
     resp = request_handler_args['resp']
 
     id = getIntPathParam("ownerId", **request_handler_args)
-    objects = EntityGame.get().filter(EntityGame.ownerid==id).all()
+    objects = EntityGame.get().filter_by(ownerid=id).all()
 
     res = []
     for _ in objects:
@@ -560,6 +564,7 @@ def GetAllGamesById(**request_handler_args):
 
     resp.body = obj_to_json(res)
     resp.status = falcon.HTTP_200
+
 
 # End of game feature set functions
 # ---------------------------------
@@ -658,7 +663,7 @@ operation_handlers = {
     'deleteMuseum':         [deleteMuseum],
     'getMuseum':            [getMuseumById],
 
-    #Games
+    # Games
     'getAllGamesById':      [GetAllGamesById],
     'getGameById':          [getGameById],
     'addNewGame':           [createGame],
@@ -729,18 +734,20 @@ class Auth(object):
         try:
             if req.auth:
                 token = req.auth.split(" ")[1].strip()
-                type = req.auth.split(" ")[2].strip()
+                if len(req.auth.split(" ")) > 2:
+                    type = req.auth.split(" ")[2].strip()
+                else:
+                    type = 'swagger'
             else:
-                token = req.params.get('access_token')
-                type = req.params.get('type')
+                raise falcon.HTTPUnauthorized(description='Token was not provided in schema [bearer <Token>]',
+                                              challenges=['Bearer realm=http://GOOOOGLE'])
         except:
-            raise falcon.HTTPUnauthorized(description='Token was not provided in schema [berear <Token>]',
-                                      challenges=['Bearer realm=http://GOOOOGLE'])
+            raise falcon.HTTPUnauthorized(description='Token was not provided in schema [bearer <Token>]',
+                                          challenges=['Bearer realm=http://GOOOOGLE'])
 
         error = 'Authorization required.'
         if token:
             error, acc_type, user_email, user_id, user_name = auth.Validate(
-                cfg['oidc']['each_oauth2']['check_token_url'],
                 token,
                 type
             )

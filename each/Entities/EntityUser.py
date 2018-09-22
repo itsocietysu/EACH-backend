@@ -42,6 +42,9 @@ class EntityUser(EntityBase, Base):
     def __setitem__(self, key, value):
         self.__dict__[key] = value
 
+    def __getitem__(self, key):
+        return self.__dict__[key]
+
     @classmethod
     def update_user(cls, eid, data):
 

@@ -34,7 +34,7 @@ class EntityToken(EntityBase, Base):
 
     allowed_types = ['each', 'vkontakte', 'google', 'swagger']
     granted_types = ['each', 'google', 'swagger']
-    revoke_types = ['each', 'google']
+    revoke_types = ['each', 'google', 'swagger']
 
     def __init__(self, access_token, type, user_id):
         super().__init__()
@@ -44,6 +44,9 @@ class EntityToken(EntityBase, Base):
         self.type = type
         ts = time.time()
         self.created_at = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M')
+
+    def __getitem__(self, key):
+        return self.__dict__[key]
 
     @classmethod
     def get_info_api(cls, access_token, type, client=None):
@@ -112,7 +115,7 @@ class EntityToken(EntityBase, Base):
             eid = new_entity.add()
 
             return eid, falcon.HTTP_200
-        return {'error': 'invalid arguments'}, falcon.HTTP_400
+        return {'error': 'Invalid parameters supplied'}, falcon.HTTP_400
 
     @classmethod
     def update_from_query(cls, data):
@@ -137,7 +140,7 @@ class EntityToken(EntityBase, Base):
 
                     return eid, falcon.HTTP_200
             return {'error': 'Invalid access token supplied'}, falcon.HTTP_400
-        return {'error': 'invalid arguments'}, falcon.HTTP_400
+        return {'error': 'Invalid parameters supplied'}, falcon.HTTP_400
 
     @classmethod
     def delete_from_json(cls, data):
@@ -160,4 +163,4 @@ class EntityToken(EntityBase, Base):
 
                     return {'token': access_token}, falcon.HTTP_200
                 return {'error': 'Invalid access token supplied'}, falcon.HTTP_400
-        return {'error': 'invalid arguments'}, falcon.HTTP_400
+        return {'error': 'Invalid parameters supplied'}, falcon.HTTP_400

@@ -1,17 +1,20 @@
 #from each.auth.config import CONFIG, PROVIDER
 
-import urllib.request
-import json
+import falcon
+
+from each.Entities.EntityToken import EntityToken, EntityUser
 
 #def Configure(**kwargs):
 #    CONFIG.update(kwargs)
 
 
-def Validate(url, token, type):
+def Validate(access_token, type):
     try:
-        response = urllib.request.urlopen('%s?access_token=%s&type=%s' % (url, token, type))
-        certs = response.read().decode()
-        json_load = json.loads(certs)
-        return None, json_load['access_type'], json_load['email'], json_load['user_id'], json_load['name']
+        res, status = EntityToken.update_from_query({'access_token': access_token, 'type': type})
+        if status != falcon.HTTP_200:
+            return res['error'], None, None, None, None
+        token = EntityToken.get().filter_by(eid=res).first()
+        user = EntityUser.get().filter_by(eid=token.user_id).first()
+        return None, user['access_type'], user['email'], token['user_id'], user['name']
     except Exception as e:
         return str(e), None, None, None, None
