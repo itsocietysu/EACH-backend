@@ -14,7 +14,7 @@ DROP TYPE IF EXISTS each_user_access_type CASCADE;
 CREATE TYPE each_user_access_type AS ENUM ('admin', 'user');
 
 DROP TYPE IF EXISTS each_clients_type CASCADE;
-CREATE TYPE each_clients_type AS ENUM ('each', 'vkontakte', 'google', 'facebook');
+CREATE TYPE each_clients_type AS ENUM ('each', 'swagger', 'vkontakte', 'google');
 
 DROP TABLE IF EXISTS "each_museum";
 CREATE TABLE "each_museum" (
