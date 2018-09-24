@@ -591,12 +591,9 @@ def getToken(**request_handler_args):
         resp.status = falcon.HTTP_400
         return
 
-    res, status = EntityToken.add_from_query({'redirect_uri': redirect_uri, 'code': code, 'type': type})
+    token, user, error, status = EntityToken.add_from_query({'redirect_uri': redirect_uri, 'code': code, 'type': type})
 
-    if status == falcon.HTTP_200:
-        token = EntityToken.get().filter_by(eid=res).first()
-        user = EntityUser.get().filter_by(eid=token.user_id).first()
-
+    if not error:
         token_dict = token.to_dict(['eid', 'access_token', 'type', 'user_id'])
         user_dict = user.to_dict(['name', 'image', 'email', 'access_type'])
         token_dict.update(user_dict)
@@ -605,7 +602,7 @@ def getToken(**request_handler_args):
         resp.status = falcon.HTTP_200
         return
 
-    resp.body = obj_to_json(res)
+    resp.body = obj_to_json(error)
     resp.status = status
 
 
@@ -621,12 +618,9 @@ def getTokenInfo(**request_handler_args):
         resp.status = falcon.HTTP_400
         return
 
-    res, status = EntityToken.update_from_query({'access_token': access_token, 'type': type})
+    token, user, error, status = EntityToken.update_from_query({'access_token': access_token, 'type': type})
 
-    if status == falcon.HTTP_200:
-        token = EntityToken.get().filter_by(eid=res).first()
-        user = EntityUser.get().filter_by(eid=token.user_id).first()
-
+    if not error:
         token_dict = token.to_dict(['eid', 'access_token', 'type', 'user_id'])
         user_dict = user.to_dict(['name', 'image', 'email', 'access_type'])
         token_dict.update(user_dict)
@@ -635,7 +629,7 @@ def getTokenInfo(**request_handler_args):
         resp.status = falcon.HTTP_200
         return
 
-    resp.body = obj_to_json(res)
+    resp.body = obj_to_json(error)
     resp.status = status
 
 
@@ -724,7 +718,7 @@ class Auth(object):
                      '/each/swagger-temp\.json|'
                      '/each/swagger-ui|'
                      '/each/feed/all|'
-                     '/each/token).*', req.relative_uri):
+                     '/each/token/get).*', req.relative_uri):
             return
 
         if req.method == 'OPTIONS':

@@ -112,10 +112,10 @@ class EntityToken(EntityBase, Base):
                 user_id = user.add()
 
             new_entity = EntityToken(res_data['access_token'], type, user_id)
-            eid = new_entity.add()
+            new_entity.add()
 
-            return eid, falcon.HTTP_200
-        return {'error': 'Invalid parameters supplied'}, falcon.HTTP_400
+            return new_entity, user, None, falcon.HTTP_200
+        return None, None, {'error': 'Invalid parameters supplied'}, falcon.HTTP_400
 
     @classmethod
     def update_from_query(cls, data):
@@ -136,11 +136,10 @@ class EntityToken(EntityBase, Base):
                         return res_data, res_status
 
                     EntityUser.update_user(token.user_id, res_data)
-                    eid = token.eid
 
-                    return eid, falcon.HTTP_200
-            return {'error': 'Invalid access token supplied'}, falcon.HTTP_400
-        return {'error': 'Invalid parameters supplied'}, falcon.HTTP_400
+                    return token, user, None, falcon.HTTP_200
+            return None, None, {'error': 'Invalid access token supplied'}, falcon.HTTP_400
+        return None, None, {'error': 'Invalid parameters supplied'}, falcon.HTTP_400
 
     @classmethod
     def delete_from_json(cls, data):
