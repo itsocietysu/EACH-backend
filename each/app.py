@@ -206,6 +206,8 @@ def getTapeFeeds(**request_handler_args):
             .join(PropInt, PropInt.eid == EntityNews.eid) \
             .order_by(PropInt.value.desc()).all()
 
+        count = session.db.query(EntityNews).count()
+
     # if last_f isn't set (==-1), it is supposed to be an infinity
     if last_f == -1:
         objects = objects[first_f:]
@@ -219,7 +221,9 @@ def getTapeFeeds(**request_handler_args):
         obj_dict.update(wide_info)
         res.append(obj_dict)
 
-    resp.body = obj_to_json(res)
+    res_dict = OrderedDict([('count', count), ('result', res)])
+
+    resp.body = obj_to_json(res_dict)
     resp.status = falcon.HTTP_200
 
 
@@ -718,6 +722,7 @@ class Auth(object):
                      '/each/swagger-temp\.json|'
                      '/each/swagger-ui|'
                      '/each/feed/all|'
+                     '/each/feed/tape|'
                      '/each/token/get).*', req.relative_uri):
             return
 
