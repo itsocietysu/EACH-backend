@@ -318,6 +318,37 @@ def getAllMuseums(**request_handler_args):
     resp.status = falcon.HTTP_200
 
 
+def getTapeMuseums(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    first_f = getIntQueryParam('FirstMuseum', **request_handler_args)
+    last_f = getIntQueryParam('LastMuseum', **request_handler_args)
+
+    with DBConnection() as session:
+        objects = session.db.query(EntityMuseum).order_by(EntityMuseum.created.desc()).all()
+
+        count = session.db.query(EntityMuseum).count()
+
+    # if last_f isn't set (==-1), it is supposed to be an infinity
+    if last_f == -1:
+        objects = objects[first_f:]
+    else:
+        objects = objects[first_f: last_f + 1]
+
+    res = []
+    for _ in objects:
+        obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
+        wide_info = EntityMuseum.get_wide_object(_.eid, ['image', 'priority'])
+        obj_dict.update(wide_info)
+        res.append(obj_dict)
+
+    res_dict = OrderedDict([('count', count), ('result', res)])
+
+    resp.body = obj_to_json(res_dict)
+    resp.status = falcon.HTTP_200
+
+
 @admin_access_type_required
 def addNewMuseum(**request_handler_args):
     req = request_handler_args['req']
@@ -656,6 +687,7 @@ operation_handlers = {
     # Museums
     'getAllMuseumsMockup':  [getAllMuseumsMockup],
     'getAllMuseums':        [getAllMuseums],
+    'getTapeMuseums':       [getTapeMuseums],
     'addNewMuseum':         [addNewMuseum],
     'updateMuseum':         [updateMuseum],
     'deleteMuseum':         [deleteMuseum],
