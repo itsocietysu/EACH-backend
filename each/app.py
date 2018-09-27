@@ -6,6 +6,7 @@ import os
 import posixpath
 import re
 import time
+import math
 from urllib.parse import parse_qs
 from collections import OrderedDict
 
@@ -206,22 +207,36 @@ def getTapeFeeds(**request_handler_args):
             .join(PropInt, PropInt.eid == EntityNews.eid) \
             .order_by(PropInt.value.desc()).all()
 
-        count = session.db.query(EntityNews).count()
+        count = objects.__len__()
+
+    if first_f < 0:
+        first_f = 0
 
     # if last_f isn't set (==-1), it is supposed to be an infinity
     if last_f == -1:
-        objects = objects[first_f:]
+        feeds = objects[first_f:]
     else:
-        objects = objects[first_f: last_f + 1]
+        feeds = objects[first_f: last_f + 1]
+
+    if feeds.__len__() == 0:
+        if count > 0:
+            if first_f > 0:
+                first_f = min(int(first_f - math.fmod(first_f, 10)), int(count - math.fmod(count, 10)))
+            elif first_f < 0:
+                first_f = 0
+            feeds = objects[first_f: first_f + 10]
+        else:
+            first_f = 0
+    page = int((first_f - math.fmod(first_f, 10)) / 10) + 1
 
     res = []
-    for _ in objects:
+    for _ in feeds:
         obj_dict = _[0].to_dict(['eid', 'title', 'desc', 'text'])
         wide_info = EntityNews.get_wide_object(_[0].eid, ['image', 'priority'])
         obj_dict.update(wide_info)
         res.append(obj_dict)
 
-    res_dict = OrderedDict([('count', count), ('result', res)])
+    res_dict = OrderedDict([('count', count), ('page', page), ('result', res)])
 
     resp.body = obj_to_json(res_dict)
     resp.status = falcon.HTTP_200
@@ -322,28 +337,42 @@ def getTapeMuseums(**request_handler_args):
     req = request_handler_args['req']
     resp = request_handler_args['resp']
 
-    first_f = getIntQueryParam('FirstMuseum', **request_handler_args)
-    last_f = getIntQueryParam('LastMuseum', **request_handler_args)
+    first_m = getIntQueryParam('FirstMuseum', **request_handler_args)
+    last_m = getIntQueryParam('LastMuseum', **request_handler_args)
 
     with DBConnection() as session:
         objects = session.db.query(EntityMuseum).order_by(EntityMuseum.created.desc()).all()
 
-        count = session.db.query(EntityMuseum).count()
+        count = objects.__len__()
+
+    if first_m < 0:
+        first_m = 0
 
     # if last_f isn't set (==-1), it is supposed to be an infinity
-    if last_f == -1:
-        objects = objects[first_f:]
+    if last_m == -1:
+        museums = objects[first_m:]
     else:
-        objects = objects[first_f: last_f + 1]
+        museums = objects[first_m: last_m + 1]
+
+    if museums.__len__() == 0:
+        if count > 0:
+            if first_m > 0:
+                first_m = min(int(first_m - math.fmod(first_m, 10)), int(count - math.fmod(count, 10)))
+            elif first_m < 0:
+                first_m = 0
+            museums = objects[first_m: first_m + 10]
+        else:
+            first_m = 0
+    page = int((first_m - math.fmod(first_m, 10)) / 10) + 1
 
     res = []
-    for _ in objects:
+    for _ in museums:
         obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
         wide_info = EntityMuseum.get_wide_object(_.eid, ['image', 'priority'])
         obj_dict.update(wide_info)
         res.append(obj_dict)
 
-    res_dict = OrderedDict([('count', count), ('result', res)])
+    res_dict = OrderedDict([('count', count), ('page', page), ('result', res)])
 
     resp.body = obj_to_json(res_dict)
     resp.status = falcon.HTTP_200
