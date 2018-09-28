@@ -787,6 +787,15 @@ class Auth(object):
                      '/each/token/get).*', req.relative_uri):
             return
 
+        with DBConnection() as session:
+            news = session.db.query(EntityNews.eid, PropInt.value) \
+                .join(PropInt, PropInt.eid == EntityNews.eid) \
+                .order_by(PropInt.value.desc()).all()[0:10]
+            res = [str(_[0]) for _ in news]
+            regexes = '/each/feed/(%s)' % '|'.join(res)
+            if re.fullmatch(regexes, req.relative_uri) and req.method == 'GET':
+                return
+
         if req.method == 'OPTIONS':
             return # pre-flight requests don't require authentication
 
