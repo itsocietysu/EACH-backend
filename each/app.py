@@ -205,7 +205,7 @@ def getTapeFeeds(**request_handler_args):
     with DBConnection() as session:
         objects = session.db.query(EntityNews, PropInt.value) \
             .join(PropInt, PropInt.eid == EntityNews.eid) \
-            .order_by(PropInt.value.desc()).all()
+            .order_by(PropInt.value.desc(), EntityNews.created.desc()).all()
 
         count = objects.__len__()
 
@@ -790,7 +790,7 @@ class Auth(object):
         with DBConnection() as session:
             news = session.db.query(EntityNews.eid, PropInt.value) \
                 .join(PropInt, PropInt.eid == EntityNews.eid) \
-                .order_by(PropInt.value.desc()).all()[0:10]
+                .order_by(PropInt.value.desc(), EntityNews.created.desc()).all()[0:10]
             res = [str(_[0]) for _ in news]
             regexes = '/each/feed/(%s)' % '|'.join(res)
             if re.fullmatch(regexes, req.relative_uri) and req.method == 'GET':
