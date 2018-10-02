@@ -777,8 +777,12 @@ def deleteLocation(**request_handler_args):
     resp = request_handler_args['resp']
 
     res = []
+    id = getIntPathParam("locationId", **request_handler_args)
+    if id is None:
+        resp.status = falcon.HTTP_400
+        return
+
     try:
-        id = getIntPathParam("locationId", **request_handler_args)
         EntityLocation.delete(id)
     except FileNotFoundError:
         resp.status = falcon.HTTP_404
@@ -835,6 +839,26 @@ def getTapeLocations(**request_handler_args):
     resp.status = falcon.HTTP_200
 
 
+def findLocationByName(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    start = getStringQueryParam("startswith", **request_handler_args)
+    if start is None:
+        resp.status = falcon.HTTP_400
+        return
+    with DBConnection() as session:
+        objects = session.db.query(EntityLocation).filter(EntityLocation.name.startswith(start)).all()
+
+    res = []
+    for _ in objects:
+        obj_dict = _.to_dict()
+        res.append(obj_dict)
+
+    resp.body = obj_to_json(res)
+    resp.status = falcon.HTTP_200
+
+
 # End of location feature set functions
 # -------------------------------------
 
@@ -874,6 +898,7 @@ operation_handlers = {
     'updateLocation':       [updateLocation],
     'deleteLocation':       [deleteLocation],
     'getTapeLocations':     [getTapeLocations],
+    'findLocationByName':   [findLocationByName],
 
     'getVersion':           [getVersion],
     'httpDefault':          [httpDefault]

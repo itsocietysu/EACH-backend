@@ -948,6 +948,36 @@
       }
     },
     "/location": {
+      "get": {
+        "tags": [
+          "Location"
+        ],
+        "summary": "Find location starts with",
+        "description": "Find location starts with",
+        "operationId": "findLocationByName",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "startswith",
+            "in": "query",
+            "description": "",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid startswith supplied"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      },
       "post": {
         "tags": [
           "Location"
