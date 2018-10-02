@@ -25,6 +25,7 @@ from each.Entities.EntityMuseum import EntityMuseum
 from each.Entities.EntityGame import EntityGame
 from each.Entities.EntityToken import EntityToken
 from each.Entities.EntityUser import EntityUser
+from each.Entities.EntityLocation import EntityLocation
 
 from each.Prop.PropMedia import PropMedia
 from each.Prop.PropInt import PropInt
@@ -634,7 +635,7 @@ def GetAllGamesById(**request_handler_args):
 # ---------------------------------
 
 # Token feature set functions
-# --------------------------
+# ---------------------------
 
 
 def getToken(**request_handler_args):
@@ -710,7 +711,132 @@ def revokeToken(**request_handler_args):
 
 
 # End of token feature set functions
-# --------------------------
+# ----------------------------------
+
+
+# Location feature set functions
+# ------------------------------
+
+@admin_access_type_required
+def addLocation(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    try:
+        params = json.loads(req.stream.read().decode('utf-8'))
+        id = EntityLocation.add_from_json(params)
+
+        if id:
+            objects = EntityLocation.get().filter_by(eid=id).all()
+
+            res = []
+            for _ in objects:
+                obj_dict = _.to_dict()
+                res.append(obj_dict)
+
+            resp.body = obj_to_json(res)
+            resp.status = falcon.HTTP_200
+            return
+    except ValueError:
+        resp.status = falcon.HTTP_405
+        return
+
+    resp.status = falcon.HTTP_501
+
+
+@admin_access_type_required
+def updateLocation(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    try:
+        params = json.loads(req.stream.read().decode('utf-8'))
+        id = EntityLocation.update_from_json(params)
+
+        if id:
+            objects = EntityLocation.get().filter_by(eid=id).all()
+
+            res = []
+            for _ in objects:
+                obj_dict = _.to_dict()
+                res.append(obj_dict)
+
+            resp.body = obj_to_json(res)
+            resp.status = falcon.HTTP_200
+            return
+    except ValueError:
+        resp.status = falcon.HTTP_405
+        return
+
+    resp.status = falcon.HTTP_501
+
+
+@admin_access_type_required
+def deleteLocation(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    res = []
+    try:
+        id = getIntPathParam("locationId", **request_handler_args)
+        EntityLocation.delete(id)
+    except FileNotFoundError:
+        resp.status = falcon.HTTP_404
+        return
+
+    object = EntityLocation.get().filter_by(eid=id).all()
+    if not len(object):
+        resp.body = obj_to_json(res)
+        resp.status = falcon.HTTP_200
+        return
+
+    resp.status = falcon.HTTP_400
+
+
+def getTapeLocations(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    first_l = getIntQueryParam('FirstLocation', **request_handler_args)
+    last_l = getIntQueryParam('LastLocation', **request_handler_args)
+
+    with DBConnection() as session:
+        objects = session.db.query(EntityLocation).order_by(EntityLocation.name.desc()).all()
+        count = objects.__len__()
+
+    if first_l < 0:
+        first_l = 0
+
+    # if last_f isn't set (==-1), it is supposed to be an infinity
+    if last_l == -1:
+        locations = objects[first_l:]
+    else:
+        locations = objects[first_l: last_l + 1]
+
+    if locations.__len__() == 0:
+        if count > 0:
+            if first_l > 0:
+                first_l = min(int(first_l - math.fmod(first_l, 10)), int(count - math.fmod(count, 10)))
+            elif first_l < 0:
+                first_l = 0
+            locations = objects[first_l: first_l + 10]
+        else:
+            first_l = 0
+    page = int((first_l - math.fmod(first_l, 10)) / 10) + 1
+
+    res = []
+    for _ in locations:
+        obj_dict = _.to_dict()
+        res.append(obj_dict)
+
+    res_dict = OrderedDict([('count', count), ('page', page), ('result', res)])
+
+    resp.body = obj_to_json(res_dict)
+    resp.status = falcon.HTTP_200
+
+
+# End of location feature set functions
+# -------------------------------------
 
 operation_handlers = {
     # Museums
@@ -742,6 +868,12 @@ operation_handlers = {
     'getToken':             [getToken],
     'getTokenInfo':         [getTokenInfo],
     'revokeToken':          [revokeToken],
+
+    # Location
+    'addLocation':          [addLocation],
+    'updateLocation':       [updateLocation],
+    'deleteLocation':       [deleteLocation],
+    'getTapeLocations':     [getTapeLocations],
 
     'getVersion':           [getVersion],
     'httpDefault':          [httpDefault]
