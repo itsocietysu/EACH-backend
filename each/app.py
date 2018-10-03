@@ -745,33 +745,6 @@ def addLocation(**request_handler_args):
 
 
 @admin_access_type_required
-def updateLocation(**request_handler_args):
-    req = request_handler_args['req']
-    resp = request_handler_args['resp']
-
-    try:
-        params = json.loads(req.stream.read().decode('utf-8'))
-        id = EntityLocation.update_from_json(params)
-
-        if id:
-            objects = EntityLocation.get().filter_by(eid=id).all()
-
-            res = []
-            for _ in objects:
-                obj_dict = _.to_dict()
-                res.append(obj_dict)
-
-            resp.body = obj_to_json(res)
-            resp.status = falcon.HTTP_200
-            return
-    except ValueError:
-        resp.status = falcon.HTTP_405
-        return
-
-    resp.status = falcon.HTTP_501
-
-
-@admin_access_type_required
 def deleteLocation(**request_handler_args):
     req = request_handler_args['req']
     resp = request_handler_args['resp']
@@ -895,7 +868,6 @@ operation_handlers = {
 
     # Location
     'addLocation':          [addLocation],
-    'updateLocation':       [updateLocation],
     'deleteLocation':       [deleteLocation],
     'getTapeLocations':     [getTapeLocations],
     'findLocationByName':   [findLocationByName],

@@ -1021,47 +1021,6 @@
             "auth_env": []
           }
         ]
-      },
-      "put": {
-        "tags": [
-          "Location"
-        ],
-        "summary": "Update existing catalog info",
-        "description": "Update existing catalog info",
-        "operationId": "updateLocation",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-       "parameters": [
-          {
-            "name": "exist_location",
-            "in": "body",
-            "description": "Location encoded in JSON string",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/Location"
-            }
-          }
-        ],
-        "responses": {
-          "400": {
-            "description": "Invalid ID supplied"
-          },
-          "404": {
-            "description": "Location not found"
-          },
-          "405": {
-            "description": "Validation exception"
-          }
-        },
-        "security": [
-          {
-            "auth_env": []
-          }
-        ]
       }
     },
     "/location/tape":{
