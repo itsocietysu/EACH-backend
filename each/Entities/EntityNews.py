@@ -35,7 +35,6 @@ class EntityNews(EntityBase, Base):
 
     json_serialize_items_list = ['eid', 'title', 'desc',
                                  'text', 'created', 'updated']
-    locales = ['RU', 'EN']
 
     def __init__(self, title_RU, title_EN, desc_RU, desc_EN, text_RU, text_EN):
         super().__init__()

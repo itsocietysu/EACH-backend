@@ -369,7 +369,7 @@ def getTapeMuseums(**request_handler_args):
     res = []
     for _ in museums:
         obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
-        wide_info = EntityMuseum.get_wide_object(_.eid, ['image', 'priority'])
+        wide_info = EntityMuseum.get_wide_object(_.eid, ['image', 'game'])
         obj_dict.update(wide_info)
         res.append(obj_dict)
 

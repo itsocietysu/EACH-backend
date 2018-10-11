@@ -1151,12 +1151,30 @@
           "format": "int64"
         },
         "name": {
-          "type": "string",
-          "example": "test"
+          "type": "object",
+          "properties": {
+            "RU": {
+              "type": "string",
+              "example": "Тест"
+            },
+            "EN": {
+              "type": "string",
+              "example": "Test"
+            }
+          }
         },
         "desc": {
-          "type": "string",
-          "example": "great museum!"
+          "type": "object",
+          "properties": {
+            "RU": {
+              "type": "string",
+              "example": "Великолепный музей!"
+            },
+            "EN": {
+              "type": "string",
+              "example": "Great museum!"
+            }
+          }
         },
         "prop": {
           "type": "object",

@@ -16,6 +16,7 @@ from each.Prop.PropComment import PropComment
 from each.db import DBConnection
 
 from each.Prop.PropGame import PropGame
+from each.utils import isAllInData
 
 Base = declarative_base()
 
@@ -24,22 +25,62 @@ class EntityMuseum(EntityBase, Base):
 
     eid = Column(Integer, Sequence('each_seq'), primary_key=True)
     ownerid = Column(Integer)
-    name = Column(String)
-    desc = Column(String)
+    name_RU = Column(String)
+    name_EN = Column(String)
+    desc_RU = Column(String)
+    desc_EN = Column(String)
     created = Column(Date)
     updated = Column(Date)
 
     json_serialize_items_list = ['eid', 'ownerid', 'name', 'desc', 'created', 'updated']
 
-    def __init__(self, ownerid, name, desc):
+    def __init__(self, ownerid, name_RU, name_EN, desc_RU, desc_EN):
         super().__init__()
 
         self.ownerid = ownerid
-        self.name = name
-        self.desc = desc
+        self.name_RU = name_RU
+        self.name_EN = name_EN
+        self.desc_RU = desc_RU
+        self.desc_EN = desc_EN
 
         ts = time.time()
         self.created = self.updated = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M')
+
+    def to_dict(self, items=[]):
+        def fullfill_entity(key, value):
+            if key == 'url':
+                value = '%s%s' % (EntityBase.host, value[1:])
+            return value
+
+        def get_value(key):
+            if key == 'name':
+                return self.name
+            elif key == 'desc':
+                return self.desc
+            else:
+                return dictionate_entity(self.__dict__[key])
+
+        def dictionate_entity(entity):
+            try:
+                json.dump(entity)
+                return entity
+            except:
+                if 'to_dict' in dir(entity):
+                    return entity.to_dict()
+                else:
+                    return str(entity)
+
+        res = OrderedDict([(key, fullfill_entity(key, get_value(key)))
+                           for key in (self.json_serialize_items_list if not len(items) else items)])
+        return res
+
+    @property
+    def name(self):
+        return {_: self.__dict__['name_%s' % _] for _ in self.locales}
+
+    @property
+    def desc(self):
+        return {_: self.__dict__['desc_%s' % _] for _ in self.locales}
 
     @classmethod
     def add_from_json(cls, data):
@@ -52,12 +93,12 @@ class EntityMuseum(EntityBase, Base):
                 lambda s, _eid, _id, _val, _uid: cls.process_media(s, 'image', _uid, _eid, _id, _val)
         }
 
-        if 'ownerid' in data and 'name' in data and 'desc' in data and 'prop' in data:
-            ownerid = data['ownerid']
-            name = data['name']
-            desc = data['desc']
-
-            new_entity = EntityMuseum(ownerid, name, desc)
+        if isAllInData(['name', 'desc', 'ownerid', 'prop'], data):
+            create_args = {'ownerid': data['ownerid']}
+            for _ in cls.locales:
+                create_args['name_%s' % _] = data['name'][_] if _ in data['name'] else ''
+                create_args['desc_%s' % _] = data['desc'][_] if _ in data['desc'] else ''
+            new_entity = EntityMuseum(**create_args)
             eid = new_entity.add()
 
             with DBConnection() as session:
@@ -89,21 +130,19 @@ class EntityMuseum(EntityBase, Base):
             with DBConnection() as session:
                 eid = data['id']
                 entity = session.db.query(EntityMuseum).filter_by(eid=eid).all()
-
+                fields = ['name', 'desc']
                 if len(entity):
                     for _ in entity:
-                        if 'name' in data:
-                            _.name = data['name']
-
-                        if 'desc' in data:
-                            _.desc = data['desc']
-
+                        for l in cls.locales:
+                            for f in fields:
+                                if f in data and l in data[f]:
+                                    setattr(_, '%s_%s' % (f, l), data[f][l])
                         session.db.commit()
 
-                        for prop_name, prop_val in data['prop'].items():
-                            if prop_name in PROPNAME_MAPPING and prop_name in PROP_MAPPING:
-                                PROP_MAPPING[prop_name](session, eid, PROPNAME_MAPPING[prop_name], prop_val)
-
+                        if 'prop' in data:
+                            for prop_name, prop_val in data['prop'].items():
+                                if prop_name in PROPNAME_MAPPING and prop_name in PROP_MAPPING:
+                                    PROP_MAPPING[prop_name](session, eid, PROPNAME_MAPPING[prop_name], prop_val)
                         session.db.commit()
 
         return eid

@@ -19,6 +19,8 @@ class EntityBase:
     MediaCls = None
     MediaPropCls = None
 
+    locales = ['RU', 'EN']
+
     def to_dict(self, items=[]):
         def fullfill_entity(key, value):
             if key == 'url':
