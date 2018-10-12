@@ -1182,6 +1182,25 @@
             "image": {
               "type": "int",
               "example": "media_id or base64 encoded string"
+            },
+            "location": {
+              "type": "object",
+              "properties": {
+                "add": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                },
+                "delete": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                }
+              }
             }
           }
         },

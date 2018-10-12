@@ -30,3 +30,15 @@ class PropLocation(PropBase, Base):
                 .filter(EntityLocation.latitude.between(p[0] - r, p[0] + r))
                 .filter(cls.value == EntityLocation.eid)
                 .all()]
+
+    @classmethod
+    def delete_by_value(cls, eid, propid, value, raise_exception=True):
+        with DBConnection() as session:
+            res = session.db.query(cls).filter_by(eid=eid, propid=propid, value=value).all()
+
+            if len(res):
+                [session.db.delete(_) for _ in res]
+                session.db.commit()
+            else:
+                if raise_exception:
+                    raise FileNotFoundError('(eid, propid, value)=(%i, %i, %i) was not found' % (eid, propid, value))

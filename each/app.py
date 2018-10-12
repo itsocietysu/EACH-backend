@@ -326,7 +326,7 @@ def getAllMuseums(**request_handler_args):
     res = []
     for _ in objects:
         obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
-        wide_info = EntityMuseum.get_wide_object(_.eid, ['image', 'game'])
+        wide_info = EntityMuseum.get_wide_object(_.eid, ['image', 'game', 'location'])
         obj_dict.update(wide_info)
         res.append(obj_dict)
 
@@ -369,7 +369,7 @@ def getTapeMuseums(**request_handler_args):
     res = []
     for _ in museums:
         obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
-        wide_info = EntityMuseum.get_wide_object(_.eid, ['image', 'game'])
+        wide_info = EntityMuseum.get_wide_object(_.eid, ['image', 'game', 'location'])
         obj_dict.update(wide_info)
         res.append(obj_dict)
 
@@ -395,7 +395,7 @@ def addNewMuseum(**request_handler_args):
             res = []
             for _ in objects:
                 obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
-                wide_info = EntityMuseum.get_wide_object(_.eid, ['image'])
+                wide_info = EntityMuseum.get_wide_object(_.eid, ['image', 'location'])
                 obj_dict.update(wide_info)
                 res.append(obj_dict)
 
@@ -432,7 +432,7 @@ def updateMuseum(**request_handler_args):
             res = []
             for _ in objects:
                 obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
-                wide_info = EntityMuseum.get_wide_object(_.eid, ['image'])
+                wide_info = EntityMuseum.get_wide_object(_.eid, ['image', 'location'])
                 obj_dict.update(wide_info)
                 res.append(obj_dict)
 
@@ -490,7 +490,7 @@ def getMuseumById(**request_handler_args):
     id = getIntPathParam("Id", **request_handler_args)
     objects = EntityMuseum.get().filter_by(eid=id).all()
 
-    wide_info = EntityMuseum.get_wide_object(id, ['image', 'game'])
+    wide_info = EntityMuseum.get_wide_object(id, ['image', 'game', 'location'])
 
     res = []
     for _ in objects:
@@ -778,7 +778,7 @@ def getTapeLocations(**request_handler_args):
     last_l = getIntQueryParam('LastLocation', **request_handler_args)
 
     with DBConnection() as session:
-        objects = session.db.query(EntityLocation).order_by(EntityLocation.name.desc()).all()
+        objects = session.db.query(EntityLocation).order_by(EntityLocation.name).all()
         count = objects.__len__()
 
     if first_l < 0:
