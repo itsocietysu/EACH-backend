@@ -913,6 +913,8 @@ class Auth(object):
                      '/each/swagger-ui|'
                      '/each/feed/all|'
                      '/each/feed/tape|'
+                     '/each/museum/tape|'
+                     '/each/museum/all|'
                      '/each/token/get).*', req.relative_uri):
             return
 
