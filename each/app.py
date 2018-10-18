@@ -649,6 +649,36 @@ def GetAllGamesById(**request_handler_args):
     resp.status = falcon.HTTP_200
 
 
+def getGamesByMuseumId(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    id = getIntPathParam("museumId", **request_handler_args)
+    if id is None:
+        resp.body = obj_to_json({'error': 'Invalid parameter supplied'})
+        resp.status = falcon.HTTP_400
+        return
+
+    with DBConnection() as session:
+        quests = EntityMuseum.get_wide_object(id, ['game'])
+        if len(quests['game']):
+            objects = [session.db.query(EntityGame).filter(EntityGame.eid == quest['eid']).first() for quest in quests['game']]
+        else:
+            resp.body = obj_to_json({'error': 'Games not found'})
+            resp.status = falcon.HTTP_404
+            return
+
+    res = []
+    for _ in objects:
+        obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
+        wide_info = EntityGame.get_wide_object(_.eid, ['image'])
+        obj_dict.update(wide_info)
+        res.append(obj_dict)
+
+    resp.body = obj_to_json(res)
+    resp.status = falcon.HTTP_200
+
+
 # End of game feature set functions
 # ---------------------------------
 
@@ -864,6 +894,7 @@ operation_handlers = {
     'getMuseum':            [getMuseumById],
 
     # Games
+    'getGamesByMuseumId':   [getGamesByMuseumId],
     'getAllGamesById':      [GetAllGamesById],
     'getGameById':          [getGameById],
     'addNewGame':           [createGame],
