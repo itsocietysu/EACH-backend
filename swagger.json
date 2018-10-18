@@ -490,9 +490,6 @@
           },
           "400": {
             "description": "Invalid ID supplied"
-          },
-          "404": {
-            "description": "Games not found"
           }
         },
         "security": [
