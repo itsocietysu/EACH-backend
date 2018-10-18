@@ -161,7 +161,7 @@ class EntityMuseum(EntityBase, Base):
 
         PROP_MAPPING = {
             'image': lambda _eid, _id: PropMedia.get_object_property(_eid, _id, ['eid', 'url']),
-            'game': lambda _eid, _id: PropGame.get_object_property(_eid, _id, ['eid', 'ownerid', 'name', 'game']),
+            'game': lambda _eid, _id: PropGame.get_object_property(_eid, _id, ['eid', 'ownerid', 'name', 'desc']),
             'location': lambda _eid, _id: PropLocation.get_object_property(_eid, _id)
         }
 

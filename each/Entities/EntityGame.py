@@ -12,53 +12,94 @@ from each.Prop.PropBase import PropBase
 from each.Prop.PropMedia import PropMedia
 
 from each.db import DBConnection
+from each.utils import isAllInData
 
 Base = declarative_base()
+
 
 class EntityGame(EntityBase, Base):
     __tablename__ = 'each_game'
 
     eid = Column(Integer, Sequence('each_seq'), primary_key=True)
     ownerid = Column(String)
-    name = Column(String)
-    game = Column(String)
+    name_RU = Column(String)
+    name_EN = Column(String)
+    desc_RU = Column(String)
+    desc_EN = Column(String)
     created = Column(Date)
     updated = Column(Date)
 
-    json_serialize_items_list = ['eid', 'ownerid', 'name', 'game', 'created', 'updated']
+    json_serialize_items_list = ['eid', 'ownerid', 'name', 'desc', 'created', 'updated']
 
-    def __init__(self, ownerid, name, game):
+    def __init__(self, ownerid, name_RU, name_EN, desc_RU, desc_EN):
         super().__init__()
 
         self.ownerid = ownerid
-        self.name = name
-        self.game = game
+        self.name_RU = name_RU
+        self.desc_RU = desc_RU
+        self.name_EN = name_EN
+        self.desc_EN = desc_EN
 
         ts = time.time()
         self.created = self.updated = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M')
 
+    def to_dict(self, items=[]):
+        def fullfill_entity(key, value):
+            if key == 'url':
+                value = '%s%s' % (EntityBase.host, value[1:])
+            return value
+
+        def get_value(key):
+            if key == 'name':
+                return self.name
+            elif key == 'desc':
+                return self.desc
+            else:
+                return dictionate_entity(self.__dict__[key])
+
+        def dictionate_entity(entity):
+            try:
+                json.dump(entity)
+                return entity
+            except:
+                if 'to_dict' in dir(entity):
+                    return entity.to_dict()
+                else:
+                    return str(entity)
+
+        res = OrderedDict([(key, fullfill_entity(key, get_value(key)))
+                           for key in (self.json_serialize_items_list if not len(items) else items)])
+        return res
+
+    @property
+    def name(self):
+        return {_: self.__dict__['name_%s' % _] for _ in self.locales}
+
+    @property
+    def desc(self):
+        return {_: self.__dict__['desc_%s' % _] for _ in self.locales}
+
     @classmethod
     def add_from_json(cls, data):
+        from each.Prop.PropGame import PropGame
         PROPNAME_MAPPING = EntityProp.map_name_id()
 
         eid = None
-        from each.Prop.PropGame import PropGame
 
         PROP_MAPPING = {
-            'avatar':
+            'image':
                 lambda s, _eid, _id, _val, _uid: cls.process_media(s, 'image', _uid, _eid, _id, _val),
             # in table - eid is museum id, and value is eid of game in each_game table
             'game':
-                 lambda session, _eid, _id, _value, _uid: PropGame(_value, _id, _eid).add(session=session, no_commit=True)
-
+                lambda s, _eid, _id, _value, _uid: PropGame(_value, _id, _eid).add(session=s, no_commit=True)
         }
 
-        if 'ownerid' in data and 'name' in data and 'game' in data and 'prop' in data:
-            ownerid = data['ownerid']
-            name = data['name']
-            game = data['game']
-
-            new_entity = EntityGame(ownerid, name, game)
+        if isAllInData(['name', 'desc', 'ownerid', 'prop'], data):
+            create_args = {'ownerid': data['ownerid']}
+            for _ in cls.locales:
+                create_args['name_%s' % _] = data['name'][_] if _ in data['name'] else ''
+                create_args['desc_%s' % _] = data['desc'][_] if _ in data['desc'] else ''
+            new_entity = EntityGame(**create_args)
             eid = new_entity.add()
 
             with DBConnection() as session:
@@ -81,32 +122,32 @@ class EntityGame(EntityBase, Base):
         eid = None
 
         PROP_MAPPING = {
-           # 'game': lambda s, _eid, _id, _val: PropGame(eid, _id, _val).add_or_update(session=s, no_commit=True),
-            'avatar': lambda s, _eid, _id, _val: PropMedia(eid, _id,
-                                                            cls.convert_media_value_to_media_item('image', _eid, _val))
-                                                                        .add_or_update(session=s, no_commit=True)
+            'image':
+                lambda s, _eid, _id, _val: [PropMedia.delete(_eid, _id), PropMedia(eid, _id,
+                                            cls.convert_media_value_to_media_item('image', _eid, _val))
+                                            .add_or_update(session=s, no_commit=True)]
         }
 
         if 'id' in data:
             with DBConnection() as session:
                 eid = data['id']
                 entity = session.db.query(EntityGame).filter_by(eid=eid).all()
-
+                fields = ['name', 'desc']
                 if len(entity):
                     for _ in entity:
-                        if 'name' in data:
-                            _.name = data['name']
-
-                        if 'game' in data:
-                            _.description = data['game']
-
-                        session.db.commit()
-
-                        for prop_name, prop_val in data['prop'].items():
-                            if prop_name in PROPNAME_MAPPING and prop_name in PROP_MAPPING:
-                                PROP_MAPPING[prop_name](session, eid, PROPNAME_MAPPING[prop_name], prop_val)
+                        for l in cls.locales:
+                            for f in fields:
+                                if f in data and l in data[f]:
+                                    setattr(_, '%s_%s' % (f, l), data[f][l])
 
                         session.db.commit()
+
+                        if 'prop' in data:
+                            for prop_name, prop_val in data['prop'].items():
+                                if prop_name in PROPNAME_MAPPING and prop_name in PROP_MAPPING:
+                                    PROP_MAPPING[prop_name](session, eid, PROPNAME_MAPPING[prop_name], prop_val)
+
+                            session.db.commit()
 
         return eid
 
@@ -115,8 +156,7 @@ class EntityGame(EntityBase, Base):
         PROPNAME_MAPPING = EntityProp.map_name_id()
 
         PROP_MAPPING = {
-           # 'game': lambda _eid, _id: PropGame.get_object_property(_eid, _id),
-            'avatar': lambda _eid, _id: PropMedia.get_object_property(_eid, _id, ['eid', 'url'])
+            'image': lambda _eid, _id: PropMedia.get_object_property(_eid, _id, ['eid', 'url'])
         }
 
         result = {
@@ -130,11 +170,12 @@ class EntityGame(EntityBase, Base):
 
     @classmethod
     def delete_wide_object(cls, eid):
+        from each.Prop.PropGame import PropGame
         PROPNAME_MAPPING = EntityProp.map_name_id()
 
         PROP_MAPPING = {
-           # 'game': lambda _eid, _id: PropGame.delete(_eid, _id),
-            'avatar': lambda _eid, _id: PropMedia.delete(_eid, _id, False)
+            'game': lambda _eid, _id: PropGame.delete_value(_eid, False),
+            'image': lambda _eid, _id: PropMedia.delete(_eid, _id, False)
         }
 
         for key, propid in PROPNAME_MAPPING.items():

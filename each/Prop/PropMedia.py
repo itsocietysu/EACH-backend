@@ -42,7 +42,7 @@ class PropMedia(PropBase, Base):
         with DBConnection() as session:
             res = session.db.query(cls).filter_by(eid=eid, propid=propid).all()
             if len(res):
-                [EntityMedia.delete(_.value) and session.db.delete(_) for _ in res]
+                [[EntityMedia.delete(_.value), session.db.delete(_)] for _ in res]
                 session.db.commit()
             elif raise_exception:
                 raise FileNotFoundError('(eid, propid)=(%i, %i) was not found' % (eid, propid))

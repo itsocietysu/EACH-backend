@@ -1229,22 +1229,40 @@
           "format": "int64"
         },
         "name": {
-          "type": "string",
-          "example": "test"
+          "type": "object",
+          "properties": {
+            "RU": {
+              "type": "string",
+              "example": "Тест"
+            },
+            "EN": {
+              "type": "string",
+              "example": "Test"
+            }
+          }
         },
-        "game": {
-          "type": "string",
-          "example": "quest params in json format"
+        "desc": {
+          "type": "object",
+          "properties": {
+            "RU": {
+              "type": "string",
+              "example": "Великолепный квест!"
+            },
+            "EN": {
+              "type": "string",
+              "example": "Great quest!"
+            }
+          }
         },
         "prop": {
           "type": "object",
           "properties": {
-            "avatar": {
-              "type": "int",
+            "image": {
+              "type": ["int", "string"],
               "example": "media_id or base64 encoded string"
             },
             "game": {
-              "type": "game",
+              "type": "int",
               "example": "museum id"
             }
           }

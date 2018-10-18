@@ -29,6 +29,7 @@ from each.Entities.EntityLocation import EntityLocation
 
 from each.Prop.PropMedia import PropMedia
 from each.Prop.PropInt import PropInt
+from each.Prop.PropGame import PropGame
 
 from each.auth import auth
 
@@ -523,6 +524,8 @@ def deleteGame(**request_handler_args):
         #    resp.status = falcon.HTTP_403
         #    return
 
+        res = []
+
         try:
             EntityGame.delete(id)
         except FileNotFoundError:
@@ -537,6 +540,7 @@ def deleteGame(**request_handler_args):
 
         object = EntityGame.get().filter_by(eid=id).all()
         if not len(object):
+            resp.body = obj_to_json(res)
             resp.status = falcon.HTTP_200
             return
 
@@ -555,7 +559,14 @@ def createGame(**request_handler_args):
         if id:
             objects = EntityGame.get().filter_by(eid=id).all()
 
-            resp.body = obj_to_json([o.to_dict() for o in objects])
+            res = []
+            for _ in objects:
+                obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
+                wide_info = EntityGame.get_wide_object(_.eid, ['image'])
+                obj_dict.update(wide_info)
+                res.append(obj_dict)
+
+            resp.body = obj_to_json(res)
             resp.status = falcon.HTTP_200
             return
     except ValueError:
@@ -584,7 +595,14 @@ def updateGame(**request_handler_args):
         if id:
             objects = EntityGame.get().filter_by(eid=id).all()
 
-            resp.body = obj_to_json([o.to_dict() for o in objects])
+            res = []
+            for _ in objects:
+                obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
+                wide_info = EntityGame.get_wide_object(_.eid, ['image'])
+                obj_dict.update(wide_info)
+                res.append(obj_dict)
+
+            resp.body = obj_to_json(res)
             resp.status = falcon.HTTP_200
             return
     except ValueError:
@@ -601,11 +619,11 @@ def getGameById(**request_handler_args):
     id = getIntPathParam("gameId", **request_handler_args)
     objects = EntityGame.get().filter_by(eid=id).all()
 
-    wide_info = EntityGame.get_wide_object(id, ['game', 'avatar'])
+    wide_info = EntityGame.get_wide_object(id, ['image'])
 
     res = []
     for _ in objects:
-        obj_dict = _.to_dict(['eid', 'name'])
+        obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
         obj_dict.update(wide_info)
         res.append(obj_dict)
 
@@ -622,8 +640,8 @@ def GetAllGamesById(**request_handler_args):
 
     res = []
     for _ in objects:
-        obj_dict = _.to_dict(['eid', 'name'])
-        wide_info = EntityGame.get_wide_object(_.eid, ['game', 'avatar'])
+        obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
+        wide_info = EntityGame.get_wide_object(_.eid, ['image'])
         obj_dict.update(wide_info)
         res.append(obj_dict)
 
