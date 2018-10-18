@@ -659,24 +659,19 @@ def getGamesByMuseumId(**request_handler_args):
         resp.status = falcon.HTTP_400
         return
 
-    with DBConnection() as session:
-        quests = EntityMuseum.get_wide_object(id, ['game'])
-        if len(quests['game']):
-            objects = [session.db.query(EntityGame).filter(EntityGame.eid == quest['eid']).first() for quest in quests['game']]
-        else:
-            resp.body = obj_to_json({'error': 'Games not found'})
-            resp.status = falcon.HTTP_404
-            return
-
-    res = []
-    for _ in objects:
-        obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
-        wide_info = EntityGame.get_wide_object(_.eid, ['image'])
-        obj_dict.update(wide_info)
-        res.append(obj_dict)
-
-    resp.body = obj_to_json(res)
-    resp.status = falcon.HTTP_200
+    quests = EntityMuseum.get_wide_object(id, ['game'])
+    if len(quests['game']):
+        res = []
+        for _ in quests['game']:
+            obj_dict = _
+            wide_info = EntityGame.get_wide_object(_['eid'], ['image'])
+            obj_dict.update(wide_info)
+            res.append(obj_dict)
+        resp.body = obj_to_json(res)
+        resp.status = falcon.HTTP_200
+    else:
+        resp.body = obj_to_json({'error': 'Games not found'})
+        resp.status = falcon.HTTP_404
 
 
 # End of game feature set functions
