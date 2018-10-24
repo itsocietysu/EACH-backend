@@ -2,7 +2,7 @@ DROP SEQUENCE IF EXISTS each_seq;
 CREATE SEQUENCE each_seq start with 1 increment by 1;
 
 DROP TYPE IF EXISTS each_prop_type CASCADE;
-CREATE TYPE each_prop_type AS ENUM ('bool', 'int', 'real', 'media', 'comment', 'like', 'location', 'post', 'museum');
+CREATE TYPE each_prop_type AS ENUM ('bool', 'int', 'real', 'media', 'comment', 'like', 'location', 'post', 'game, ''museum', 'scenario');
 
 DROP TYPE IF EXISTS each_media_type CASCADE;
 CREATE TYPE each_media_type AS ENUM ('ava', 'image');
@@ -98,6 +98,17 @@ CREATE TABLE "each_location" (
 );
 
 
+DROP TABLE IF EXISTS "each_scenario";
+CREATE TABLE "each_scenario" (
+	"eid" BIGSERIAL NOT NULL PRIMARY KEY,
+	"json" VARCHAR(4000) NOT NULL DEFAULT '',
+	"created" TIMESTAMP WITH TIME ZONE NOT NULL,
+	"updated" TIMESTAMP WITH TIME ZONE NOT NULL
+) WITH (
+  OIDS=FALSE
+);
+
+
 DROP TABLE IF EXISTS "each_prop";
 CREATE TABLE "each_prop" (
 	"eid" BIGSERIAL NOT NULL PRIMARY KEY,
@@ -125,6 +136,8 @@ commit;
 INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'game', 'game');
 commit;
 INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'priority', 'int');
+commit;
+INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'scenario', 'scenario');
 commit;
 
 
@@ -213,6 +226,18 @@ CREATE TABLE "each_prop_location" (
 ) WITH (
   OIDS=FALSE
 );
+
+
+DROP TABLE IF EXISTS "each_prop_scenario";
+CREATE TABLE "each_prop_scenario" (
+	"eid" BIGINT NOT NULL,
+	"propid" BIGINT NOT NULL,
+	"value" BIGINT NOT NULL,
+	PRIMARY KEY (eid, propid, value)
+) WITH (
+  OIDS=FALSE
+);
+
 
 DROP TABLE IF EXISTS "each_news";
 CREATE TABLE "each_news" (

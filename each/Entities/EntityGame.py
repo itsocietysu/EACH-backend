@@ -6,10 +6,12 @@ from sqlalchemy import Column, String, Integer, Date, Sequence
 from sqlalchemy.ext.declarative import declarative_base
 
 from each.Entities.EntityBase import EntityBase
+from each.Entities.EntityScenario import EntityScenario
 from each.Entities.EntityProp import EntityProp
 
 from each.Prop.PropBase import PropBase
 from each.Prop.PropMedia import PropMedia
+from each.Prop.PropScenario import PropScenario
 
 from each.db import DBConnection
 from each.utils import isAllInData
@@ -91,7 +93,10 @@ class EntityGame(EntityBase, Base):
                 lambda s, _eid, _id, _val, _uid: cls.process_media(s, 'image', _uid, _eid, _id, _val),
             # in table - eid is museum id, and value is eid of game in each_game table
             'game':
-                lambda s, _eid, _id, _value, _uid: PropGame(_value, _id, _eid).add(session=s, no_commit=True)
+                lambda s, _eid, _id, _val, _uid: PropGame(_val, _id, _eid).add(session=s, no_commit=True),
+            'scenario':
+                lambda s, _eid, _id, _val, _uid: PropScenario(_eid, _id, EntityScenario.add_by_game_id(_eid))
+                                                    .add(session=s, no_commit=True)
         }
 
         if isAllInData(['name', 'desc', 'ownerid', 'prop'], data):
@@ -103,6 +108,7 @@ class EntityGame(EntityBase, Base):
             eid = new_entity.add()
 
             with DBConnection() as session:
+                data['prop']['scenario'] = ''
                 for prop_name, prop_val in data['prop'].items():
                     if prop_name in PROPNAME_MAPPING and prop_name in PROP_MAPPING:
                         PROP_MAPPING[prop_name](session, eid, PROPNAME_MAPPING[prop_name], prop_val, eid)
@@ -175,7 +181,8 @@ class EntityGame(EntityBase, Base):
 
         PROP_MAPPING = {
             'game': lambda _eid, _id: PropGame.delete_value(_eid, False),
-            'image': lambda _eid, _id: PropMedia.delete(_eid, _id, False)
+            'image': lambda _eid, _id: PropMedia.delete(_eid, _id, False),
+            'scenario': lambda _eid, _id: PropScenario.delete(_eid, _id, False)
         }
 
         for key, propid in PROPNAME_MAPPING.items():

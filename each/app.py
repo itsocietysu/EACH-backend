@@ -23,6 +23,7 @@ from each.Entities.EntityMedia import EntityMedia
 from each.Entities.EntityNews import EntityNews
 from each.Entities.EntityMuseum import EntityMuseum
 from each.Entities.EntityGame import EntityGame
+from each.Entities.EntityScenario import EntityScenario
 from each.Entities.EntityToken import EntityToken
 from each.Entities.EntityUser import EntityUser
 from each.Entities.EntityLocation import EntityLocation
@@ -510,6 +511,7 @@ def getMuseumById(**request_handler_args):
 # --------------------------
 
 
+@admin_access_type_required
 def deleteGame(**request_handler_args):
     resp = request_handler_args['resp']
     req = request_handler_args['req']
@@ -547,6 +549,7 @@ def deleteGame(**request_handler_args):
     resp.status = falcon.HTTP_400
 
 
+@admin_access_type_required
 def createGame(**request_handler_args):
     req = request_handler_args['req']
     resp = request_handler_args['resp']
@@ -576,6 +579,7 @@ def createGame(**request_handler_args):
     resp.status = falcon.HTTP_501
 
 
+@admin_access_type_required
 def updateGame(**request_handler_args):
     req = request_handler_args['req']
     resp = request_handler_args['resp']
@@ -674,6 +678,56 @@ def getGamesByMuseumId(**request_handler_args):
 
 # End of game feature set functions
 # ---------------------------------
+
+
+# Scenario feature set functions
+# --------------------------
+
+
+@admin_access_type_required
+def updateScenario(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    try:
+        params = json.loads(req.stream.read().decode('utf-8'))
+
+        id, props = EntityScenario.update_from_json(params)
+
+        if id:
+            resp.body = obj_to_json(props)
+            resp.status = falcon.HTTP_200
+            return
+    except ValueError:
+        resp.status = falcon.HTTP_405
+        return
+
+    resp.status = falcon.HTTP_501
+
+
+def getScenarioById(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    id = getIntPathParam("scenarioId", **request_handler_args)
+    if id is None:
+        resp.status = falcon.HTTP_400
+        return
+
+    objects = EntityScenario.get().filter_by(eid=id).all()
+
+    res = []
+    for _ in objects:
+        obj_dict = _.to_dict(['eid', 'json'])
+        res.append(obj_dict)
+
+    resp.body = obj_to_json(res)
+    resp.status = falcon.HTTP_200
+
+
+# End of scenario feature set functions
+# ---------------------------------
+
 
 # Token feature set functions
 # ---------------------------
@@ -913,6 +967,10 @@ operation_handlers = {
     'deleteLocation':       [deleteLocation],
     'getTapeLocations':     [getTapeLocations],
     'findLocationByName':   [findLocationByName],
+
+    # Scenario
+    'getScenarioById':      [getScenarioById],
+    'updateScenario':       [updateScenario],
 
     'getVersion':           [getVersion],
     'httpDefault':          [httpDefault]

@@ -21,6 +21,10 @@
       "description": "Quests feature set"
     },
     {
+      "name": "Scenario",
+      "description": "Scenario feature set"
+    },
+    {
       "name": "Feed",
       "description": "Feed feature set"
     },
@@ -349,7 +353,7 @@
           {
             "name": "new_game",
             "in": "body",
-            "description": "User encoded in JSON string",
+            "description": "Game encoded in JSON string",
             "required": true,
             "schema": {
               "$ref": "#/definitions/Game"
@@ -393,7 +397,7 @@
           {
             "name": "new_game",
             "in": "body",
-            "description": "User encoded in JSON string",
+            "description": "Game encoded in JSON string",
             "required": true,
             "schema": {
               "$ref": "#/definitions/Game"
@@ -405,7 +409,7 @@
             "description": "Invalid ID supplied"
           },
           "404": {
-            "description": "Museum not found"
+            "description": "Game not found"
           },
           "405": {
             "description": "Validation exception"
@@ -573,6 +577,88 @@
           },
           "404": {
             "description": "Game not found"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/scenario": {
+      "put": {
+        "tags": [
+          "Scenario"
+        ],
+        "summary": "Update existing scenario info",
+        "description": "",
+        "operationId": "updateScenario",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "new_scenario",
+            "in": "body",
+            "description": "Scenario encoded in JSON string",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Scenario"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Scenario not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/scenario/{scenarioId}": {
+      "get": {
+        "tags": [
+          "Scenario"
+        ],
+        "summary": "Return scenario by id",
+        "description": "Scenario by id",
+        "operationId": "getScenarioById",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "scenarioId",
+            "in": "path",
+            "description": "ID of scenario to return",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Scenario"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
           }
         },
         "security": [
@@ -1303,6 +1389,54 @@
             "game": {
               "type": "int",
               "example": "museum id"
+            }
+          }
+        },
+        "created": {
+          "type": "string",
+          "example": "2018-07-18 20:24:00+00:00"
+        },
+        "updated": {
+          "type": "string",
+          "example": "2018-07-18 20:24:00+00:00"
+        }
+      }
+    },
+    "Scenario": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "json": {
+          "type": "string",
+          "example": "{}"
+        },
+        "prop": {
+          "type": "object",
+          "properties": {
+            "image": {
+              "type": "object",
+              "properties": {
+                "add": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "example": "media_id or base64 encoded string"
+                  }
+                },
+                "delete": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                }
+              }
             }
           }
         },

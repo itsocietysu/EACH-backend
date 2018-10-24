@@ -46,3 +46,15 @@ class PropMedia(PropBase, Base):
                 session.db.commit()
             elif raise_exception:
                 raise FileNotFoundError('(eid, propid)=(%i, %i) was not found' % (eid, propid))
+
+    @classmethod
+    def delete_by_value(cls, eid, propid, value, raise_exception=True):
+        with DBConnection() as session:
+            res = session.db.query(cls).filter_by(eid=eid, propid=propid, value=value).all()
+
+            if len(res):
+                [[EntityMedia.delete(value), session.db.delete(_)] for _ in res]
+                session.db.commit()
+            else:
+                if raise_exception:
+                    raise FileNotFoundError('(eid, propid, value)=(%i, %i, %i) was not found' % (eid, propid, value))
