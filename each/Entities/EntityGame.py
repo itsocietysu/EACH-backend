@@ -162,7 +162,8 @@ class EntityGame(EntityBase, Base):
         PROPNAME_MAPPING = EntityProp.map_name_id()
 
         PROP_MAPPING = {
-            'image': lambda _eid, _id: PropMedia.get_object_property(_eid, _id, ['eid', 'url'])
+            'image': lambda _eid, _id: PropMedia.get_object_property(_eid, _id, ['eid', 'url']),
+            'scenario': lambda _eid, _id: PropScenario.get_object_property(_eid, _id, ['eid'])
         }
 
         result = {
