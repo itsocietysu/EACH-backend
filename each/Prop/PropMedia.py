@@ -53,7 +53,8 @@ class PropMedia(PropBase, Base):
             res = session.db.query(cls).filter_by(eid=eid, propid=propid, value=value).all()
 
             if len(res):
-                [[EntityMedia.delete(value), session.db.delete(_)] for _ in res]
+                EntityMedia.delete(value)
+                [session.db.delete(_) for _ in res]
                 session.db.commit()
             else:
                 if raise_exception:
