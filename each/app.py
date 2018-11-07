@@ -565,7 +565,7 @@ def createGame(**request_handler_args):
             res = []
             for _ in objects:
                 obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
-                wide_info = EntityGame.get_wide_object(_.eid, ['image'])
+                wide_info = EntityGame.get_wide_object(_.eid, ['image', 'scenario'])
                 obj_dict.update(wide_info)
                 res.append(obj_dict)
 
@@ -602,7 +602,7 @@ def updateGame(**request_handler_args):
             res = []
             for _ in objects:
                 obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
-                wide_info = EntityGame.get_wide_object(_.eid, ['image'])
+                wide_info = EntityGame.get_wide_object(_.eid, ['image', 'scenario'])
                 obj_dict.update(wide_info)
                 res.append(obj_dict)
 
@@ -623,7 +623,7 @@ def getGameById(**request_handler_args):
     id = getIntPathParam("gameId", **request_handler_args)
     objects = EntityGame.get().filter_by(eid=id).all()
 
-    wide_info = EntityGame.get_wide_object(id, ['image'])
+    wide_info = EntityGame.get_wide_object(id, ['image', 'scenario'])
 
     res = []
     for _ in objects:
@@ -645,7 +645,7 @@ def GetAllGamesById(**request_handler_args):
     res = []
     for _ in objects:
         obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
-        wide_info = EntityGame.get_wide_object(_.eid, ['image'])
+        wide_info = EntityGame.get_wide_object(_.eid, ['image', 'scenario'])
         obj_dict.update(wide_info)
         res.append(obj_dict)
 
