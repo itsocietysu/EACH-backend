@@ -668,7 +668,7 @@ def getGamesByMuseumId(**request_handler_args):
     if len(quests['game']):
         for _ in quests['game']:
             obj_dict = _
-            wide_info = EntityGame.get_wide_object(_['eid'], ['image', 'scenario'])
+            wide_info = EntityGame.get_wide_object(int(_['eid']), ['image', 'scenario'])
             obj_dict.update(wide_info)
             res.append(obj_dict)
 
