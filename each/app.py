@@ -268,7 +268,7 @@ def getFeedById(**request_handler_args):
     id = getIntPathParam("feedId", **request_handler_args)
     objects = EntityNews.get().filter_by(eid=id).all()
 
-    wide_info = EntityNews.get_wide_object(id, ['image'])
+    wide_info = EntityNews.get_wide_object(id, ['image', 'priority'])
 
     res = []
     for _ in objects:
