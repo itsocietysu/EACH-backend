@@ -90,7 +90,7 @@ class EntityMuseum(EntityBase, Base):
 
         PROP_MAPPING = {
             'logo':
-                lambda s, _eid, _id, _val, _uid: cls.process_media(s, 'logo', _uid, _eid, _id, _val),
+                lambda s, _eid, _id, _val, _uid: cls.process_media(s, 'image', _uid, _eid, _id, _val),
             'image':
                 lambda s, _eid, _id, _val, _uid: cls.process_media(s, 'image', _uid, _eid, _id, _val),
             'location':
@@ -127,7 +127,7 @@ class EntityMuseum(EntityBase, Base):
 
         PROP_MAPPING = {
             'logo': lambda s, _eid, _id, _val: [PropMedia.delete(_eid, _id), PropMedia(eid, _id,
-                                                            cls.convert_media_value_to_media_item('logo', _eid, _val))
+                                                            cls.convert_media_value_to_media_item('image', _eid, _val))
                                                                         .add_or_update(session=s, no_commit=True)],
             'image': lambda s, _eid, _id, _val: [PropMedia.delete(_eid, _id), PropMedia(eid, _id,
                                                             cls.convert_media_value_to_media_item('image', _eid, _val))
