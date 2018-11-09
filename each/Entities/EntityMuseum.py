@@ -123,7 +123,9 @@ class EntityMuseum(EntityBase, Base):
     @classmethod
     def update_from_json(cls, data):
         def mediaPropMapping(s, _eid, _id, _val):
-            PropMedia.delete(_eid, _id), PropMedia(eid, _id, cls.convert_media_value_to_media_item('image', _eid, _val)).add_or_update(session=s, no_commit=True)
+            PropMedia.delete(_eid, _id)
+            PropMedia(eid, _id, cls.convert_media_value_to_media_item('image', _eid, _val))\
+                .add_or_update(session=s, no_commit=True)
 
         PROPNAME_MAPPING = EntityProp.map_name_id()
 
@@ -163,7 +165,7 @@ class EntityMuseum(EntityBase, Base):
     @classmethod
     def get_wide_object(cls, eid, items=[]):
         def mediaPropMapping(_eid, _id):
-            PropMedia.get_object_property(_eid, _id, ['eid', 'url'])
+            return PropMedia.get_object_property(_eid, _id, ['eid', 'url'])
 
         PROPNAME_MAPPING = EntityProp.map_name_id()
 
