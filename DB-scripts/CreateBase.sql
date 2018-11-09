@@ -2,10 +2,10 @@ DROP SEQUENCE IF EXISTS each_seq;
 CREATE SEQUENCE each_seq start with 1 increment by 1;
 
 DROP TYPE IF EXISTS each_prop_type CASCADE;
-CREATE TYPE each_prop_type AS ENUM ('bool', 'int', 'real', 'media', 'comment', 'like', 'location', 'post', 'game, ''museum', 'scenario');
+CREATE TYPE each_prop_type AS ENUM ('bool', 'int', 'real', 'media', 'comment', 'like', 'location', 'post', 'game', 'museum', 'scenario');
 
 DROP TYPE IF EXISTS each_media_type CASCADE;
-CREATE TYPE each_media_type AS ENUM ('ava', 'image');
+CREATE TYPE each_media_type AS ENUM ('avatar', 'image', 'logo');
 
 DROP TYPE IF EXISTS each_user_admin_type CASCADE;
 CREATE TYPE each_user_admin_type AS ENUM ('admin', 'super');
@@ -126,6 +126,8 @@ commit;
 INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'image', 'media');
 commit;
 INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'avatar', 'media');
+commit;
+INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'logo', 'media');
 commit;
 INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'comment', 'comment');
 commit;

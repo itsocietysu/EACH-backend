@@ -84,13 +84,16 @@ class EntityMuseum(EntityBase, Base):
 
     @classmethod
     def add_from_json(cls, data):
+        def mediaPropMapping(s, _eid, _id, _val, _uid):
+            cls.process_media(s, 'image', _uid, _eid, _id, _val)
+
         PROPNAME_MAPPING = EntityProp.map_name_id()
 
         eid = None
 
         PROP_MAPPING = {
-            'image':
-                lambda s, _eid, _id, _val, _uid: cls.process_media(s, 'image', _uid, _eid, _id, _val),
+            'logo': mediaPropMapping,
+            'image': mediaPropMapping,
             'location':
                 lambda s, _eid, _id, _val, _uid: [PropLocation(_eid, _id, _).add(session=s, no_commit=True)
                                                   for _ in _val['add']]
@@ -119,14 +122,18 @@ class EntityMuseum(EntityBase, Base):
 
     @classmethod
     def update_from_json(cls, data):
+        def mediaPropMapping(s, _eid, _id, _val):
+            PropMedia.delete(_eid, _id)
+            PropMedia(eid, _id, cls.convert_media_value_to_media_item('image', _eid, _val))\
+                .add_or_update(session=s, no_commit=True)
+
         PROPNAME_MAPPING = EntityProp.map_name_id()
 
         eid = None
 
         PROP_MAPPING = {
-            'image': lambda s, _eid, _id, _val: [PropMedia.delete(_eid, _id), PropMedia(eid, _id,
-                                                            cls.convert_media_value_to_media_item('image', _eid, _val))
-                                                                        .add_or_update(session=s, no_commit=True)],
+            'logo': mediaPropMapping,
+            'image': mediaPropMapping,
             'location':
                 lambda s, _eid, _id, _val: [[PropLocation(_eid, _id, _).add(session=s, no_commit=True)
                                             for _ in _val['add']],
@@ -157,10 +164,14 @@ class EntityMuseum(EntityBase, Base):
 
     @classmethod
     def get_wide_object(cls, eid, items=[]):
+        def mediaPropMapping(_eid, _id):
+            return PropMedia.get_object_property(_eid, _id, ['eid', 'url'])
+
         PROPNAME_MAPPING = EntityProp.map_name_id()
 
         PROP_MAPPING = {
-            'image': lambda _eid, _id: PropMedia.get_object_property(_eid, _id, ['eid', 'url']),
+            'logo': mediaPropMapping,
+            'image': mediaPropMapping,
             'game': lambda _eid, _id: PropGame.get_object_property(_eid, _id, ['eid', 'ownerid', 'name', 'desc']),
             'location': lambda _eid, _id: PropLocation.get_object_property(_eid, _id)
         }
@@ -176,10 +187,14 @@ class EntityMuseum(EntityBase, Base):
 
     @classmethod
     def delete_wide_object(cls, eid):
+        def mediaPropMapping(_eid, _id):
+            PropMedia.delete(_eid, _id, False)
+
         PROPNAME_MAPPING = EntityProp.map_name_id()
 
         PROP_MAPPING = {
-            'image': lambda _eid, _id: PropMedia.delete(_eid, _id, False),
+            'logo': mediaPropMapping,
+            'image': mediaPropMapping,
             'location': lambda _eid, _id: PropLocation.delete(_eid, _id, False)
         }
 
