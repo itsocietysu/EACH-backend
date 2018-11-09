@@ -328,7 +328,7 @@ def getAllMuseums(**request_handler_args):
     res = []
     for _ in objects:
         obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
-        wide_info = EntityMuseum.get_wide_object(_.eid, ['image', 'game', 'location'])
+        wide_info = EntityMuseum.get_wide_object(_.eid, ['image', 'game', 'location', 'logo'])
         obj_dict.update(wide_info)
         res.append(obj_dict)
 
@@ -371,7 +371,7 @@ def getTapeMuseums(**request_handler_args):
     res = []
     for _ in museums:
         obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
-        wide_info = EntityMuseum.get_wide_object(_.eid, ['image', 'game', 'location'])
+        wide_info = EntityMuseum.get_wide_object(_.eid, ['image', 'game', 'location', 'logo'])
         obj_dict.update(wide_info)
         res.append(obj_dict)
 
@@ -397,7 +397,7 @@ def addNewMuseum(**request_handler_args):
             res = []
             for _ in objects:
                 obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
-                wide_info = EntityMuseum.get_wide_object(_.eid, ['image', 'location'])
+                wide_info = EntityMuseum.get_wide_object(_.eid, ['image', 'location', 'logo'])
                 obj_dict.update(wide_info)
                 res.append(obj_dict)
 
@@ -434,7 +434,7 @@ def updateMuseum(**request_handler_args):
             res = []
             for _ in objects:
                 obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
-                wide_info = EntityMuseum.get_wide_object(_.eid, ['image', 'location'])
+                wide_info = EntityMuseum.get_wide_object(_.eid, ['image', 'location', 'logo'])
                 obj_dict.update(wide_info)
                 res.append(obj_dict)
 
@@ -492,7 +492,7 @@ def getMuseumById(**request_handler_args):
     id = getIntPathParam("Id", **request_handler_args)
     objects = EntityMuseum.get().filter_by(eid=id).all()
 
-    wide_info = EntityMuseum.get_wide_object(id, ['image', 'game', 'location'])
+    wide_info = EntityMuseum.get_wide_object(id, ['image', 'game', 'location', 'logo'])
 
     res = []
     for _ in objects:

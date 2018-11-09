@@ -89,6 +89,8 @@ class EntityMuseum(EntityBase, Base):
         eid = None
 
         PROP_MAPPING = {
+            'logo':
+                lambda s, _eid, _id, _val, _uid: cls.process_media(s, 'logo', _uid, _eid, _id, _val),
             'image':
                 lambda s, _eid, _id, _val, _uid: cls.process_media(s, 'image', _uid, _eid, _id, _val),
             'location':
@@ -124,6 +126,9 @@ class EntityMuseum(EntityBase, Base):
         eid = None
 
         PROP_MAPPING = {
+            'logo': lambda s, _eid, _id, _val: [PropMedia.delete(_eid, _id), PropMedia(eid, _id,
+                                                            cls.convert_media_value_to_media_item('logo', _eid, _val))
+                                                                        .add_or_update(session=s, no_commit=True)],
             'image': lambda s, _eid, _id, _val: [PropMedia.delete(_eid, _id), PropMedia(eid, _id,
                                                             cls.convert_media_value_to_media_item('image', _eid, _val))
                                                                         .add_or_update(session=s, no_commit=True)],
@@ -160,6 +165,7 @@ class EntityMuseum(EntityBase, Base):
         PROPNAME_MAPPING = EntityProp.map_name_id()
 
         PROP_MAPPING = {
+            'logo': lambda _eid, _id: PropMedia.get_object_property(_eid, _id, ['eid', 'url']),
             'image': lambda _eid, _id: PropMedia.get_object_property(_eid, _id, ['eid', 'url']),
             'game': lambda _eid, _id: PropGame.get_object_property(_eid, _id, ['eid', 'ownerid', 'name', 'desc']),
             'location': lambda _eid, _id: PropLocation.get_object_property(_eid, _id)
@@ -179,6 +185,7 @@ class EntityMuseum(EntityBase, Base):
         PROPNAME_MAPPING = EntityProp.map_name_id()
 
         PROP_MAPPING = {
+            'logo': lambda _eid, _id: PropMedia.delete(_eid, _id, False),
             'image': lambda _eid, _id: PropMedia.delete(_eid, _id, False),
             'location': lambda _eid, _id: PropLocation.delete(_eid, _id, False)
         }

@@ -1308,6 +1308,10 @@
               "type": "int",
               "example": "media_id or base64 encoded string"
             },
+            "logo": {
+              "type": "int",
+              "example": "media_id or base64 encoded string"
+            },
             "location": {
               "type": "object",
               "properties": {
