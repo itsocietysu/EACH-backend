@@ -38,7 +38,7 @@ class PropMedia(PropBase, Base):
     '''
 
     @classmethod
-    def delete(cls, eid, propid, session=None, raise_exception=True):
+    def delete(cls, eid, propid, raise_exception=True):
         with DBConnection() as session:
             res = session.db.query(cls).filter_by(eid=eid, propid=propid).all()
             if len(res):
