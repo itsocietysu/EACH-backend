@@ -1017,7 +1017,9 @@ class Auth(object):
                      '/each/feed/tape|'
                      '/each/museum/tape|'
                      '/each/museum/all|'
-                     '/each/token/get).*', req.relative_uri):
+                     '/each/token/get|'
+                     '/each/scenario/|'
+                     '/each/game/all/museum/).*', req.relative_uri):
             return
 
         with DBConnection() as session:
