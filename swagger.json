@@ -668,6 +668,66 @@
         ]
       }
     },
+    "/scenario/check_image": {
+      "post": {
+        "tags": [
+          "Scenario"
+        ],
+        "summary": "Return similarity",
+        "description": "Return whether the picture is similar",
+        "operationId": "checkImageAnswer",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "image_answer",
+            "in": "body",
+            "description": "Answer encoded in JSON string",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "int",
+                  "example": 0
+                },
+                "stepid": {
+                  "type": "int",
+                  "example": 0
+                },
+                "image": {
+                  "type": "string",
+                  "example": "base64 encoded string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "result": {
+                    "type": "int",
+                    "example": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
     "/feed": {
       "get": {
         "tags": [

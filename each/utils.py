@@ -7,12 +7,55 @@ import requests
 import json
 import falcon
 
+import torch
+import torch.nn as nn
+import torchvision.models as models
+import torchvision.transforms as transforms
+from torch.autograd import Variable
+from PIL import Image
+from io import BytesIO
+
+
 def obj_to_json(obj):
     return json.dumps(obj, indent=2)
 
 
 def _DateToString(datetime):
     return datetime.ctime()
+
+
+def image_similarity(base, path):
+    def get_vector(img):
+        t_img = Variable(normalize(to_tensor(scaler(img))).unsqueeze(0))
+        embedding = torch.zeros(1, 512, 1, 1)
+
+        def copy_data(m, i, o):
+            embedding.copy_(o.data)
+
+        h = layer.register_forward_hook(copy_data)
+        model(t_img)
+        h.remove()
+        return embedding[0, :, 0, 0]
+
+    model = models.resnet18(pretrained=True)
+    layer = model._modules.get('avgpool')
+    scaler = transforms.Resize((224, 224))
+    model.eval()
+    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                     std=[0.229, 0.224, 0.225])
+    to_tensor = transforms.ToTensor()
+
+    target_vec = get_vector(Image.open(path))
+    base_decoded = base64.b64decode(base)
+    if base_decoded == base:
+        return False
+    base_vec = get_vector(Image.open(BytesIO(base_decoded)))
+
+    cos = nn.CosineSimilarity(dim=1, eps=1e-6)
+    sim = cos(target_vec.unsqueeze(0), base_vec.unsqueeze(0)).numpy()
+
+    return sim[0] >= 0.9
+
 
 def batch(iterable, batch_size):
     b = []

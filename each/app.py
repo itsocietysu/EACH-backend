@@ -727,6 +727,22 @@ def getScenarioById(**request_handler_args):
     resp.status = falcon.HTTP_200
 
 
+def checkImageAnswer(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    try:
+        params = json.loads(req.stream.read().decode('utf-8'))
+
+        similar = EntityScenario.check_similar_image(params)
+
+        res = [{'result': 1 if similar else 0}]
+        resp.body = obj_to_json(res)
+        resp.status = falcon.HTTP_200
+    except ValueError:
+        resp.status = falcon.HTTP_405
+
+
 # End of scenario feature set functions
 # ---------------------------------
 
@@ -973,6 +989,7 @@ operation_handlers = {
     # Scenario
     'getScenarioById':      [getScenarioById],
     'updateScenario':       [updateScenario],
+    'checkImageAnswer':     [checkImageAnswer],
 
     'getVersion':           [getVersion],
     'httpDefault':          [httpDefault]

@@ -1,6 +1,7 @@
 from collections import OrderedDict
 import time
 import datetime
+import json
 
 from sqlalchemy import Column, String, Integer, Date, Sequence
 from sqlalchemy.ext.declarative import declarative_base
@@ -12,7 +13,7 @@ from each.Entities.EntityProp import EntityProp
 from each.Prop.PropMedia import PropMedia
 
 from each.db import DBConnection
-from each.utils import obj_to_json
+from each.utils import obj_to_json, isAllInData, image_similarity
 
 Base = declarative_base()
 
@@ -27,10 +28,10 @@ class EntityScenario(EntityBase, Base):
 
     json_serialize_items_list = ['eid', 'json', 'created', 'updated']
 
-    def __init__(self, json):
+    def __init__(self, scenario):
         super().__init__()
 
-        self.json = json
+        self.json = scenario
 
         ts = time.time()
         self.created = self.updated = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M')
@@ -43,12 +44,12 @@ class EntityScenario(EntityBase, Base):
             new_entity = EntityScenario('')
             eid = new_entity.add()
 
-            json = {'game_id': game_id, 'scenario_id': eid, 'difficulty_bounty': 0,
-                    'final_bonus': {'type': 'NONE', 'uri': 'none', 'eid': 0}, 'step_count': 0, 'steps': []}
+            scenario = {'game_id': game_id, 'scenario_id': eid, 'difficulty_bounty': 0,
+                        'final_bonus': {'type': 'NONE', 'uri': 'none', 'eid': 0}, 'step_count': 0, 'steps': []}
 
             with DBConnection() as session:
                 entity = session.db.query(EntityScenario).filter_by(eid=eid).first()
-                setattr(entity, 'json', obj_to_json(json))
+                setattr(entity, 'json', obj_to_json(scenario))
                 session.db.commit()
 
         return eid
@@ -142,3 +143,27 @@ class EntityScenario(EntityBase, Base):
                 session.db.commit()
             else:
                 raise FileNotFoundError('%s was not found' % cls.__name__)
+
+    @classmethod
+    def check_similar_image(cls, data):
+
+        similar = False
+
+        if isAllInData(['id', 'stepid', 'image'], data):
+            with DBConnection() as session:
+                eid = data['id']
+                stepid = data['stepid']
+                base = data['image']
+                entity = session.db.query(EntityScenario).filter_by(eid=eid).all()
+                if len(entity):
+                    for _ in entity:
+                        scenario = json.loads(_.json)
+                        if 0 <= int(stepid) < scenario['step_count']:
+                            step = scenario['steps'][stepid]
+                            if step['type'] == 'ar_paint_question':
+                                image_path = '.%s' % step['desc']['target']['uri']["http://each.itsociety.su:4201/each"
+                                                                                   .__len__():]
+
+                                similar = image_similarity(base, image_path)
+
+        return similar
