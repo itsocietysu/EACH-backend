@@ -187,9 +187,9 @@ class EntityScenario(EntityBase, Base):
                                 image_path = '.%s' % step['desc']['target']['uri']["http://each.itsociety.su:4201/each"
                                                                                    .__len__():]
                                 img = io.imread(image_path)
-                                aspect = float(img.shape[1]) / img.shape[0]
+                                ratio = float(img.shape[1]) / img.shape[0]
                                 scenario['steps'][i]['desc']['target'].pop('uri', None)
-                                scenario['steps'][i]['desc']['target'].update({'aspect': aspect})
+                                scenario['steps'][i]['desc']['target'].update({'ratio': ratio})
                         new_entity = EntityScenario(obj_to_json(scenario))
                         new_entity.eid = _.eid
                         res.append(new_entity)
