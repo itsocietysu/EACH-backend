@@ -34,6 +34,8 @@ from each.Prop.PropGame import PropGame
 
 from each.auth import auth
 
+from each.img_to_vec import Img2Vec
+
 
 # from each.MediaResolver.MediaResolverFactory import MediaResolverFactory
 
@@ -734,7 +736,7 @@ def checkImageAnswer(**request_handler_args):
     try:
         params = json.loads(req.stream.read().decode('utf-8'))
 
-        similar = EntityScenario.check_similar_image(params)
+        similar = EntityScenario.check_similar_image(params, img2vec)
 
         res = [{'result': 1 if similar else 0}]
         resp.body = obj_to_json(res)
@@ -1130,3 +1132,5 @@ with open('swagger_temp.json') as f:
     server.load_spec_swagger(f.read())
 
 api.add_sink(server, r'/')
+
+img2vec = Img2Vec()

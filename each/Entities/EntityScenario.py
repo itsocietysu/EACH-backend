@@ -145,7 +145,7 @@ class EntityScenario(EntityBase, Base):
                 raise FileNotFoundError('%s was not found' % cls.__name__)
 
     @classmethod
-    def check_similar_image(cls, data):
+    def check_similar_image(cls, data, img2vec):
 
         similar = False
 
@@ -164,6 +164,6 @@ class EntityScenario(EntityBase, Base):
                                 image_path = '.%s' % step['desc']['target']['uri']["http://each.itsociety.su:4201/each"
                                                                                    .__len__():]
 
-                                similar = image_similarity(base, image_path)
+                                similar = image_similarity(base, image_path, img2vec)
 
         return similar
