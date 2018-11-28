@@ -668,6 +668,42 @@
         ]
       }
     },
+    "/scenario/user/{scenarioId}": {
+      "get": {
+        "tags": [
+          "Scenario"
+        ],
+        "summary": "Return scenario for user by id",
+        "description": "Scenario by id",
+        "operationId": "getScenarioUserById",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "scenarioId",
+            "in": "path",
+            "description": "ID of scenario to return",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Scenario"
+            }
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
     "/scenario/check_image": {
       "post": {
         "tags": [

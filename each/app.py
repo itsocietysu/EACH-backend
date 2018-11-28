@@ -729,6 +729,26 @@ def getScenarioById(**request_handler_args):
     resp.status = falcon.HTTP_200
 
 
+def getScenarioUserById(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    id = getIntPathParam("scenarioId", **request_handler_args)
+    if id is None:
+        resp.status = falcon.HTTP_400
+        return
+
+    objects = EntityScenario.get_scenario_for_user(id)
+
+    res = []
+    for _ in objects:
+        obj_dict = _.to_dict(['eid', 'json'])
+        res.append(obj_dict)
+
+    resp.body = obj_to_json(res)
+    resp.status = falcon.HTTP_200
+
+
 def checkImageAnswer(**request_handler_args):
     req = request_handler_args['req']
     resp = request_handler_args['resp']
@@ -990,6 +1010,7 @@ operation_handlers = {
 
     # Scenario
     'getScenarioById':      [getScenarioById],
+    'getScenarioUserById':  [getScenarioUserById],
     'updateScenario':       [updateScenario],
     'checkImageAnswer':     [checkImageAnswer],
 

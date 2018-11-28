@@ -3,6 +3,8 @@ import time
 import datetime
 import json
 
+from skimage import io
+
 from sqlalchemy import Column, String, Integer, Date, Sequence
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -167,3 +169,29 @@ class EntityScenario(EntityBase, Base):
                                 similar = image_similarity(base, image_path, img2vec)
 
         return similar
+
+    @classmethod
+    def get_scenario_for_user(cls, eid):
+
+        res = []
+
+        if eid:
+            with DBConnection() as session:
+                entity = session.db.query(EntityScenario).filter_by(eid=eid).all()
+                if len(entity):
+                    for _ in entity:
+                        scenario = json.loads(_.json)
+                        for i in range(scenario['step_count']):
+                            step = scenario['steps'][i]
+                            if step['type'] == 'ar_paint_question':
+                                image_path = '.%s' % step['desc']['target']['uri']["http://each.itsociety.su:4201/each"
+                                                                                   .__len__():]
+                                img = io.imread(image_path)
+                                aspect = float(img.shape[1]) / img.shape[0]
+                                scenario['steps'][i]['desc']['target'].pop('uri', None)
+                                scenario['steps'][i]['desc']['target'].update({'aspect': aspect})
+                        new_entity = EntityScenario(obj_to_json(scenario))
+                        new_entity.eid = _.eid
+                        res.append(new_entity)
+
+        return res
