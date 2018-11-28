@@ -4,6 +4,7 @@ WORKDIR /usr/src/app
 
 COPY Requirements.txt ./
 RUN pip install --no-cache-dir -r Requirements.txt
+RUN pip3 install torch torchvision
 
 COPY each/ ./each/
 COPY swagger-ui/ ./swagger-ui/

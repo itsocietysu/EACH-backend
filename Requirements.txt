@@ -10,5 +10,3 @@ scikit-image
 matplotlib
 falcon-multipart
 pillow
-torch
-torchvision
