@@ -4,7 +4,8 @@ WORKDIR /usr/src/app
 
 COPY Requirements.txt ./
 RUN pip install --no-cache-dir -r Requirements.txt
-RUN pip3 install torch torchvision
+RUN pip3 install http://download.pytorch.org/whl/cpu/torch-0.4.1-cp36-cp36m-linux_x86_64.whl
+RUN pip3 install torchvision
 
 COPY each/ ./each/
 COPY swagger-ui/ ./swagger-ui/
