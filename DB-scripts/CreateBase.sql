@@ -2,10 +2,10 @@ DROP SEQUENCE IF EXISTS each_seq;
 CREATE SEQUENCE each_seq start with 1 increment by 1;
 
 DROP TYPE IF EXISTS each_prop_type CASCADE;
-CREATE TYPE each_prop_type AS ENUM ('bool', 'int', 'real', 'media', 'comment', 'like', 'location', 'post', 'game', 'museum', 'scenario');
+CREATE TYPE each_prop_type AS ENUM ('bool', 'int', 'real', 'media', 'comment', 'like', 'location', 'post', 'game', 'museum', 'scenario', 'run', 'interval');
 
 DROP TYPE IF EXISTS each_media_type CASCADE;
-CREATE TYPE each_media_type AS ENUM ('avatar', 'image', 'logo');
+CREATE TYPE each_media_type AS ENUM ('image', 'logo');
 
 DROP TYPE IF EXISTS each_user_admin_type CASCADE;
 CREATE TYPE each_user_admin_type AS ENUM ('admin', 'super');
@@ -15,6 +15,9 @@ CREATE TYPE each_user_access_type AS ENUM ('admin', 'user');
 
 DROP TYPE IF EXISTS each_clients_type CASCADE;
 CREATE TYPE each_clients_type AS ENUM ('each', 'swagger', 'vkontakte', 'google');
+
+DROP TYPE IF EXISTS each_game_status_type CASCADE;
+CREATE TYPE each_game_status_type AS ENUM ('process', 'pass');
 
 DROP TABLE IF EXISTS "each_museum";
 CREATE TABLE "each_museum" (
@@ -60,6 +63,23 @@ CREATE TABLE "each_user" (
 ) WITH (
   OIDS=FALSE
 );
+
+
+DROP TABLE IF EXISTS "each_run";
+CREATE TABLE "each_run" (
+	"eid" BIGSERIAL NOT NULL PRIMARY KEY,
+	"step_passed" INT NOT NULL,
+	"status" each_game_status_type NOT NULL,
+	"game_id" BIGINT NOT NULL,
+	"start_time" TIMESTAMP WITH TIME ZONE NOT NULL,
+	"best_time" INTERVAL NOT NULL,
+	"bonus" BIGINT NOT NULL,
+	"created" TIMESTAMP WITH TIME ZONE NOT NULL,
+	"updated" TIMESTAMP WITH TIME ZONE NOT NULL
+) WITH (
+  OIDS=FALSE
+);
+
 
 DROP TABLE IF EXISTS "each_token";
 CREATE TABLE "each_token" (
@@ -125,8 +145,6 @@ INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'price', 'r
 commit;
 INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'image', 'media');
 commit;
-INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'avatar', 'media');
-commit;
 INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'logo', 'media');
 commit;
 INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'comment', 'comment');
@@ -140,6 +158,10 @@ commit;
 INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'priority', 'int');
 commit;
 INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'scenario', 'scenario');
+commit;
+INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'run', 'run');
+commit;
+INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'time_in_game', 'interval');
 commit;
 
 
@@ -235,6 +257,28 @@ CREATE TABLE "each_prop_scenario" (
 	"eid" BIGINT NOT NULL,
 	"propid" BIGINT NOT NULL,
 	"value" BIGINT NOT NULL,
+	PRIMARY KEY (eid, propid, value)
+) WITH (
+  OIDS=FALSE
+);
+
+
+DROP TABLE IF EXISTS "each_prop_run";
+CREATE TABLE "each_prop_run" (
+    "eid" BIGSERIAL NOT NULL,
+	"propid" BIGSERIAL NOT NULL,
+	"value" BIGINT NOT NULL,
+	PRIMARY KEY (eid, propid, value)
+) WITH (
+  OIDS=FALSE
+);
+
+
+DROP TABLE IF EXISTS "each_prop_interval";
+CREATE TABLE "each_prop_interval" (
+	"eid" BIGINT NOT NULL,
+	"propid" BIGINT NOT NULL,
+	"value" INTERVAL NOT NULL,
 	PRIMARY KEY (eid, propid, value)
 ) WITH (
   OIDS=FALSE

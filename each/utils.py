@@ -20,6 +20,29 @@ def _DateToString(datetime):
     return datetime.ctime()
 
 
+def _interval_to_string(interval):
+    if interval.total_seconds() == 0:
+        return '0'
+    days = interval.days
+    years, days = divmod(days, 365)
+    months, days = divmod(days, 30)
+    weeks, days = divmod(days, 7)
+    seconds = interval.seconds
+    hours, seconds = divmod(seconds, 3600)
+    minutes, seconds = divmod(seconds, 60)
+    d = {}
+    r = ''
+    for name in ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds']:
+        d.update({name: eval(name)})
+    for _ in d:
+        if d[_] > 0:
+            if len(r):
+                r += ' ' + str(d[_]) + _[0]
+            else:
+                r = str(d[_]) + _[0]
+    return r
+
+
 def image_similarity(base, path, img2vec):
     target_vec = img2vec.get_vec(Image.open(path))
     base_decoded = base64.b64decode(base)
@@ -72,6 +95,14 @@ def getStringQueryParam(name, **request_handler_args):
         return request_handler_args['req'].params[name]
     except:
         return None
+
+
+def getBoolQueryParam(name, **request_handler_args):
+    try:
+        return request_handler_args['req'].params[name].lower() == 'true'
+    except:
+        return False
+
 
 def isAllInData(params, data):
     return all([(_ in data) for _ in params])

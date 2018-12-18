@@ -16,7 +16,8 @@ from falcon_multipart.middleware import MultipartMiddleware
 from each import utils
 from each.db import DBConnection
 from each.serve_swagger import SpecServer
-from each.utils import obj_to_json, getIntPathParam, getIntQueryParam, getStringQueryParam, admin_access_type_required
+from each.utils import obj_to_json, getIntPathParam, getIntQueryParam, getStringQueryParam, getBoolQueryParam, \
+    admin_access_type_required
 
 from each.Entities.EntityBase import EntityBase
 from each.Entities.EntityMedia import EntityMedia
@@ -26,6 +27,7 @@ from each.Entities.EntityGame import EntityGame
 from each.Entities.EntityScenario import EntityScenario
 from each.Entities.EntityToken import EntityToken
 from each.Entities.EntityUser import EntityUser
+from each.Entities.EntityRun import EntityRun
 from each.Entities.EntityLocation import EntityLocation
 
 from each.Prop.PropMedia import PropMedia
@@ -769,7 +771,7 @@ def checkImageAnswer(**request_handler_args):
 # ---------------------------------
 
 
-# Token feature set functions
+# User feature set functions
 # ---------------------------
 
 
@@ -812,6 +814,7 @@ def getTokenInfo(**request_handler_args):
 
     access_token = getStringQueryParam('access_token', **request_handler_args)
     type = getStringQueryParam('type', **request_handler_args)
+    expansion = getBoolQueryParam('expansion', **request_handler_args)
 
     if access_token is None or type is None:
         resp.body = obj_to_json({'error': 'Invalid parameters supplied'})
@@ -823,6 +826,9 @@ def getTokenInfo(**request_handler_args):
     if not error:
         token_dict = token.to_dict(['eid', 'access_token', 'type', 'user_id'])
         user_dict = user.to_dict(['name', 'image', 'email', 'access_type'])
+        if expansion:
+            wide_info = EntityUser.get_wide_object(user.eid)
+            user_dict.update(wide_info)
         token_dict.update(user_dict)
 
         resp.body = obj_to_json(token_dict)
@@ -845,7 +851,37 @@ def revokeToken(**request_handler_args):
     resp.status = status
 
 
-# End of token feature set functions
+def updateStatistic(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    try:
+        params = json.loads(req.stream.read().decode('utf-8'))
+        params['user_id'] = req.context['user_id']
+
+        print(params)
+
+        id = EntityRun.update_from_json(params)
+        if id:
+            objects = EntityRun.get().filter_by(eid=id).all()
+
+            res = []
+            for _ in objects:
+                obj_dict = _.to_dict()
+                res.append(obj_dict)
+
+            resp.body = obj_to_json(res)
+            resp.status = falcon.HTTP_200
+            return
+
+    except ValueError:
+        resp.status = falcon.HTTP_405
+        return
+
+    resp.status = falcon.HTTP_501
+
+
+# End of user feature set functions
 # ----------------------------------
 
 
@@ -997,10 +1033,11 @@ operation_handlers = {
     'getFeed':              [getFeedById],
     'deleteFeed':           [deleteFeed],
 
-    # OAuth
+    # User
     'getToken':             [getToken],
     'getTokenInfo':         [getTokenInfo],
     'revokeToken':          [revokeToken],
+    'updateStatistic':      [updateStatistic],
 
     # Location
     'addLocation':          [addLocation],

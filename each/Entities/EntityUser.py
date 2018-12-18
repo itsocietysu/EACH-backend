@@ -5,6 +5,10 @@ from sqlalchemy import Column, String, Integer, Date, Sequence
 from sqlalchemy.ext.declarative import declarative_base
 
 from each.Entities.EntityBase import EntityBase
+from each.Entities.EntityGame import EntityGame
+from each.Entities.EntityProp import EntityProp
+from each.Prop.PropInterval import PropInterval
+from each.Prop.PropRun import PropRun
 
 from each.db import DBConnection
 
@@ -58,3 +62,46 @@ class EntityUser(EntityBase, Base):
                 ts = time.time()
                 entity.updated = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M')
                 session.db.commit()
+
+    @classmethod
+    def get_wide_object(cls, eid, items=[]):
+        def get_run(_eid, _id):
+            objects = PropRun.get_object_property(_eid, _id)
+            passed = []
+            process = []
+            bonus = 0
+            for o in objects:
+                games = EntityGame.get().filter_by(eid=int(o['game_id'])).all()
+                if len(games):
+                    for g in games:
+                        obj_dict = g.to_dict(['eid', 'ownerid', 'name', 'desc'])
+                        wide_info = EntityGame.get_wide_object(g.eid, ['image', 'scenario'])
+                        obj_dict.update(wide_info)
+                        if o['best_time'] != '0':
+                            obj_dict.update({'best_time': o['best_time']})
+                            passed.append(obj_dict)
+                            bonus += int(o['bonus'])
+                        if o['status'] == 'process':
+                            obj_dict.update({'step_passed': o['step_passed']})
+                            process.append(obj_dict)
+            return {'game_passed': passed, 'game_process': process, 'bonus': bonus}
+
+        def get_time_in_game(_eid, _id):
+            times = PropInterval.get_object_property(eid, _id)
+            if not len(times):
+                return "0s"
+            return times[0]
+
+        PROPNAME_MAPPING = EntityProp.map_name_id()
+
+        PROP_MAPPING = {
+            'run': get_run,
+            'time_in_game': get_time_in_game
+        }
+
+        result = {}
+        for key, propid in PROPNAME_MAPPING.items():
+            if key in PROP_MAPPING and (not len(items) or key in items):
+                result.update({key: PROP_MAPPING[key](eid, propid)})
+
+        return result
