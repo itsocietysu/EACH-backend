@@ -1189,7 +1189,7 @@
         ]
       }
     },
-    "/update_statistic": {
+    "statistic/update": {
       "post": {
         "tags": [
           "User"
@@ -1223,6 +1223,61 @@
                 "step_passed": {
                   "type": "int",
                   "example": 0
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "400": {
+            "description": "Invalid parameters supplied"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "statistic/drop": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Drop statistic of user",
+        "description": "Drop process of user for given games",
+        "operationId": "dropStatistic",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "statistic_info",
+            "in": "body",
+            "description": "Games for drop",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "game_ids"
+              ],
+              "properties": {
+                "game_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
                 }
               }
             }

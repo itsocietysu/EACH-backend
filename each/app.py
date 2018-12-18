@@ -859,10 +859,8 @@ def updateStatistic(**request_handler_args):
         params = json.loads(req.stream.read().decode('utf-8'))
         params['user_id'] = req.context['user_id']
 
-        print(params)
-
         id = EntityRun.update_from_json(params)
-        if id:
+        if id is not None:
             objects = EntityRun.get().filter_by(eid=id).all()
 
             res = []
@@ -879,6 +877,25 @@ def updateStatistic(**request_handler_args):
         return
 
     resp.status = falcon.HTTP_501
+
+
+def dropStatistic(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    try:
+        params = json.loads(req.stream.read().decode('utf-8'))
+        params['user_id'] = req.context['user_id']
+
+        id = EntityRun.drop_from_json(params)
+
+        resp.body = obj_to_json(id)
+        resp.status = falcon.HTTP_200
+        return
+
+    except ValueError:
+        resp.status = falcon.HTTP_405
+        return
 
 
 # End of user feature set functions
@@ -1038,6 +1055,7 @@ operation_handlers = {
     'getTokenInfo':         [getTokenInfo],
     'revokeToken':          [revokeToken],
     'updateStatistic':      [updateStatistic],
+    'dropStatistic':        [dropStatistic],
 
     # Location
     'addLocation':          [addLocation],

@@ -11,6 +11,7 @@ from each.Prop.PropInterval import PropInterval
 from each.Prop.PropRun import PropRun
 
 from each.db import DBConnection
+from each.utils import _interval_to_string
 
 Base = declarative_base()
 
@@ -70,6 +71,7 @@ class EntityUser(EntityBase, Base):
             passed = []
             process = []
             bonus = 0
+            ts = time.time()
             for o in objects:
                 games = EntityGame.get().filter_by(eid=int(o['game_id'])).all()
                 if len(games):
@@ -82,7 +84,11 @@ class EntityUser(EntityBase, Base):
                             passed.append(obj_dict)
                             bonus += int(o['bonus'])
                         if o['status'] == 'process':
-                            obj_dict.update({'step_passed': o['step_passed']})
+                            d_time = datetime.datetime.fromtimestamp(ts) - \
+                                     datetime.datetime.strptime(o['start_time'][:-6],
+                                                                '%Y-%m-%d %H:%M:%S')
+                            obj_dict.update({'step_passed': o['step_passed'],
+                                             'delta_time': _interval_to_string(d_time)})
                             process.append(obj_dict)
             return {'game_passed': passed, 'game_process': process, 'bonus': bonus}
 

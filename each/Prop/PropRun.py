@@ -22,3 +22,16 @@ class PropRun(PropBase, Base):
                     filter(cls.eid == eid).
                     filter(cls.propid == propid).
                     filter(cls.value == EntityRun.eid).all()]
+
+    @classmethod
+    def delete_value(cls, value, raise_exception=True):
+        with DBConnection() as session:
+            res = session.db.query(cls).filter_by(value=value).all()
+
+            if len(res):
+                EntityRun.delete(value)
+                [session.db.delete(_) for _ in res]
+                session.db.commit()
+            else:
+                if raise_exception:
+                    raise FileNotFoundError('(value)=(%s) was not found' % str(value))

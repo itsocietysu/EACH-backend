@@ -86,48 +86,98 @@ class EntityRun(EntityBase, Base):
             game = data['game_id']
             steps = data['step_passed']
 
-            prop_scenario = PropScenario.get().filter_by(eid=game, propid=PROPNAME_MAPPING['scenario']).all()
-            if len(prop_scenario):
-                with DBConnection() as session:
+            with DBConnection() as session:
+                scenario = [_[1] for _ in session.db.query(PropScenario, EntityScenario).
+                            filter(PropScenario.eid == game).
+                            filter(PropScenario.propid == PROPNAME_MAPPING['scenario']).
+                            filter(PropScenario.value == EntityScenario.eid).all()]
+                if len(scenario):
                     entity = [_[1] for _ in session.db.query(PropRun, EntityRun).filter(PropRun.eid == user).
+                              filter(PropRun.propid == PROPNAME_MAPPING['run']).
                               filter(PropRun.value == EntityRun.eid).filter(EntityRun.game_id == game).all()]
                     if not len(entity):
                         _eid = create_new_entity()
                         entity = session.db.query(EntityRun).filter_by(eid=_eid)
                     times = session.db.query(PropInterval).filter_by(eid=user).all()
                     if not len(times):
-                        PropInterval(user, PROPNAME_MAPPING['time_in_game'], datetime.timedelta(seconds=0)).\
+                        PropInterval(user, PROPNAME_MAPPING['time_in_game'], datetime.timedelta(seconds=0)). \
                             add(session=session)
                         times = session.db.query(PropInterval).filter_by(eid=user).all()
-                    for ps in prop_scenario:
-                        scenario = EntityScenario.get().filter_by(eid=ps.value).all()
-                        if len(scenario):
+                    ts = time.time()
+                    for s in scenario:
+                        sc = json.loads(s.json)
+                        for _ in entity:
+                            if steps == 0:
+                                _.start_time = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+                                d_time = datetime.datetime.fromtimestamp(ts) - \
+                                    datetime.datetime.strptime(_.start_time, '%Y-%m-%d %H:%M:%S')
+                            else:
+                                d_time = datetime.datetime.fromtimestamp(ts) - \
+                                    datetime.datetime.strptime(_.start_time.strftime('%Y-%m-%d %H:%M:%S'),
+                                                               '%Y-%m-%d %H:%M:%S')
+                            one_week = datetime.timedelta(weeks=1)
+                            if d_time >= one_week:
+                                if _.bonus == 0:
+                                    eid = 0
+                                    PropRun.delete_value(_.eid, False)
+                                else:
+                                    eid = _.eid
+                                    _.status = 'pass'
+                                    _.step_passed = sc['step_count']
+                                    _.updated = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M')
+                            else:
+                                eid = _.eid
+                                _.step_passed = steps
+                                if sc['step_count'] == steps:
+                                    _.status = 'pass'
+                                    if _.bonus == 0:
+                                        _.bonus = int(sc['difficulty_bounty'])
+                                    if _.best_time == 0 or _.best_time > d_time:
+                                        _.best_time = d_time
+                                        for t in times:
+                                            t.value += d_time
+                                else:
+                                    _.status = 'process'
+                                _.updated = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M')
+                            session.db.commit()
+
+        return eid
+
+    @classmethod
+    def drop_from_json(cls, data):
+        from each.Prop.PropRun import PropRun
+
+        PROPNAME_MAPPING = EntityProp.map_name_id()
+
+        eid = []
+
+        if isAllInData(['user_id', 'game_ids'], data):
+
+            user = data['user_id']
+            games = data['game_ids']
+
+            with DBConnection() as session:
+                for g in games:
+                    scenario = [_[1] for _ in session.db.query(PropScenario, EntityScenario).
+                                filter(PropScenario.eid == g).
+                                filter(PropScenario.propid == PROPNAME_MAPPING['scenario']).
+                                filter(PropScenario.value == EntityScenario.eid).all()]
+                    if len(scenario):
+                        ts = time.time()
+                        entity = [_[1] for _ in session.db.query(PropRun, EntityRun).filter(PropRun.eid == user).
+                                  filter(PropRun.propid == PROPNAME_MAPPING['run']).
+                                  filter(PropRun.value == EntityRun.eid).filter(EntityRun.game_id == g).all()]
+                        if len(entity):
                             for s in scenario:
                                 sc = json.loads(s.json)
                                 for _ in entity:
-                                    eid = _.eid
-                                    _.step_passed = steps
-                                    ts = time.time()
-                                    if steps == 0:
-                                        _.start_time = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
-                                    if sc['step_count'] == steps:
-                                        _.status = 'pass'
-                                        if _.bonus == 0:
-                                            _.bonus = int(sc['difficulty_bounty'])
-                                        d_time = datetime.datetime.fromtimestamp(ts) - \
-                                            datetime.datetime.strptime(_.start_time.strftime('%Y-%m-%d %H:%M:%S'),
-                                                                       '%Y-%m-%d %H:%M:%S')
-                                        if _.best_time == 0 or _.best_time > d_time:
-                                            one_week = datetime.timedelta(weeks=1)
-                                            if d_time > one_week:
-                                                _.best_time = one_week
-                                            else:
-                                                _.best_time = d_time
-                                        for t in times:
-                                            t.value += d_time
+                                    eid.append(_.eid)
+                                    if _.bonus == 0:
+                                        PropRun.delete_value(_.eid, False)
                                     else:
-                                        _.status = 'process'
-                                    _.updated = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M')
+                                        _.status = 'pass'
+                                        _.step_passed = sc['step_count']
+                                        _.updated = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M')
                                     session.db.commit()
 
         return eid
