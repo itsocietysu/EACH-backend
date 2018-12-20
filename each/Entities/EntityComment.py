@@ -21,7 +21,7 @@ class EntityComment(EntityBase, Base):
     text = Column(String)
     created = Column(Date)
 
-    json_serialize_items_list = ['eid', 'userid', 'text', 'created', 'updated']
+    json_serialize_items_list = ['eid', 'userid', 'text', 'created']
 
     def __init__(self, userid, text):
         super().__init__()

@@ -7,7 +7,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from each.Entities.EntityBase import EntityBase
 from each.Entities.EntityGame import EntityGame
 from each.Entities.EntityProp import EntityProp
+from each.Prop.PropComment import PropComment
 from each.Prop.PropInterval import PropInterval
+from each.Prop.PropLike import PropLike
 from each.Prop.PropRun import PropRun
 
 from each.db import DBConnection
@@ -80,8 +82,13 @@ class EntityUser(EntityBase, Base):
                         wide_info = EntityGame.get_wide_object(g.eid, ['image', 'scenario', 'rating'])
                         obj_dict.update(wide_info)
                         if o['best_time'] != '0':
-                            obj_dict.update({'best_time': o['best_time']})
-                            passed.append(obj_dict)
+                            obj_dict2 = g.to_dict(['eid', 'ownerid', 'name', 'desc'])
+                            obj_dict2.update(wide_info)
+                            likes = PropLike.get_like_user_related(obj_dict2['eid'], PROPNAME_MAPPING['rating'], eid)
+                            comments = PropComment.get_comment_user_related(obj_dict2['eid'],
+                                                                            PROPNAME_MAPPING['comment'], eid)
+                            obj_dict2.update({'best_time': o['best_time'], 'rate': likes, 'comment': comments})
+                            passed.append(obj_dict2)
                             bonus += int(o['bonus'])
                         if o['status'] == 'process':
                             d_time = datetime.datetime.fromtimestamp(ts) - \
