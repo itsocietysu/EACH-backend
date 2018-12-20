@@ -29,6 +29,8 @@ from each.Entities.EntityToken import EntityToken
 from each.Entities.EntityUser import EntityUser
 from each.Entities.EntityRun import EntityRun
 from each.Entities.EntityLocation import EntityLocation
+from each.Entities.EntityComment import EntityComment
+from each.Entities.EntityLike import EntityLike
 
 from each.Prop.PropMedia import PropMedia
 from each.Prop.PropInt import PropInt
@@ -569,7 +571,7 @@ def createGame(**request_handler_args):
             res = []
             for _ in objects:
                 obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
-                wide_info = EntityGame.get_wide_object(_.eid, ['image', 'scenario'])
+                wide_info = EntityGame.get_wide_object(_.eid, ['image', 'scenario', 'rating'])
                 obj_dict.update(wide_info)
                 res.append(obj_dict)
 
@@ -606,7 +608,7 @@ def updateGame(**request_handler_args):
             res = []
             for _ in objects:
                 obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
-                wide_info = EntityGame.get_wide_object(_.eid, ['image', 'scenario'])
+                wide_info = EntityGame.get_wide_object(_.eid, ['image', 'scenario', 'rating'])
                 obj_dict.update(wide_info)
                 res.append(obj_dict)
 
@@ -627,7 +629,7 @@ def getGameById(**request_handler_args):
     id = getIntPathParam("gameId", **request_handler_args)
     objects = EntityGame.get().filter_by(eid=id).all()
 
-    wide_info = EntityGame.get_wide_object(id, ['image', 'scenario'])
+    wide_info = EntityGame.get_wide_object(id, ['image', 'scenario', 'rating'])
 
     res = []
     for _ in objects:
@@ -649,7 +651,7 @@ def GetAllGamesById(**request_handler_args):
     res = []
     for _ in objects:
         obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
-        wide_info = EntityGame.get_wide_object(_.eid, ['image', 'scenario'])
+        wide_info = EntityGame.get_wide_object(_.eid, ['image', 'scenario', 'rating'])
         obj_dict.update(wide_info)
         res.append(obj_dict)
 
@@ -672,12 +674,50 @@ def getGamesByMuseumId(**request_handler_args):
     if len(quests['game']):
         for _ in quests['game']:
             obj_dict = _
-            wide_info = EntityGame.get_wide_object(int(_['eid']), ['image', 'scenario'])
+            wide_info = EntityGame.get_wide_object(int(_['eid']), ['image', 'scenario', 'rating'])
             obj_dict.update(wide_info)
             res.append(obj_dict)
 
     resp.body = obj_to_json(res)
     resp.status = falcon.HTTP_200
+
+
+def addRatingToGame(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    try:
+        _id_like = None
+        _id_comment = None
+        params = json.loads(req.stream.read().decode('utf-8'))
+        params['userid'] = req.context['user_id']
+
+        _id_like = EntityLike.add_from_json(params, 'rating')
+        if _id_like:
+            _id_comment = EntityComment.add_from_json(params, 'comment')
+
+            likes = EntityLike.get().filter_by(eid=_id_like).all()
+            comments = []
+            if _id_comment:
+                comments = EntityComment.get().filter_by(eid=_id_comment).all()
+
+            res = []
+            arr = range(len(likes))
+            for i in arr:
+                obj_dict = likes[i].to_dict(['userid', 'weight'])
+                if _id_comment:
+                    comment_info = comments[i].to_dict(['userid', 'text'])
+                    obj_dict.update(comment_info)
+                res.append(obj_dict)
+
+            resp.body = obj_to_json(res)
+            resp.status = falcon.HTTP_200
+            return
+    except ValueError:
+        resp.status = falcon.HTTP_405
+        return
+
+    resp.status = falcon.HTTP_501
 
 
 # End of game feature set functions
@@ -1040,6 +1080,7 @@ operation_handlers = {
     'addNewGame':           [createGame],
     'updateGame':           [updateGame],
     'deleteGame':           [deleteGame],
+    'addRatingToGame':      [addRatingToGame],
 
     # Feed
     'getFeedMockup':        [getFeedMockup],

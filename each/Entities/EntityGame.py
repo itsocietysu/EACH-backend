@@ -6,10 +6,13 @@ from sqlalchemy import Column, String, Integer, Date, Sequence
 from sqlalchemy.ext.declarative import declarative_base
 
 from each.Entities.EntityBase import EntityBase
+from each.Entities.EntityLike import EntityLike
 from each.Entities.EntityScenario import EntityScenario
 from each.Entities.EntityProp import EntityProp
 
 from each.Prop.PropBase import PropBase
+from each.Prop.PropComment import PropComment
+from each.Prop.PropLike import PropLike
 from each.Prop.PropMedia import PropMedia
 from each.Prop.PropScenario import PropScenario
 
@@ -159,11 +162,25 @@ class EntityGame(EntityBase, Base):
 
     @classmethod
     def get_wide_object(cls, eid, items=[]):
+        def rating(_eid, propid):
+            with DBConnection() as session:
+                likes = session.db.query(PropLike, EntityLike). \
+                    filter(PropLike.eid == _eid). \
+                    filter(PropLike.propid == propid).filter(PropLike.value == EntityLike.eid).all()
+                if len(likes):
+                    rate = 0
+                    for _ in likes:
+                        rate += _[1].weight
+                    rate /= len(likes)
+                    return rate
+            return 0
+
         PROPNAME_MAPPING = EntityProp.map_name_id()
 
         PROP_MAPPING = {
             'image': lambda _eid, _id: PropMedia.get_object_property(_eid, _id, ['eid', 'url']),
-            'scenario': lambda _eid, _id: PropScenario.get_object_property(_eid, _id, ['eid'])
+            'scenario': lambda _eid, _id: PropScenario.get_object_property(_eid, _id, ['eid']),
+            'rating': rating
         }
 
         result = {
@@ -183,7 +200,9 @@ class EntityGame(EntityBase, Base):
         PROP_MAPPING = {
             'game': lambda _eid, _id: PropGame.delete_value(_eid, False),
             'image': lambda _eid, _id: PropMedia.delete(_eid, _id, False),
-            'scenario': lambda _eid, _id: PropScenario.delete(_eid, _id, False)
+            'scenario': lambda _eid, _id: PropScenario.delete(_eid, _id, False),
+            'rating': lambda _eid, _id: PropLike.delete(_eid, _id, False),
+            'comment': lambda _eid, _id: PropComment.delete(_eid, _id, False)
         }
 
         for key, propid in PROPNAME_MAPPING.items():

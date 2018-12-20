@@ -149,7 +149,7 @@ INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'logo', 'me
 commit;
 INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'comment', 'comment');
 commit;
-INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'like', 'like');
+INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'rating', 'like');
 commit;
 INSERT INTO each_prop (eid, name, type) VALUES (NEXTVAL('each_seq'), 'location', 'location');
 commit;
@@ -304,9 +304,8 @@ DROP TABLE IF EXISTS "each_comment";
 CREATE TABLE "each_comment" (
 	"eid" BIGSERIAL NOT NULL PRIMARY KEY ,
 	"userid" BIGINT NOT NULL,
-	"text" TEXT NOT NULL,
-	"created" TIMESTAMP WITH TIME ZONE NOT NULL,
-	"updated" TIMESTAMP WITH TIME ZONE NOT NULL
+	"text" VARCHAR(256) NOT NULL,
+	"created" TIMESTAMP WITH TIME ZONE NOT NULL
 ) WITH (
   OIDS=FALSE
 );

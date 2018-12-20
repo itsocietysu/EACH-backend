@@ -77,7 +77,7 @@ class EntityUser(EntityBase, Base):
                 if len(games):
                     for g in games:
                         obj_dict = g.to_dict(['eid', 'ownerid', 'name', 'desc'])
-                        wide_info = EntityGame.get_wide_object(g.eid, ['image', 'scenario'])
+                        wide_info = EntityGame.get_wide_object(g.eid, ['image', 'scenario', 'rating'])
                         obj_dict.update(wide_info)
                         if o['best_time'] != '0':
                             obj_dict.update({'best_time': o['best_time']})

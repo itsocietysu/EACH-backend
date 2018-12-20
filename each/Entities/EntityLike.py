@@ -8,8 +8,10 @@ from each.Entities.EntityBase import EntityBase
 from each.Entities.EntityProp import EntityProp
 
 from each.db import DBConnection
+from each.utils import isAllInData
 
 Base = declarative_base()
+
 
 class EntityLike(EntityBase, Base):
     __tablename__ = 'each_like'
@@ -30,44 +32,27 @@ class EntityLike(EntityBase, Base):
         self.weight = weight
 
     @classmethod
-    def add_from_json(cls, data, userId):
+    def add_from_json(cls, data, prop):
         PROPNAME_MAPPING = EntityProp.map_name_id()
 
-        _id = None
-        if 'weight' in data and 'eid' in data:
-            weight = data['weight']
-            eid = data['eid']
-
-            from each.Prop.PropLike import PropLike
-            likes = PropLike.get_post_user_related(eid, PROPNAME_MAPPING['like'], userId)
-
-            if not len(likes):
-                new_entity = EntityLike(userId, weight)
-                _id = new_entity.add()
-
-                PropLike(eid, PROPNAME_MAPPING['like'], _id).add()
-
-        return _id
-
-
-    @classmethod
-    def update_from_json(cls, data):
         eid = None
 
-        if 'id' in data:
-            with DBConnection() as session:
-                eid = data['id']
-                entity = session.db.query(EntityLike).filter_by(eid=eid).all()
+        if isAllInData(['weight', 'userid', 'id', 'prop_like'], data):
+            weight = data['weight']
+            userid = data['userid']
+            _id = data['id']
 
-                if len(entity):
-                    for _ in entity:
-                        if 'weight' in data:
-                            _.weight = data['weight']
+            from each.Prop.PropLike import PropLike
+            likes = PropLike.get_like_user_related(_id, PROPNAME_MAPPING[prop], userid)
 
-                        session.db.commit()
+            if not len(likes):
+                new_entity = EntityLike(userid, weight)
+                eid = new_entity.add()
+
+                PropLike(_id, PROPNAME_MAPPING[prop], eid).add()
+
+            else:
+                eid = likes[0]['eid']
 
         return eid
-
-
-
 
