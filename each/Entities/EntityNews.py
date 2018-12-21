@@ -140,9 +140,10 @@ class EntityNews(EntityBase, Base):
         eid = None
         PROP_MAPPING = {
             'image':
-                lambda s, _eid, _id, _val: [PropMedia.delete(_eid, _id), PropMedia(_eid, _id,
-                                                           cls.convert_media_value_to_media_item('image', _eid, _val))
-                                                                    .add_or_update(session=s, no_commit=True)],
+                lambda s, _eid, _id, _val: [PropMedia.delete(_eid, _id, False),
+                                            PropMedia(_eid, _id,
+                                                      cls.convert_media_value_to_media_item('image', _eid, _val)).
+                                            add_or_update(session=s, no_commit=True)],
             'priority':
                 lambda s, _eid, _id, _val: PropInt(eid, _id, _val).add_or_update(session=s, no_commit=True)
         }

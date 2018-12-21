@@ -61,7 +61,7 @@ class EntityScenario(EntityBase, Base):
         def process_image(s, _eid, _id, _val):
             if 'delete' in _val:
                 for _ in _val['delete']:
-                    PropMedia.delete_by_value(_eid, _id, _)
+                    PropMedia.delete_by_value(_eid, _id, _, False)
             images = []
             if 'add' in _val:
                 for _ in _val['add']:
