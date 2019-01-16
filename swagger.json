@@ -1131,6 +1131,13 @@
             "description": "The type of the client app",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "expansion",
+            "in": "query",
+            "description": "Expansion information",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "responses": {

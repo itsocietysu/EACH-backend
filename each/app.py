@@ -820,6 +820,7 @@ def getToken(**request_handler_args):
     resp = request_handler_args['resp']
 
     type = getStringQueryParam('type', **request_handler_args)
+    expansion = getBoolQueryParam('expansion', **request_handler_args)
     if type == 'swagger':
         query = parse_qs(req.stream.read().decode('utf-8'))
         redirect_uri = query['redirect_uri'][0]
@@ -838,6 +839,9 @@ def getToken(**request_handler_args):
     if not error:
         token_dict = token.to_dict(['eid', 'access_token', 'type', 'user_id'])
         user_dict = user.to_dict(['name', 'image', 'email', 'access_type'])
+        if expansion:
+            wide_info = EntityUser.get_wide_object(user.eid)
+            user_dict.update(wide_info)
         token_dict.update(user_dict)
 
         resp.body = obj_to_json(token_dict)
