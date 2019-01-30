@@ -180,7 +180,8 @@ class EntityGame(EntityBase, Base):
             from each.Entities.EntityUser import EntityUser
 
             def get_comment(note):
-                fields = {'user': note[2].to_dict(['name', 'email']), 'like': note[0].to_dict(['weight', 'created'])}
+                fields = {'eid': note[0].eid, 'user': note[2].to_dict(['name', 'email']),
+                          'like': note[0].to_dict(['weight', 'created'])}
                 if note[1] is not None:
                     fields['comment'] = note[1].to_dict(['text', 'created'])
                 return fields
