@@ -441,6 +441,13 @@
             "required": true,
             "type": "integer",
             "format": "int64"
+          },
+          {
+            "name": "feedback",
+            "in": "query",
+            "description": "Feedback information",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "responses": {
@@ -483,6 +490,13 @@
             "required": true,
             "type": "integer",
             "format": "int64"
+          },
+          {
+            "name": "feedback",
+            "in": "query",
+            "description": "Feedback information",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "responses": {
@@ -522,6 +536,13 @@
             "required": true,
             "type": "integer",
             "format": "int64"
+          },
+          {
+            "name": "feedback",
+            "in": "query",
+            "description": "Feedback information",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "responses": {

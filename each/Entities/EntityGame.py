@@ -2,10 +2,11 @@ from collections import OrderedDict
 import time
 import datetime
 
-from sqlalchemy import Column, String, Integer, Date, Sequence
+from sqlalchemy import Column, String, Integer, Date, Sequence, or_
 from sqlalchemy.ext.declarative import declarative_base
 
 from each.Entities.EntityBase import EntityBase
+from each.Entities.EntityComment import EntityComment
 from each.Entities.EntityLike import EntityLike
 from each.Entities.EntityScenario import EntityScenario
 from each.Entities.EntityProp import EntityProp
@@ -175,12 +176,35 @@ class EntityGame(EntityBase, Base):
                     return rate
             return 0
 
+        def comment(_eid, propid):
+            from each.Entities.EntityUser import EntityUser
+
+            def get_comment(note):
+                fields = {'user': note[2].to_dict(['name', 'email']), 'like': note[0].to_dict(['weight', 'created'])}
+                if note[1] is not None:
+                    fields['comment'] = note[1].to_dict(['text', 'created'])
+                return fields
+
+            with DBConnection() as session:
+                comments = session.db.query(EntityLike, EntityComment, EntityUser). \
+                    join(EntityComment, EntityLike.userid == EntityComment.userid, isouter=True). \
+                    join(EntityUser, EntityUser.eid == EntityLike.userid). \
+                    filter(PropComment.eid == _eid). \
+                    filter(PropComment.propid == propid). \
+                    filter(or_(EntityComment.eid == PropComment.value, EntityComment.eid == None)). \
+                    filter(PropLike.eid == _eid). \
+                    filter(PropLike.propid == PROPNAME_MAPPING['rating']).filter(PropLike.value == EntityLike.eid).all()
+                if len(comments):
+                    return [get_comment(_) for _ in comments]
+            return []
+
         PROPNAME_MAPPING = EntityProp.map_name_id()
 
         PROP_MAPPING = {
             'image': lambda _eid, _id: PropMedia.get_object_property(_eid, _id, ['eid', 'url']),
             'scenario': lambda _eid, _id: PropScenario.get_object_property(_eid, _id, ['eid']),
-            'rating': rating
+            'rating': rating,
+            'comment': comment
         }
 
         result = {
