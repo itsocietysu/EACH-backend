@@ -570,7 +570,7 @@ def createGame(**request_handler_args):
 
             res = []
             for _ in objects:
-                obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
+                obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc', 'active'])
                 wide_info = EntityGame.get_wide_object(_.eid, ['image', 'scenario', 'rating'])
                 obj_dict.update(wide_info)
                 res.append(obj_dict)
@@ -612,7 +612,7 @@ def updateGame(**request_handler_args):
 
             res = []
             for _ in objects:
-                obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
+                obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc', 'active'])
                 wide_info = EntityGame.get_wide_object(_.eid, wide_info_arr)
                 obj_dict.update(wide_info)
                 res.append(obj_dict)
@@ -642,7 +642,7 @@ def getGameById(**request_handler_args):
 
     res = []
     for _ in objects:
-        obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
+        obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc', 'active'])
         obj_dict.update(wide_info)
         res.append(obj_dict)
 
@@ -655,7 +655,12 @@ def GetAllGamesById(**request_handler_args):
     resp = request_handler_args['resp']
 
     id = getIntPathParam("ownerId", **request_handler_args)
-    objects = EntityGame.get().filter_by(ownerid=id).all()
+    active = getBoolQueryParam('active', **request_handler_args)
+    objects = []
+    if active:
+        objects = EntityGame.get().filter_by(ownerid=id, active=True).all()
+    else:
+        objects = EntityGame.get().filter_by(ownerid=id).all()
     feedback = getBoolQueryParam('feedback', **request_handler_args)
 
     res = []
@@ -663,7 +668,7 @@ def GetAllGamesById(**request_handler_args):
     if feedback:
         wide_info_arr = ['image', 'scenario', 'rating', 'comment']
     for _ in objects:
-        obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
+        obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc', 'active'])
         wide_info = EntityGame.get_wide_object(_.eid, wide_info_arr)
         obj_dict.update(wide_info)
         res.append(obj_dict)
@@ -677,6 +682,7 @@ def getGamesByMuseumId(**request_handler_args):
     resp = request_handler_args['resp']
 
     id = getIntPathParam("museumId", **request_handler_args)
+    active = getBoolQueryParam('active', **request_handler_args)
     feedback = getBoolQueryParam('feedback', **request_handler_args)
 
     if id is None:
@@ -691,10 +697,11 @@ def getGamesByMuseumId(**request_handler_args):
         wide_info_arr = ['image', 'scenario', 'rating', 'comment']
     if len(quests['game']):
         for _ in quests['game']:
-            obj_dict = _
-            wide_info = EntityGame.get_wide_object(int(_['eid']), wide_info_arr)
-            obj_dict.update(wide_info)
-            res.append(obj_dict)
+            if (active and _['active'] == 'True') or not active:
+                obj_dict = _
+                wide_info = EntityGame.get_wide_object(int(_['eid']), wide_info_arr)
+                obj_dict.update(wide_info)
+                res.append(obj_dict)
 
     resp.body = obj_to_json(res)
     resp.status = falcon.HTTP_200

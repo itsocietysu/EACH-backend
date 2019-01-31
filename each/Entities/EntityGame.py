@@ -2,7 +2,7 @@ from collections import OrderedDict
 import time
 import datetime
 
-from sqlalchemy import Column, String, Integer, Date, Sequence
+from sqlalchemy import Column, String, Integer, Date, Sequence, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 
 from each.Entities.EntityBase import EntityBase
@@ -32,12 +32,13 @@ class EntityGame(EntityBase, Base):
     name_EN = Column(String)
     desc_RU = Column(String)
     desc_EN = Column(String)
+    active = Column(Boolean)
     created = Column(Date)
     updated = Column(Date)
 
-    json_serialize_items_list = ['eid', 'ownerid', 'name', 'desc', 'created', 'updated']
+    json_serialize_items_list = ['eid', 'ownerid', 'name', 'desc', 'active', 'created', 'updated']
 
-    def __init__(self, ownerid, name_RU, name_EN, desc_RU, desc_EN):
+    def __init__(self, ownerid, name_RU, name_EN, desc_RU, desc_EN, active):
         super().__init__()
 
         self.ownerid = ownerid
@@ -45,6 +46,7 @@ class EntityGame(EntityBase, Base):
         self.desc_RU = desc_RU
         self.name_EN = name_EN
         self.desc_EN = desc_EN
+        self.active = active
 
         ts = time.time()
         self.created = self.updated = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M')
@@ -103,8 +105,8 @@ class EntityGame(EntityBase, Base):
                                                     .add(session=s, no_commit=True)
         }
 
-        if isAllInData(['name', 'desc', 'ownerid', 'prop'], data):
-            create_args = {'ownerid': data['ownerid']}
+        if isAllInData(['name', 'desc', 'ownerid', 'active', 'prop'], data):
+            create_args = {'ownerid': data['ownerid'], 'active': data['active']}
             for _ in cls.locales:
                 create_args['name_%s' % _] = data['name'][_] if _ in data['name'] else ''
                 create_args['desc_%s' % _] = data['desc'][_] if _ in data['desc'] else ''
@@ -149,6 +151,8 @@ class EntityGame(EntityBase, Base):
                             for f in fields:
                                 if f in data and l in data[f]:
                                     setattr(_, '%s_%s' % (f, l), data[f][l])
+                        if 'active' in data:
+                            setattr(_, 'active', data['active'])
 
                         session.db.commit()
 

@@ -450,6 +450,13 @@
             "format": "int64"
           },
           {
+            "name": "active",
+            "in": "query",
+            "description": "Only active games",
+            "required": false,
+            "type": "boolean"
+          },
+          {
             "name": "feedback",
             "in": "query",
             "description": "Feedback information",
@@ -497,6 +504,13 @@
             "required": true,
             "type": "integer",
             "format": "int64"
+          },
+          {
+            "name": "active",
+            "in": "query",
+            "description": "Only active games",
+            "required": false,
+            "type": "boolean"
           },
           {
             "name": "feedback",
@@ -1717,6 +1731,9 @@
               "example": "Great quest!"
             }
           }
+        },
+        "active": {
+          "type": "boolean"
         },
         "prop": {
           "type": "object",
