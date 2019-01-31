@@ -402,6 +402,13 @@
             "schema": {
               "$ref": "#/definitions/Game"
             }
+          },
+          {
+            "name": "feedback",
+            "in": "query",
+            "description": "Feedback information",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "responses": {
@@ -446,6 +453,13 @@
             "name": "active",
             "in": "query",
             "description": "Only active games",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "feedback",
+            "in": "query",
+            "description": "Feedback information",
             "required": false,
             "type": "boolean"
           }
@@ -497,6 +511,13 @@
             "description": "Only active games",
             "required": false,
             "type": "boolean"
+          },
+          {
+            "name": "feedback",
+            "in": "query",
+            "description": "Feedback information",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "responses": {
@@ -536,6 +557,13 @@
             "required": true,
             "type": "integer",
             "format": "int64"
+          },
+          {
+            "name": "feedback",
+            "in": "query",
+            "description": "Feedback information",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "responses": {

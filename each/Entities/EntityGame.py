@@ -6,6 +6,7 @@ from sqlalchemy import Column, String, Integer, Date, Sequence, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 
 from each.Entities.EntityBase import EntityBase
+from each.Entities.EntityComment import EntityComment
 from each.Entities.EntityLike import EntityLike
 from each.Entities.EntityScenario import EntityScenario
 from each.Entities.EntityProp import EntityProp
@@ -179,12 +180,27 @@ class EntityGame(EntityBase, Base):
                     return rate
             return 0
 
+        def comment(_eid, propid):
+            from each.Entities.EntityUser import EntityUser
+
+            with DBConnection() as session:
+                comments = session.db.query(EntityComment, EntityUser). \
+                    join(EntityUser, EntityUser.eid == EntityComment.userid). \
+                    filter(PropComment.eid == _eid). \
+                    filter(PropComment.propid == propid). \
+                    filter(EntityComment.eid == PropComment.value).order_by(EntityComment.created.desc()).all()
+                if len(comments):
+                    return [{'eid': _[0].eid, 'user': _[1].to_dict(['name', 'email']),
+                            'comment': _[0].to_dict(['text', 'created'])} for _ in comments]
+            return []
+
         PROPNAME_MAPPING = EntityProp.map_name_id()
 
         PROP_MAPPING = {
             'image': lambda _eid, _id: PropMedia.get_object_property(_eid, _id, ['eid', 'url']),
             'scenario': lambda _eid, _id: PropScenario.get_object_property(_eid, _id, ['eid']),
-            'rating': rating
+            'rating': rating,
+            'comment': comment
         }
 
         result = {
