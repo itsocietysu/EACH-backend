@@ -1704,6 +1704,9 @@
             }
           }
         },
+        "active": {
+          "type": "boolean"
+        },
         "prop": {
           "type": "object",
           "properties": {
