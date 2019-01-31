@@ -194,7 +194,8 @@ class EntityGame(EntityBase, Base):
                     filter(PropComment.propid == propid). \
                     filter(or_(EntityComment.eid == PropComment.value, EntityComment.eid == None)). \
                     filter(PropLike.eid == _eid). \
-                    filter(PropLike.propid == PROPNAME_MAPPING['rating']).filter(PropLike.value == EntityLike.eid).all()
+                    filter(PropLike.propid == PROPNAME_MAPPING['rating']).filter(PropLike.value == EntityLike.eid). \
+                    order_by(EntityLike.created.desc()).all()
                 if len(comments):
                     return [get_comment(_) for _ in comments]
             return []
