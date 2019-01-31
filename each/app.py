@@ -595,6 +595,7 @@ def updateGame(**request_handler_args):
 
     try:
         params = json.loads(req.stream.read().decode('utf-8'))
+        feedback = getBoolQueryParam('feedback', **request_handler_args)
 
         # if params['id'] != id_email or not EntitySuperUser.is_id_super_admin(id_email):
         #    resp.status = falcon.HTTP_403
@@ -605,10 +606,14 @@ def updateGame(**request_handler_args):
         if id:
             objects = EntityGame.get().filter_by(eid=id).all()
 
+            wide_info_arr = ['image', 'scenario', 'rating']
+            if feedback:
+                wide_info_arr = ['image', 'scenario', 'rating', 'comment']
+
             res = []
             for _ in objects:
                 obj_dict = _.to_dict(['eid', 'ownerid', 'name', 'desc'])
-                wide_info = EntityGame.get_wide_object(_.eid, ['image', 'scenario', 'rating'])
+                wide_info = EntityGame.get_wide_object(_.eid, wide_info_arr)
                 obj_dict.update(wide_info)
                 res.append(obj_dict)
 

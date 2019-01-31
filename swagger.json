@@ -402,6 +402,13 @@
             "schema": {
               "$ref": "#/definitions/Game"
             }
+          },
+          {
+            "name": "feedback",
+            "in": "query",
+            "description": "Feedback information",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "responses": {
