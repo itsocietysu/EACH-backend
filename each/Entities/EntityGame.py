@@ -2,7 +2,7 @@ from collections import OrderedDict
 import time
 import datetime
 
-from sqlalchemy import Column, String, Integer, Date, Sequence, or_
+from sqlalchemy import Column, String, Integer, Date, Sequence
 from sqlalchemy.ext.declarative import declarative_base
 
 from each.Entities.EntityBase import EntityBase
@@ -179,25 +179,15 @@ class EntityGame(EntityBase, Base):
         def comment(_eid, propid):
             from each.Entities.EntityUser import EntityUser
 
-            def get_comment(note):
-                fields = {'eid': note[0].eid, 'user': note[2].to_dict(['name', 'email']),
-                          'like': note[0].to_dict(['weight', 'created'])}
-                if note[1] is not None:
-                    fields['comment'] = note[1].to_dict(['text', 'created'])
-                return fields
-
             with DBConnection() as session:
-                comments = session.db.query(EntityLike, EntityComment, EntityUser). \
-                    join(EntityComment, EntityLike.userid == EntityComment.userid, isouter=True). \
-                    join(EntityUser, EntityUser.eid == EntityLike.userid). \
+                comments = session.db.query(EntityComment, EntityUser). \
+                    join(EntityUser, EntityUser.eid == EntityComment.userid). \
                     filter(PropComment.eid == _eid). \
                     filter(PropComment.propid == propid). \
-                    filter(or_(EntityComment.eid == PropComment.value, EntityComment.eid == None)). \
-                    filter(PropLike.eid == _eid). \
-                    filter(PropLike.propid == PROPNAME_MAPPING['rating']).filter(PropLike.value == EntityLike.eid). \
-                    order_by(EntityLike.created.desc()).all()
+                    filter(EntityComment.eid == PropComment.value).order_by(EntityComment.created.desc()).all()
                 if len(comments):
-                    return [get_comment(_) for _ in comments]
+                    return [{'eid': _[0].eid, 'user': _[1].to_dict(['name', 'email']),
+                            'comment': _[0].to_dict(['text', 'created'])} for _ in comments]
             return []
 
         PROPNAME_MAPPING = EntityProp.map_name_id()
