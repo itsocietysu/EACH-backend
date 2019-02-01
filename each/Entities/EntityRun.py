@@ -70,10 +70,10 @@ class EntityRun(EntityBase, Base):
     def update_from_json(cls, data):
         from each.Prop.PropRun import PropRun
 
-        def create_new_entity():
+        def create_new_entity(session):
             new_entity = EntityRun(game)
             n_eid = new_entity.add()
-            PropRun(user, PROPNAME_MAPPING['run'], n_eid).add()
+            PropRun(user, PROPNAME_MAPPING['run'], n_eid).add(session=session)
             return [n_eid]
 
         PROPNAME_MAPPING = EntityProp.map_name_id()
@@ -96,8 +96,8 @@ class EntityRun(EntityBase, Base):
                               filter(PropRun.propid == PROPNAME_MAPPING['run']).
                               filter(PropRun.value == EntityRun.eid).filter(EntityRun.game_id == game).all()]
                     if not len(entity):
-                        _eid = create_new_entity()
-                        entity = session.db.query(EntityRun).filter_by(eid=_eid)
+                        _eid = create_new_entity(session)
+                        entity = session.db.query(EntityRun).filter(EntityRun.eid.in_(_eid)).all()
                     times = session.db.query(PropInterval).filter_by(eid=user).all()
                     if not len(times):
                         PropInterval(user, PROPNAME_MAPPING['time_in_game'], datetime.timedelta(seconds=0)). \
@@ -109,8 +109,7 @@ class EntityRun(EntityBase, Base):
                         for _ in entity:
                             if steps == 0:
                                 _.start_time = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
-                                d_time = datetime.datetime.fromtimestamp(ts) - \
-                                    datetime.datetime.strptime(_.start_time, '%Y-%m-%d %H:%M:%S')
+                                d_time = datetime.timedelta(seconds=0)
                             else:
                                 d_time = datetime.datetime.fromtimestamp(ts) - \
                                     datetime.datetime.strptime(_.start_time.strftime('%Y-%m-%d %H:%M:%S'),
@@ -132,7 +131,7 @@ class EntityRun(EntityBase, Base):
                                     _.status = 'pass'
                                     if _.bonus == 0:
                                         _.bonus = int(sc['difficulty_bounty'])
-                                    if _.best_time == 0 or _.best_time > d_time:
+                                    if _.best_time == datetime.timedelta(seconds=0) or _.best_time > d_time:
                                         _.best_time = d_time
                                         for t in times:
                                             t.value += d_time
