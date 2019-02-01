@@ -17,6 +17,7 @@ COPY VERSION 		./VERSION
 COPY museum.json        ./museum.json
 COPY feed.json          ./feed.json
 COPY client_config.json ./client_config.json
+COPY agreement.txt      ./agreement.txt
 COPY startup.sh         ./startup.sh
 RUN chmod 777 ./startup.sh && \
     sed -i 's/\r//' ./startup.sh

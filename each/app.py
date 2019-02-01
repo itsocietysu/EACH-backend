@@ -17,7 +17,7 @@ from each import utils
 from each.db import DBConnection
 from each.serve_swagger import SpecServer
 from each.utils import obj_to_json, getIntPathParam, getIntQueryParam, getStringQueryParam, getBoolQueryParam, \
-    admin_access_type_required
+    admin_access_type_required, getQueryParam
 
 from each.Entities.EntityBase import EntityBase
 from each.Entities.EntityMedia import EntityMedia
@@ -1092,6 +1092,54 @@ def findLocationByName(**request_handler_args):
 # End of location feature set functions
 # -------------------------------------
 
+# Agreement feature set functions
+# -------------------------------
+
+@admin_access_type_required
+def updateAgreement(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    try:
+        text = getQueryParam('text', **request_handler_args)
+
+        if text is not None and text.headers['content-type'] == "text/plain" and text.filename[-3:] == "txt":
+
+            _bytes = text.file.read()
+
+            open('./agreement.txt', 'wb').write(_bytes)
+
+            resp.body = obj_to_json([])
+            resp.status = falcon.HTTP_200
+            return
+    except ValueError:
+        resp.status = falcon.HTTP_405
+        return
+
+    resp.status = falcon.HTTP_501
+
+
+def getAgreement(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    try:
+        text = open('./agreement.txt', 'rb').read().decode("windows-1251")
+        res = [{'text': text}]
+
+        resp.body = obj_to_json(res)
+        resp.status = falcon.HTTP_200
+        return
+    except ValueError:
+        resp.status = falcon.HTTP_405
+        return
+
+    resp.status = falcon.HTTP_501
+
+# End of agreement feature set functions
+# -------------------------------------
+
+
 operation_handlers = {
     # Museums
     'getAllMuseumsMockup':  [getAllMuseumsMockup],
@@ -1139,6 +1187,10 @@ operation_handlers = {
     'updateScenario':       [updateScenario],
     'checkImageAnswer':     [checkImageAnswer],
 
+    # User agreement
+    'updateAgreement':      [updateAgreement],
+    'getAgreement':         [getAgreement],
+
     'getVersion':           [getVersion],
     'httpDefault':          [httpDefault]
 }
@@ -1184,6 +1236,7 @@ class Auth(object):
                      '/each/museum/all|'
                      '/each/token/get|'
                      '/each/scenario/|'
+                     '/each/agreement/get|'
                      '/each/game/all/museum/).*', req.relative_uri):
             return
 
