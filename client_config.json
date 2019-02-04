@@ -1,0 +1,31 @@
+{
+  "clients": {
+    "each": {
+      "client_id": "",
+      "client_secret": "",
+      "access_token_url": "http://eachdev.itsociety.su:5000/oauth2/token",
+      "token_info_url": "http://eachdev.itsociety.su:5000/oauth2/tokeninfo?access_token=",
+      "revoke_token_url": "http://eachdev.itsociety.su:5000/oauth2/revoke_bearer"
+    },
+    "swagger": {
+      "client_id": "",
+      "client_secret": "",
+      "access_token_url": "http://eachdev.itsociety.su:5000/oauth2/token",
+      "token_info_url": "http://eachdev.itsociety.su:5000/oauth2/tokeninfo?access_token=",
+      "revoke_token_url": "http://eachdev.itsociety.su:5000/oauth2/revoke_bearer"
+    },
+    "vkontakte": {
+      "client_id": "",
+      "client_secret": "",
+      "access_token_url": "https://oauth.vk.com/access_token",
+      "token_info_url": "https://api.vk.com/method/users.get?fields=photo_400_orig&v=5.85&access_token="
+    },
+    "google": {
+      "client_id": "",
+      "client_secret": "",
+      "access_token_url": "https://www.googleapis.com/oauth2/v4/token",
+      "token_info_url": "https://www.googleapis.com/oauth2/v2/userinfo?access_token=",
+      "revoke_token_url": "https://accounts.google.com/o/oauth2/revoke"
+    }
+  }
+}
