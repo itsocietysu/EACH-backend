@@ -163,7 +163,7 @@ class EntityScenario(EntityBase, Base):
                         if 0 <= int(stepid) < scenario['step_count']:
                             step = scenario['steps'][stepid]
                             if step['type'] == 'ar_paint_question':
-                                image_path = '.%s' % step['desc']['target']['uri']["http://each.itsociety.su:4201/each"
+                                image_path = '.%s' % step['desc']['target']['uri']["http://eachdev.itsociety.su:4201/each"
                                                                                    .__len__():]
 
                                 similar = image_similarity(base, image_path, img2vec)
@@ -184,7 +184,7 @@ class EntityScenario(EntityBase, Base):
                         for i in range(scenario['step_count']):
                             step = scenario['steps'][i]
                             if step['type'] == 'ar_paint_question':
-                                image_path = '.%s' % step['desc']['target']['uri']["http://each.itsociety.su:4201/each"
+                                image_path = '.%s' % step['desc']['target']['uri']["http://eachdev.itsociety.su:4201/each"
                                                                                    .__len__():]
                                 img = io.imread(image_path)
                                 ratio = float(img.shape[1]) / img.shape[0]
