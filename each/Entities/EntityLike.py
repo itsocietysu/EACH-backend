@@ -37,7 +37,7 @@ class EntityLike(EntityBase, Base):
 
         eid = None
 
-        if isAllInData(['weight', 'userid', 'id', 'prop_like'], data):
+        if isAllInData(['weight', 'userid', 'id'], data):
             weight = data['weight']
             userid = data['userid']
             _id = data['id']
