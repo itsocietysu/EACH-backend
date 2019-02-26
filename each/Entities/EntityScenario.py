@@ -163,8 +163,7 @@ class EntityScenario(EntityBase, Base):
                         if 0 <= int(stepid) < scenario['step_count']:
                             step = scenario['steps'][stepid]
                             if step['type'] == 'ar_paint_question':
-                                image_path = '.%s' % step['desc']['target']['uri']["http://eachdev.itsociety.su:4201/each"
-                                                                                   .__len__():]
+                                image_path = '.%s' % step['desc']['target']['uri'][len("http://" + EntityBase.host):]
 
                                 similar = image_similarity(base, image_path, img2vec)
 
