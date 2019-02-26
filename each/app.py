@@ -1259,7 +1259,7 @@ class Auth(object):
                 if len(req.auth.split(" ")) > 2:
                     type = req.auth.split(" ")[2].strip()
                 else:
-                    type = 'swagger'
+                    type = 'each'
             else:
                 raise falcon.HTTPUnauthorized(description='Token was not provided in schema [bearer <Token>]',
                                               challenges=['Bearer realm=http://GOOOOGLE'])
