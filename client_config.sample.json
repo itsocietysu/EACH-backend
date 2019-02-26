@@ -7,6 +7,13 @@
       "token_info_url": "http://eachdev.itsociety.su:5000/oauth2/tokeninfo?access_token=",
       "revoke_token_url": "http://eachdev.itsociety.su:5000/oauth2/revoke_bearer"
     },
+    "swagger": {
+      "client_id": "",
+      "client_secret": "",
+      "access_token_url": "http://eachdev.itsociety.su:5000/oauth2/token",
+      "token_info_url": "http://eachdev.itsociety.su:5000/oauth2/tokeninfo?access_token=",
+      "revoke_token_url": "http://eachdev.itsociety.su:5000/oauth2/revoke_bearer"
+    },
     "vkontakte": {
       "client_id": "",
       "client_secret": "",

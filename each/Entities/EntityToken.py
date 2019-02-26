@@ -28,6 +28,7 @@ class EntityToken(EntityBase, Base):
     json_serialize_items_list = ['eid', 'user_id' 'access_token', 'type', 'created_at']
 
     fields_each = {'name': 'name', 'email': 'email', 'image': 'image', 'access_type': 'access_type'}
+    fields_swagger = fields_each
     fields_vkontakte = {'name': 'first_name', 'image': 'photo_400_orig'}
     fields_google = {'name': 'given_name', 'email': 'email', 'image': 'picture'}
 
