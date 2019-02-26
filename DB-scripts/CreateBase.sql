@@ -14,7 +14,7 @@ DROP TYPE IF EXISTS each_user_access_type CASCADE;
 CREATE TYPE each_user_access_type AS ENUM ('admin', 'user');
 
 DROP TYPE IF EXISTS each_clients_type CASCADE;
-CREATE TYPE each_clients_type AS ENUM ('each', 'vkontakte', 'google');
+CREATE TYPE each_clients_type AS ENUM ('each', 'swagger', 'vkontakte', 'google');
 
 DROP TYPE IF EXISTS each_game_status_type CASCADE;
 CREATE TYPE each_game_status_type AS ENUM ('process', 'pass');
