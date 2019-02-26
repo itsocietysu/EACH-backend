@@ -32,9 +32,9 @@ class EntityToken(EntityBase, Base):
     fields_vkontakte = {'name': 'first_name', 'image': 'photo_400_orig'}
     fields_google = {'name': 'given_name', 'email': 'email', 'image': 'picture'}
 
-    allowed_types = ['each', 'vkontakte', 'google', 'swagger']
-    granted_types = ['each', 'google', 'swagger']
-    revoke_types = ['each', 'google', 'swagger']
+    allowed_types = ['each', 'vkontakte', 'google']
+    granted_types = ['each', 'google']
+    revoke_types = ['each', 'google']
 
     def __init__(self, access_token, type, user_id):
         super().__init__()
