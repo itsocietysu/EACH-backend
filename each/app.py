@@ -727,9 +727,45 @@ def addRatingToGame(**request_handler_args):
                 comments = EntityComment.get().filter_by(eid=_id_comment).all()
 
             res = []
-            arr = range(len(likes))
-            for i in arr:
-                obj_dict = likes[i].to_dict(['userid', 'weight'])
+            for i, like in enumerate(likes):
+                obj_dict = like.to_dict(['userid', 'weight'])
+                if _id_comment:
+                    comment_info = comments[i].to_dict(['userid', 'text'])
+                    obj_dict.update(comment_info)
+                res.append(obj_dict)
+
+            resp.body = obj_to_json(res)
+            resp.status = falcon.HTTP_200
+            return
+    except ValueError:
+        resp.status = falcon.HTTP_405
+        return
+
+    resp.status = falcon.HTTP_501
+
+
+def updateRatingToGame(**request_handler_args):
+    req = request_handler_args['req']
+    resp = request_handler_args['resp']
+
+    try:
+        _id_like = None
+        _id_comment = None
+        params = json.loads(req.stream.read().decode('utf-8'))
+        params['userid'] = req.context['user_id']
+
+        _id_like = EntityLike.update_from_json(params, 'rating')
+        if _id_like:
+            _id_comment = EntityComment.update_from_json(params, 'comment')
+
+            likes = EntityLike.get().filter_by(eid=_id_like).all()
+            comments = []
+            if _id_comment:
+                comments = EntityComment.get().filter_by(eid=_id_comment).all()
+
+            res = []
+            for i, like in enumerate(likes):
+                obj_dict = like.to_dict(['userid', 'weight'])
                 if _id_comment:
                     comment_info = comments[i].to_dict(['userid', 'text'])
                     obj_dict.update(comment_info)
@@ -1158,6 +1194,7 @@ operation_handlers = {
     'updateGame':           [updateGame],
     'deleteGame':           [deleteGame],
     'addRatingToGame':      [addRatingToGame],
+    'updateRatingToGame':   [updateRatingToGame],
 
     # Feed
     'getFeedMockup':        [getFeedMockup],

@@ -57,3 +57,28 @@ class EntityComment(EntityBase, Base):
                 eid = comments[0]['eid']
 
         return eid
+
+    @classmethod
+    def update_from_json(cls, data, prop):
+        PROPNAME_MAPPING = EntityProp.map_name_id()
+
+        eid = None
+
+        if isAllInData(['userid', 'id'], data):
+            userid = data['userid']
+            _id = data['id']
+
+            from each.Prop.PropComment import PropComment
+            with DBConnection() as session:
+                comments = session.db.query(PropComment, EntityComment).filter(PropComment.eid == _id). \
+                    filter(PropComment.propid == PROPNAME_MAPPING[prop]). \
+                    filter(PropComment.value == EntityComment.eid).filter(EntityComment.userid == userid).all()
+
+                if len(comments):
+                    eid = comments[0][0].value
+                    if 'text' in data:
+                        for _ in comments:
+                            setattr(_[1], 'text', data['text'])
+                        session.db.commit()
+
+        return eid

@@ -56,3 +56,27 @@ class EntityLike(EntityBase, Base):
 
         return eid
 
+    @classmethod
+    def update_from_json(cls, data, prop):
+        PROPNAME_MAPPING = EntityProp.map_name_id()
+
+        eid = None
+
+        if isAllInData(['userid', 'id'], data):
+            userid = data['userid']
+            _id = data['id']
+
+            from each.Prop.PropLike import PropLike
+            with DBConnection() as session:
+                likes = session.db.query(PropLike, EntityLike).filter(PropLike.eid == _id).\
+                    filter(PropLike.propid == PROPNAME_MAPPING[prop]).\
+                    filter(PropLike.value == EntityLike.eid).filter(EntityLike.userid == userid).all()
+
+                if len(likes):
+                    eid = likes[0][0].value
+                    if 'weight' in data:
+                        for _ in likes:
+                            setattr(_[1], 'weight', data['weight'])
+                        session.db.commit()
+
+        return eid
