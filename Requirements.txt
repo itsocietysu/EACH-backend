@@ -9,3 +9,4 @@ scipy
 scikit-image
 matplotlib
 falcon-multipart
+pillow

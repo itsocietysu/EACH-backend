@@ -2,16 +2,15 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine.url import URL
 from sqlalchemy.orm import sessionmaker
 
-
 class DBConnection:
     s_owner_token = None
 
     s_dbParams = {
-        'host': 'localhost',
-        'port': 5432,
-        'sid': 'EACH',
-        'user': 'each_admin',
-        'password': "asdfghjkl;'",
+        'host': '185.122.59.110',
+        'port': 5433,
+        'sid': 'each_dev',
+        'user': 'each',
+        'password': "Ellesmera2006",
         'pool_size': 2
     }
 

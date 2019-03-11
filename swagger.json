@@ -10,11 +10,35 @@
   "tags": [
     {
       "name": "default",
-      "description": "default feature set"
+      "description": "Default feature set"
     },
     {
       "name": "Museum",
       "description": "Museum feature set"
+    },
+    {
+      "name": "Quest",
+      "description": "Quests feature set"
+    },
+    {
+      "name": "Scenario",
+      "description": "Scenario feature set"
+    },
+    {
+      "name": "Feed",
+      "description": "Feed feature set"
+    },
+    {
+      "name": "User",
+      "description": "User feature set"
+    },
+    {
+      "name": "Location",
+      "description": "Location feature set"
+    },
+    {
+      "name": "Agreement",
+      "description": "User agreement feature set"
     }
   ],
   "schemes": [
@@ -52,8 +76,167 @@
         "tags": [
           "Museum"
         ],
+        "summary": "Returns list of museums mockup",
+        "description": "",
+        "operationId": "getAllMuseumsMockup",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/add": {
+      "post": {
+        "tags": [
+          "Museum"
+        ],
+        "summary": "Add a new museum",
+        "description": "",
+        "operationId": "addNewMuseum",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "new_museum",
+            "in": "body",
+            "description": "User encoded in JSON string",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Museum"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "405": {
+            "description": "Validation exception"
+          },
+          "412": {
+            "description": "Name already taken"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/update": {
+      "put": {
+        "tags": [
+          "Museum"
+        ],
+        "summary": "Update existing museum info",
+        "description": "",
+        "operationId": "updateMuseum",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "new_museum",
+            "in": "body",
+            "description": "User encoded in JSON string",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Museum"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Museum not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/museum/tape":{
+      "get": {
+        "tags": [
+          "Museum"
+        ],
+        "summary": "Get museums in tape",
+        "description": "Returns a list of museums descriptions in set tape",
+        "operationId": "getTapeMuseums",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "FirstMuseum",
+            "in": "query",
+            "description": "Index of the first museum to be shown (from 0)",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "LastMuseum",
+            "in": "query",
+            "description": "Index of the last museum to be shown (including)",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/museum/all": {
+      "get": {
+        "tags": [
+          "Museum"
+        ],
         "summary": "Returns list of available museums",
-        "description": "Returns list of available museums",
+        "description": "",
         "operationId": "getAllMuseums",
         "produces": [
           "application/json"
@@ -72,6 +255,1483 @@
           }
         ]
       }
+    },
+    "/museum/{Id}": {
+      "get": {
+        "tags": [
+          "Museum"
+        ],
+        "summary": "Find museum by ID",
+        "description": "Returns a museum name",
+        "operationId": "getMuseum",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Id",
+            "in": "path",
+            "description": "ID of museum to return",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Museum"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Museum not found"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Museum"
+        ],
+        "summary": "Remove museum",
+        "description": "",
+        "operationId": "deleteMuseum",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Id",
+            "in": "path",
+            "description": "Museum id to unlink",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "hard",
+            "in": "query",
+            "description": "Hard-delete (no undo)",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Museum not found"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/game": {
+      "post": {
+        "tags": [
+          "Quest"
+        ],
+        "summary": "Add a new game",
+        "description": "",
+        "operationId": "addNewGame",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "new_game",
+            "in": "body",
+            "description": "Game encoded in JSON string",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Game"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "405": {
+            "description": "Validation exception"
+          },
+          "412": {
+            "description": "Name already taken"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Quest"
+        ],
+        "summary": "Update existing game info",
+        "description": "",
+        "operationId": "updateGame",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "new_game",
+            "in": "body",
+            "description": "Game encoded in JSON string",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Game"
+            }
+          },
+          {
+            "name": "feedback",
+            "in": "query",
+            "description": "Feedback information",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Game not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/game/all/{ownerId}": {
+      "get": {
+        "tags": [
+          "Quest"
+        ],
+        "summary": "Return all games by ownerid",
+        "description": "all games by id",
+        "operationId": "getAllGamesById",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "ownerId",
+            "in": "path",
+            "description": "ID of owner",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "active",
+            "in": "query",
+            "description": "Only active games",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "feedback",
+            "in": "query",
+            "description": "Feedback information",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Game"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Games not found"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/game/all/museum/{museumId}": {
+      "get": {
+        "tags": [
+          "Quest"
+        ],
+        "summary": "Return all games by museum id",
+        "description": "all games by id",
+        "operationId": "getGamesByMuseumId",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "museumId",
+            "in": "path",
+            "description": "ID of museum",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "active",
+            "in": "query",
+            "description": "Only active games",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "feedback",
+            "in": "query",
+            "description": "Feedback information",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Game"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/game/{gameId}": {
+      "get": {
+        "tags": [
+          "Quest"
+        ],
+        "summary": "Return game by id",
+        "description": "all games by id",
+        "operationId": "getGameById",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "description": "ID of game to return",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "feedback",
+            "in": "query",
+            "description": "Feedback information",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Game"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Games not found"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Quest"
+        ],
+        "summary": "Remove game",
+        "description": "",
+        "operationId": "deleteGame",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "description": "Game id to unlink",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "hard",
+            "in": "query",
+            "description": "Hard-delete (no undo)",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Game not found"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/game/rating": {
+      "post": {
+        "tags": [
+          "Quest"
+        ],
+        "summary": "Add rating to game",
+        "description": "Add rating and comment to game",
+        "operationId": "addRatingToGame",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "rating",
+            "in": "body",
+            "description": "rating data",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "text": {
+                  "type": "string",
+                  "example": "Крутой квест"
+                },
+                "weight": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "userid": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "text": {
+                  "type": "string",
+                  "example": "Крутой квест"
+                },
+                "weight": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Games not found"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Quest"
+        ],
+        "summary": "Update rating of game",
+        "description": "Update rating and comment of game",
+        "operationId": "updateRatingToGame",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "rating",
+            "in": "body",
+            "description": "rating data",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "text": {
+                  "type": "string",
+                  "example": "Крутой квест"
+                },
+                "weight": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "userid": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "text": {
+                  "type": "string",
+                  "example": "Крутой квест"
+                },
+                "weight": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Games not found"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/scenario": {
+      "put": {
+        "tags": [
+          "Scenario"
+        ],
+        "summary": "Update existing scenario info",
+        "description": "",
+        "operationId": "updateScenario",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "new_scenario",
+            "in": "body",
+            "description": "Scenario encoded in JSON string",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Scenario"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Scenario not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/scenario/{scenarioId}": {
+      "get": {
+        "tags": [
+          "Scenario"
+        ],
+        "summary": "Return scenario by id",
+        "description": "Scenario by id",
+        "operationId": "getScenarioById",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "scenarioId",
+            "in": "path",
+            "description": "ID of scenario to return",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Scenario"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/scenario/user/{scenarioId}": {
+      "get": {
+        "tags": [
+          "Scenario"
+        ],
+        "summary": "Return scenario for user by id",
+        "description": "Scenario by id",
+        "operationId": "getScenarioUserById",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "scenarioId",
+            "in": "path",
+            "description": "ID of scenario to return",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Scenario"
+            }
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/scenario/check_image": {
+      "post": {
+        "tags": [
+          "Scenario"
+        ],
+        "summary": "Return similarity",
+        "description": "Return whether the picture is similar",
+        "operationId": "checkImageAnswer",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "image_answer",
+            "in": "body",
+            "description": "Answer encoded in JSON string",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "int",
+                  "example": 0
+                },
+                "stepid": {
+                  "type": "int",
+                  "example": 0
+                },
+                "image": {
+                  "type": "string",
+                  "example": "base64 encoded string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "result": {
+                    "type": "int",
+                    "example": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/feed": {
+      "get": {
+        "tags": [
+          "Feed"
+        ],
+        "summary": "Returns feed mockup",
+        "description": "Returns feed mockup",
+        "operationId": "getFeedMockup",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Feed"
+        ],
+        "summary": "Add a new feed",
+        "description": "Add a new feed",
+        "operationId": "addFeed",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "new_feed",
+            "in": "body",
+            "description": "Feed encoded in JSON string",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Feed"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "405": {
+            "description": "Validation exception"
+          },
+          "412": {
+            "description": "Name already taken"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Feed"
+        ],
+        "summary": "Update existing catalog info",
+        "description": "Update existing catalog info",
+        "operationId": "updateFeed",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+       "parameters": [
+          {
+            "name": "new_feed",
+            "in": "body",
+            "description": "Feed encoded in JSON string",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Feed"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Feed not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/feed/tape":{
+      "get": {
+        "tags": [
+          "Feed"
+        ],
+        "summary": "Get feeds in tape",
+        "description": "Returns a list of feeds descriptions in set tape",
+        "operationId": "getTapeFeeds",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "FirstFeed",
+            "in": "query",
+            "description": "Index of the first feed to be shown (from 0)",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "LastFeed",
+            "in": "query",
+            "description": "Index of the last feed to be shown (including)",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/feed/all": {
+      "get": {
+        "tags": [
+          "Feed"
+        ],
+        "summary": "Get all feeds",
+        "description": "Returns a list of feeds descriptions",
+        "operationId": "getAllFeeds",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/feed/{feedId}": {
+      "get": {
+        "tags": [
+          "Feed"
+        ],
+        "summary": "Find feed by ID",
+        "description": "Returns a feed description",
+        "operationId": "getFeed",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "feedId",
+            "in": "path",
+            "description": "ID of feed to return",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Feed"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Feed not found"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Feed"
+        ],
+        "summary": "Remove feed",
+        "description": "Remove feed",
+        "operationId": "deleteFeed",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "feedId",
+            "in": "path",
+            "description": "Feed id to unlink",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "hard",
+            "in": "query",
+            "description": "Hard-delete (no undo)",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Feed not found"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/token/get": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Return access token by code",
+        "description": "Make request for getting token and return result",
+        "operationId": "getToken",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "redirect_uri",
+            "in": "query",
+            "description": "URL where code was sent",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "code",
+            "in": "query",
+            "description": "Current code for token getting request",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "The type of the client app",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "expansion",
+            "in": "query",
+            "description": "Expansion information",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "400": {
+            "description": "Invalid parameters supplied"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/token/info": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Return information about access token",
+        "description": "Make request for getting information about token and return result",
+        "operationId": "getTokenInfo",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "access_token",
+            "in": "query",
+            "description": "Current access token for token information getting request",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "The type of the client app",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "expansion",
+            "in": "query",
+            "description": "Expansion information",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "400": {
+            "description": "Invalid parameters supplied"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/token/revoke": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Revoke access token",
+        "description": "Revoke access token from both databases",
+        "operationId": "revokeToken",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "token_info",
+            "in": "body",
+            "description": "Current access token for token revoking request",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "access_token",
+                "type"
+              ],
+              "properties": {
+                "access_token": {
+                  "type": "string",
+                  "example": "ncr74RlkjTYFfyuGUjlkJO56J0"
+                },
+                "type": {
+                  "type": "string",
+                  "example": "each"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "400": {
+            "description": "Invalid parameters supplied"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/statistic/update": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Update statistic of user",
+        "description": "Update process of user for given game",
+        "operationId": "updateStatistic",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "statistic_info",
+            "in": "body",
+            "description": "Process of game",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "game_id",
+                "step_passed"
+              ],
+              "properties": {
+                "game_id": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "step_passed": {
+                  "type": "int",
+                  "example": 0
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "400": {
+            "description": "Invalid parameters supplied"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/statistic/drop": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Drop statistic of user",
+        "description": "Drop process of user for given games",
+        "operationId": "dropStatistic",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "statistic_info",
+            "in": "body",
+            "description": "Games for drop",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "game_ids"
+              ],
+              "properties": {
+                "game_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "400": {
+            "description": "Invalid parameters supplied"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/location": {
+      "get": {
+        "tags": [
+          "Location"
+        ],
+        "summary": "Find location starts with",
+        "description": "Find location starts with",
+        "operationId": "findLocationByName",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "startswith",
+            "in": "query",
+            "description": "",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid startswith supplied"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Location"
+        ],
+        "summary": "Add a new location",
+        "description": "Add a new location",
+        "operationId": "addLocation",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "new_location",
+            "in": "body",
+            "description": "Location encoded in JSON string",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Location"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "405": {
+            "description": "Validation exception"
+          },
+          "412": {
+            "description": "Name already taken"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/location/tape":{
+      "get": {
+        "tags": [
+          "Location"
+        ],
+        "summary": "Get locations in tape",
+        "description": "Returns a list of locations descriptions in set tape",
+        "operationId": "getTapeLocations",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "FirstLocation",
+            "in": "query",
+            "description": "Index of the first location to be shown (from 0)",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "LastLocation",
+            "in": "query",
+            "description": "Index of the last location to be shown (including)",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/location/{locationId}": {
+      "delete": {
+        "tags": [
+          "Location"
+        ],
+        "summary": "Remove location",
+        "description": "Remove location",
+        "operationId": "deleteLocation",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "locationId",
+            "in": "path",
+            "description": "Location id to unlink",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "hard",
+            "in": "query",
+            "description": "Hard-delete (no undo)",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Location not found"
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/agreement/get": {
+      "get": {
+        "tags": [
+          "Agreement"
+        ],
+        "summary": "Get user agreement",
+        "description": "Returns an user agreement",
+        "operationId": "getAgreement",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    },
+    "/agreement/update": {
+      "put": {
+        "tags": [
+          "Agreement"
+        ],
+        "summary": "Update user agreement",
+        "description": "Updates an user agreement",
+        "operationId": "updateAgreement",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "formData",
+            "name": "text",
+            "type": "file",
+            "description": "The text file with agreement to upload.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "auth_env": []
+          }
+        ]
+      }
+    }
+  },
+  "securityDefinitions": {
+    "auth_env": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "http://eachdev.itsociety.su:5000/oauth2/authorize",
+      "tokenUrl": "http://eachdev.itsociety.su:4201/each/token/get?type=swagger",
+      "scopes": {
+        "email": "View your email address",
+        "profile": "View your basic profile info"
+      }
     }
   },
   "definitions": {
@@ -84,6 +1744,384 @@
         },
         "message": {
           "type": "string"
+        }
+      }
+    },
+    "Museum": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "ownerid": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "object",
+          "properties": {
+            "RU": {
+              "type": "string",
+              "example": "Тест"
+            },
+            "EN": {
+              "type": "string",
+              "example": "Test"
+            }
+          }
+        },
+        "desc": {
+          "type": "object",
+          "properties": {
+            "RU": {
+              "type": "string",
+              "example": "Великолепный музей!"
+            },
+            "EN": {
+              "type": "string",
+              "example": "Great museum!"
+            }
+          }
+        },
+        "prop": {
+          "type": "object",
+          "properties": {
+            "image": {
+              "type": "int",
+              "example": "media_id or base64 encoded string"
+            },
+            "logo": {
+              "type": "int",
+              "example": "media_id or base64 encoded string"
+            },
+            "location": {
+              "type": "object",
+              "properties": {
+                "add": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                },
+                "delete": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "created": {
+          "type": "string",
+          "example": "2018-07-18 20:24:00+00:00"
+        },
+        "updated": {
+          "type": "string",
+          "example": "2018-07-18 20:24:00+00:00"
+        }
+      }
+    },
+    "Game": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "ownerid": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "object",
+          "properties": {
+            "RU": {
+              "type": "string",
+              "example": "Тест"
+            },
+            "EN": {
+              "type": "string",
+              "example": "Test"
+            }
+          }
+        },
+        "desc": {
+          "type": "object",
+          "properties": {
+            "RU": {
+              "type": "string",
+              "example": "Великолепный квест!"
+            },
+            "EN": {
+              "type": "string",
+              "example": "Great quest!"
+            }
+          }
+        },
+        "active": {
+          "type": "boolean"
+        },
+        "prop": {
+          "type": "object",
+          "properties": {
+            "image": {
+              "type": ["int", "string"],
+              "example": "media_id or base64 encoded string"
+            },
+            "game": {
+              "type": "int",
+              "example": "museum id"
+            }
+          }
+        },
+        "created": {
+          "type": "string",
+          "example": "2018-07-18 20:24:00+00:00"
+        },
+        "updated": {
+          "type": "string",
+          "example": "2018-07-18 20:24:00+00:00"
+        }
+      }
+    },
+    "Scenario": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "json": {
+          "type": "string",
+          "example": "{}"
+        },
+        "prop": {
+          "type": "object",
+          "properties": {
+            "image": {
+              "type": "object",
+              "properties": {
+                "add": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "example": "media_id or base64 encoded string"
+                  }
+                },
+                "delete": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "created": {
+          "type": "string",
+          "example": "2018-07-18 20:24:00+00:00"
+        },
+        "updated": {
+          "type": "string",
+          "example": "2018-07-18 20:24:00+00:00"
+        }
+      }
+    },
+    "Feed": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "title": {
+          "type": "object",
+          "properties": {
+            "RU": {
+              "type": "string",
+              "example": "Туристы составили рейтинг обязательных к посещению музеев Европы"
+            },
+            "EN": {
+              "type": "string",
+              "example": "Tourists made a ranking of must seen museums in Europe"
+            }
+          }
+        },
+        "desc": {
+          "type": "object",
+          "properties": {
+            "RU": {
+              "type": "string",
+              "example": "В топе - два российских"
+            },
+            "EN": {
+              "type": "string",
+              "example": "Two of them are in Russia"
+            }
+          }
+        },
+        "text": {
+          "type": "object",
+          "properties": {
+            "RU": {
+              "type": "string",
+              "example": "Компания SentiOne проанализировала упоминания музеев Европы в соцсетях. На основе этого эксперты составили рейтинг самых популярных выставочных залов. Больше всего упоминаний получил Лувр, а сразу за ним идёт Эрмитаж. Третьяковка оказалась на седьмом месте."
+            },
+            "EN": {
+              "type": "string",
+              "example": "The company SentiOne has analyzed some mentions about European museums in social nets. The experts made a ranking of most popular showrooms. The Louvre gained most of all mentions, the Hermitage goes right behind the Louvre. Tretyakov gallery took the seventh place."
+            }
+          }
+        },
+        "prop": {
+          "type": "object",
+          "properties": {
+            "image": {
+              "type": "int",
+              "example": "media_id or base64 encoded string"
+            },
+            "priority": {
+              "type": "int",
+              "example": "from 0 to INT_MAX"
+            }
+          }
+        },
+        "created": {
+          "type": "string",
+          "example": "2018-03-28 20:24:00+00:00"
+        },
+        "updated": {
+          "type": "string",
+          "example": "2018-03-28 20:24:00+00:00"
+        }
+      }
+    },
+    "User": {
+      "type": "object",
+      "required": [
+        "access_token",
+        "type"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "access_token": {
+          "type": "string",
+          "example": "ncr74RlkjTYFfyuGUjlkJO56J0"
+        },
+        "type": {
+          "type": "string",
+          "example": "each"
+        },
+        "name": {
+          "type": "string",
+          "example": "user"
+        },
+        "email": {
+          "type": "string",
+          "example": "email@m.dom"
+        },
+        "access_type": {
+          "type": "string",
+          "example": "user"
+        },
+        "image": {
+          "type": "string",
+          "example": "http://api.com/image.format"
+        },
+        "run": {
+          "type": "object",
+          "properties": {
+            "games_passed": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "game": {
+                    "type": "object",
+                    "$ref": "#/definitions/Game"
+                  },
+                  "best_time": {
+                    "type": "string",
+                    "example": "1w 2d 3h 4m 5s"
+                  }
+                }
+              }
+            },
+            "games_process": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "game": {
+                    "type": "object",
+                    "$ref": "#/definitions/Game"
+                  }
+                }
+              }
+            },
+            "bonus": {
+              "type": "integer",
+              "example": 50
+            }
+          }
+        },
+        "time_in_game": {
+          "type": "string",
+          "example": "1y 2m 3w 4d 5h 6m 7s"
+        },
+        "created": {
+          "type": "string",
+          "example": "2018-03-28 20:24:00+00:00"
+        },
+        "updated": {
+          "type": "string",
+          "example": "2018-03-28 20:24:00+00:00"
+        }
+      }
+    },
+    "Location": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string",
+          "example": "Peter the Great St.Petersburg Polytechnic University"
+        },
+        "latitude": {
+          "type": "string",
+          "example": "60.0074"
+        },
+        "longitude": {
+          "type": "string",
+          "example": "30.3729"
         }
       }
     }

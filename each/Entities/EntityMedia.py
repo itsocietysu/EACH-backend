@@ -38,7 +38,8 @@ class EntityMedia(EntityBase, Base):
     @classmethod
     def delete(cls, eid):
         def safe_delete(item):
-            os.remove(item.url)
+            if os.path.isfile(item.url):
+                os.remove(item.url)
             session.db.delete(item)
 
         with DBConnection() as session:
