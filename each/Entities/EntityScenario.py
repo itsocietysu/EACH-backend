@@ -183,8 +183,7 @@ class EntityScenario(EntityBase, Base):
                         for i in range(scenario['step_count']):
                             step = scenario['steps'][i]
                             if step['type'] == 'ar_paint_question':
-                                image_path = '.%s' % step['desc']['target']['uri']["http://eachdev.itsociety.su:4201/each"
-                                                                                   .__len__():]
+                                image_path = '.%s' % step['desc']['target']['uri'][len("http://" + EntityBase.host):]
                                 img = io.imread(image_path)
                                 ratio = float(img.shape[1]) / img.shape[0]
                                 scenario['steps'][i]['desc']['target'].pop('uri', None)
